@@ -1,23 +1,25 @@
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { Features } from "@/components/Features";
-import { HowItWorks } from "@/components/HowItWorks";
-import { Pricing } from "@/components/Pricing";
-import { CTA } from "@/components/CTA";
-import { FAQ } from "@/components/FAQ";
-import { Footer } from "@/components/Footer";
+import Navbar from "@/components/Navbar/Navbar";
+import Hero from "@/components/Hero/Hero";
+import Features from "@/components/Features/Features";
+import HowItWorks from "@/components/HowItWorks/HowItWorks";
+import Stats from "@/components/Stats/Stats";
+import Pricing from "@/components/Pricing/Pricing";
+import CTA from "@/components/CTA/CTA";
+import Footer from "@/components/Footer/Footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-white">
+    <>
       <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Pricing />
-      <CTA />
-      <FAQ />
+      <main>
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <Stats />
+        <Pricing />
+        <CTA />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

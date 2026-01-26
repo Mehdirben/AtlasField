@@ -1,21 +1,35 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "AtlasField | Satellite Intelligence for Smarter Agriculture",
-  description: "Harness Sentinel-1 & Sentinel-2 satellite data with AI-driven insights. Monitor crops 24/7, even through clouds, and get actionable recommendations for your fields.",
-  keywords: ["agriculture", "satellite", "AI", "farming", "ESA", "Sentinel", "crop monitoring"],
+  title: "AtlasField - AI-Powered Satellite Crop Monitoring",
+  description:
+    "Monitor your fields from space. Get real-time insights on crop health, yield predictions, and pest alerts using Sentinel satellite data and AI. Built for ESA ActInSpace.",
+  keywords: [
+    "agriculture",
+    "satellite monitoring",
+    "crop health",
+    "NDVI",
+    "precision farming",
+    "AI",
+    "Sentinel",
+    "ESA",
+  ],
+  authors: [{ name: "AtlasField Team" }],
+  openGraph: {
+    title: "AtlasField - AI-Powered Satellite Crop Monitoring",
+    description:
+      "Monitor your fields from space with AI and Sentinel satellite data.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -25,9 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}>
-        {children}
-      </body>
+      <body className={inter.variable}>{children}</body>
     </html>
   );
 }

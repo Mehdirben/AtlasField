@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import styles from "./Hero.module.css";
 
 export default function Hero() {
@@ -15,6 +16,13 @@ export default function Hero() {
         e.preventDefault();
         alert("Demo video coming soon! 🎬");
     };
+
+    const [opacities, setOpacities] = useState<number[]>([]);
+
+    useEffect(() => {
+        // Generate random opacities only on the client side to avoid hydration mismatch
+        setOpacities([...Array(20)].map(() => 0.2 + Math.random() * 0.6));
+    }, []);
 
     return (
         <section className={styles.hero}>
@@ -104,7 +112,7 @@ export default function Hero() {
                                     <div className={styles.mapGrid}>
                                         {[...Array(20)].map((_, i) => (
                                             <div key={i} className={styles.gridCell} style={{
-                                                backgroundColor: `rgba(16, 185, 129, ${0.2 + Math.random() * 0.6})`
+                                                backgroundColor: opacities[i] ? `rgba(16, 185, 129, ${opacities[i]})` : 'rgba(16, 185, 129, 0.2)'
                                             }}></div>
                                         ))}
                                     </div>

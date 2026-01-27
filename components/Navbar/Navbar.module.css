@@ -126,81 +126,72 @@
     transform: rotate(-45deg) translate(5px, -5px);
 }
 
-.mobileMenu {
-    position: fixed;
-    top: 0;
+/* Mobile Dropdown Menu */
+.mobileDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    bottom: 0;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    z-index: 999;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    padding: 8px;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+    z-index: 100;
 }
 
-.mobileMenu.mobileMenuOpen {
+.mobileDropdown.mobileDropdownOpen {
     opacity: 1;
     visibility: visible;
+    transform: translateY(0);
 }
 
-.mobileMenuContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 24px;
-    padding: 24px;
-}
-
-.closeButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+.mobileNavLink {
+    display: block;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 500;
     color: var(--text-primary);
-    cursor: pointer;
+    border-radius: 12px;
     transition: all 0.2s ease;
 }
 
-.closeButton:hover {
-    background: var(--text-primary);
-    color: white;
-    border-color: var(--text-primary);
-}
-
-
-.mobileNavLink {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    transition: color 0.2s ease;
-}
-
 .mobileNavLink:hover {
+    background: rgba(5, 150, 105, 0.08);
     color: var(--primary);
 }
 
 .mobileCta {
-    margin-top: 24px;
-    padding: 16px 40px;
+    display: block;
+    margin-top: 8px;
+    padding: 14px 16px;
     background: var(--primary-gradient);
     color: white;
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
-    border-radius: 9999px;
-    box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
 }
+
+.mobileCta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+}
+
+/* Make navbar relative for dropdown positioning */
+@media (max-width: 768px) {
+    .navbar {
+        position: relative;
+    }
+}
+
 
 /* Responsive */
 @media (max-width: 1024px) {

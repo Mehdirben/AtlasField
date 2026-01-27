@@ -57,11 +57,11 @@
     .container {
         padding: 0 16px;
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 0;
     }
 
     .statItem {
-        padding: 16px 0;
+        padding: 32px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
@@ -80,7 +80,11 @@
     }
 
     .container {
-        gap: 20px;
+        gap: 0;
+    }
+
+    .statItem {
+        padding: 24px 0;
     }
 
     .statValue {

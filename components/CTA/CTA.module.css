@@ -150,19 +150,74 @@
         padding: 60px 0;
     }
 
+    .container {
+        padding: 0 16px;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 28px;
+    }
+
     .inputWrapper {
         flex-direction: column;
-        border-radius: 20px;
+        border-radius: 16px;
         padding: 8px;
     }
 
     .input {
-        border-radius: 12px;
+        border-radius: 10px;
+        padding: 12px 16px;
     }
 
     .submitButton {
         width: 100%;
         justify-content: center;
+        border-radius: 10px;
+        padding: 12px 20px;
+    }
+
+    .successMessage {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    .decorativeOrb1 {
+        width: 250px;
+        height: 250px;
+        top: -100px;
+        right: -80px;
+    }
+
+    .decorativeOrb2 {
+        width: 200px;
+        height: 200px;
+        bottom: -80px;
+        left: -60px;
+    }
+}
+
+@media (max-width: 400px) {
+    .cta {
+        padding: 48px 0;
+    }
+
+    .inputWrapper {
+        padding: 6px;
         border-radius: 12px;
+    }
+
+    .input {
+        padding: 10px 14px;
+        font-size: 0.9375rem;
+    }
+
+    .submitButton {
+        padding: 10px 16px;
+        font-size: 0.9375rem;
+    }
+
+    .disclaimer {
+        font-size: 0.8125rem;
     }
 }

@@ -407,6 +407,21 @@
         max-width: 500px;
         margin: 0 auto;
     }
+
+    .blob1 {
+        width: 350px;
+        height: 350px;
+    }
+
+    .blob2 {
+        width: 300px;
+        height: 300px;
+    }
+
+    .blob3 {
+        width: 200px;
+        height: 200px;
+    }
 }
 
 @media (max-width: 640px) {
@@ -416,24 +431,119 @@
         padding-bottom: 60px;
     }
 
+    .container {
+        padding: 0 16px;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        font-size: 0.8125rem;
+        margin-bottom: 16px;
+    }
+
+    .title {
+        margin-bottom: 16px;
+    }
+
+    .subtitle {
+        font-size: 1.0625rem;
+        margin-bottom: 24px;
+    }
+
     .ctas {
         flex-direction: column;
         width: 100%;
+        gap: 12px;
+        margin-bottom: 32px;
     }
 
     .primaryBtn,
     .secondaryBtn {
         width: 100%;
         justify-content: center;
+        padding: 14px 24px;
+        font-size: 1rem;
     }
 
     .trustBadges {
         flex-direction: column;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+    }
+
+    .trustItem {
+        font-size: 0.875rem;
     }
 
     .mapPlaceholder {
+        height: 140px;
+    }
+
+    .dashboardMockup {
+        max-width: 100%;
+    }
+
+    .mockupBody {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .healthIndicator {
+        padding: 8px 14px;
+    }
+
+    .healthValue {
+        font-size: 1.25rem;
+    }
+
+    .statBar {
+        height: 6px;
+    }
+
+    .blob1 {
+        width: 250px;
+        height: 250px;
+        top: -5%;
+        right: -15%;
+    }
+
+    .blob2 {
+        width: 200px;
+        height: 200px;
+        left: -20%;
+    }
+
+    .blob3 {
+        width: 150px;
         height: 150px;
+    }
+}
+
+@media (max-width: 400px) {
+    .hero {
+        padding-top: 70px;
+        padding-bottom: 40px;
+    }
+
+    .content {
+        gap: 32px;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .primaryBtn,
+    .secondaryBtn {
+        padding: 12px 20px;
+        font-size: 0.9375rem;
+    }
+
+    .mapPlaceholder {
+        height: 120px;
     }
 }

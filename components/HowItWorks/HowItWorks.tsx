@@ -43,9 +43,11 @@ export default function HowItWorks() {
                 <div className={styles.timeline}>
                     {steps.map((step, index) => (
                         <div key={index} className={styles.step}>
-                            <div className={styles.stepNumber}>{step.number}</div>
                             <div className={styles.stepContent}>
-                                <div className={styles.stepIcon}>{step.icon}</div>
+                                <div className={styles.stepHeader}>
+                                    <span className={styles.stepNumber}>{step.number}</span>
+                                    <div className={styles.stepIcon}>{step.icon}</div>
+                                </div>
                                 <h3 className={styles.stepTitle}>{step.title}</h3>
                                 <p className={styles.stepDescription}>{step.description}</p>
                             </div>

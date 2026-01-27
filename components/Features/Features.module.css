@@ -100,8 +100,16 @@
         padding: 60px 0;
     }
 
+    .container {
+        padding: 0 16px;
+    }
+
     .header {
-        margin-bottom: 40px;
+        margin-bottom: 32px;
+    }
+
+    .subtitle {
+        font-size: 1rem;
     }
 
     .grid {
@@ -110,6 +118,35 @@
     }
 
     .card {
-        padding: 24px;
+        padding: 24px 20px;
+    }
+
+    .iconWrapper {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+    }
+
+    .icon {
+        font-size: 1.25rem;
+    }
+
+    .cardTitle {
+        font-size: 1.125rem;
+        margin-bottom: 8px;
+    }
+
+    .cardDescription {
+        font-size: 0.9375rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .features {
+        padding: 48px 0;
+    }
+
+    .card {
+        padding: 20px 16px;
     }
 }

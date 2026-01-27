@@ -196,11 +196,69 @@
         padding: 60px 0;
     }
 
+    .container {
+        padding: 0 16px;
+    }
+
     .header {
         margin-bottom: 40px;
     }
 
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .grid {
+        max-width: 100%;
+    }
+
     .card {
-        padding: 28px 24px;
+        padding: 28px 20px;
+    }
+
+    .planName {
+        font-size: 1.25rem;
+    }
+
+    .planDescription {
+        font-size: 0.875rem;
+    }
+
+    .price {
+        font-size: 2.5rem;
+    }
+
+    .featureItem {
+        font-size: 0.875rem;
+    }
+
+    .ctaButton {
+        padding: 14px 20px;
+        font-size: 0.9375rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .pricing {
+        padding: 48px 0;
+    }
+
+    .card {
+        padding: 24px 16px;
+        border-radius: 16px;
+    }
+
+    .badge {
+        padding: 5px 14px;
+        font-size: 0.75rem;
+        top: -12px;
+    }
+
+    .price {
+        font-size: 2.25rem;
+    }
+
+    .features {
+        margin-bottom: 24px;
     }
 }

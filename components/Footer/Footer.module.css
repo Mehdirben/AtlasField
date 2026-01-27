@@ -135,12 +135,17 @@
 
 @media (max-width: 640px) {
     .footer {
-        padding: 60px 0 32px;
+        padding: 48px 0 28px;
+    }
+
+    .container {
+        padding: 0 16px;
     }
 
     .grid {
         grid-template-columns: 1fr;
-        gap: 32px;
+        gap: 28px;
+        margin-bottom: 40px;
     }
 
     .brand {
@@ -148,17 +153,61 @@
         text-align: center;
     }
 
+    .brandDescription {
+        font-size: 0.875rem;
+        margin-bottom: 20px;
+    }
+
     .socialLinks {
         justify-content: center;
+    }
+
+    .socialLink {
+        width: 36px;
+        height: 36px;
     }
 
     .linksSection {
         text-align: center;
     }
 
+    .linksTitle {
+        font-size: 0.8125rem;
+        margin-bottom: 14px;
+    }
+
+    .linksList {
+        gap: 10px;
+    }
+
+    .link {
+        font-size: 0.875rem;
+    }
+
     .bottom {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         text-align: center;
+        padding-top: 24px;
+    }
+
+    .copyright,
+    .badge {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .footer {
+        padding: 40px 0 24px;
+    }
+
+    .grid {
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .logoText {
+        font-size: 1.25rem;
     }
 }

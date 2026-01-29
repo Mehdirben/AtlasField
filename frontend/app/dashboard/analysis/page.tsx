@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   getSites,
   runAnalysis,
@@ -802,6 +802,8 @@ function DetailedReportPanel({
 
 export default function AnalysisPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const initialSiteId = searchParams.get("site") || searchParams.get("field");
 
   const [sites, setSites] = useState<Site[]>([]);
@@ -823,6 +825,11 @@ export default function AnalysisPage() {
   useEffect(() => {
     if (selectedSite) {
       loadSiteData(selectedSite.id);
+
+      // Update URL to persist selection on refresh
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("site", selectedSite.id.toString());
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
   }, [selectedSite?.id]);
 

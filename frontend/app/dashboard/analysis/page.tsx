@@ -1126,58 +1126,6 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              {yieldData && (
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-100">
-                    <h2 className="font-semibold text-slate-900 flex items-center gap-2">
-                      <span>🌾</span> Yield Prediction
-                    </h2>
-                  </div>
-                  <div className="p-5">
-                    <div className="text-center py-2">
-                      <p className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                        {yieldData.total_yield_tonnes?.toFixed(1) || "—"}
-                      </p>
-                      <p className="text-slate-500 mt-1">tonnes total</p>
-                    </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-slate-50/80 rounded-xl text-center">
-                        <p className="text-xs text-slate-500">Per Hectare</p>
-                        <p className="font-semibold text-slate-900">{yieldData.yield_per_ha?.toFixed(1)} t/ha</p>
-                      </div>
-                      <div className="p-3 bg-slate-50/80 rounded-xl text-center">
-                        <p className="text-xs text-slate-500">Confidence</p>
-                        <p className="font-semibold text-slate-900">{yieldData.confidence_percent}%</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {biomassData && (
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-100">
-                    <h2 className="font-semibold text-slate-900 flex items-center gap-2">
-                      <span>🌱</span> Biomass Estimate
-                    </h2>
-                  </div>
-                  <div className="p-5">
-                    <div className="text-center py-2">
-                      <p className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                        {biomassData.mean_biomass_t_ha?.toFixed(1) || "—"}
-                      </p>
-                      <p className="text-slate-500 mt-1">tonnes/hectare</p>
-                    </div>
-                    {biomassData.interpretation && (
-                      <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl text-center border border-green-200/60">
-                        <p className="text-xs text-slate-500">Status</p>
-                        <p className="font-semibold text-green-700 text-sm">{biomassData.interpretation}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm p-5">
                 <h3 className="font-medium text-slate-900 mb-3">Quick Links</h3>
                 <div className="space-y-2">

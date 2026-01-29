@@ -258,13 +258,13 @@ export default function SettingsPage() {
                       </div>
                       <button
                         onClick={() => handleNotificationChange(item.key)}
-                        className={`relative w-14 h-7 rounded-full transition-all shadow-inner ${
+                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
                           notifications[item.key] ? "bg-emerald-500" : "bg-slate-300"
                         }`}
                       >
                         <span
-                          className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
-                            notifications[item.key] ? "translate-x-8" : "translate-x-1"
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
+                            notifications[item.key] ? "translate-x-6" : "translate-x-0"
                           }`}
                         />
                       </button>

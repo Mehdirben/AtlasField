@@ -53,7 +53,7 @@ export default function FieldsPage() {
 
   const handleFieldClick = (fieldId: number) => {
     setSelectedField(fieldId);
-    router.push(`/dashboard/fields/${fieldId}`);
+    router.push(`/dashboard/analysis?field=${fieldId}`);
   };
 
   if (loading) {

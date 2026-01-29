@@ -3,9 +3,9 @@
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   getFields,
-  getField,
   runAnalysis,
   getAnalysisHistory,
   getYieldPrediction,
@@ -613,6 +613,9 @@ function DetailedReportPanel({
 }
 
 export default function AnalysisPage() {
+  const searchParams = useSearchParams();
+  const initialFieldId = searchParams.get("field");
+  
   const [fields, setFields] = useState<Field[]>([]);
   const [selectedField, setSelectedField] = useState<Field | null>(null);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
@@ -637,7 +640,16 @@ export default function AnalysisPage() {
     try {
       const data = await getFields();
       setFields(data);
-      if (data.length > 0) {
+      
+      // If field ID is provided in URL, select that field
+      if (initialFieldId) {
+        const fieldFromUrl = data.find((f: Field) => f.id === Number(initialFieldId));
+        if (fieldFromUrl) {
+          setSelectedField(fieldFromUrl);
+        } else if (data.length > 0) {
+          setSelectedField(data[0]);
+        }
+      } else if (data.length > 0) {
         setSelectedField(data[0]);
       }
     } catch (error) {
@@ -1146,12 +1158,6 @@ export default function AnalysisPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm p-5">
                 <h3 className="font-medium text-slate-900 mb-3">Quick Links</h3>
                 <div className="space-y-2">
-                  <Link
-                    href={`/dashboard/fields/${selectedField.id}`}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-slate-600 hover:text-slate-900"
-                  >
-                    <span>🗺️</span> View Field Details
-                  </Link>
                   <Link
                     href="/dashboard/alerts"
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-slate-600 hover:text-slate-900"

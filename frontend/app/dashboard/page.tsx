@@ -134,7 +134,7 @@ export default function DashboardPage() {
             {fields.slice(0, 4).map((field) => (
               <Link
                 key={field.id}
-                href={`/dashboard/fields/${field.id}`}
+                href={`/dashboard/analysis?field=${field.id}`}
                 className="group bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-slate-200/60 hover:shadow-lg hover:border-emerald-300 hover:-translate-y-0.5 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-3">

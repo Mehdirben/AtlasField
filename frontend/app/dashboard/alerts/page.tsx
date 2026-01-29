@@ -231,7 +231,7 @@ export default function AlertsPage() {
                         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100">
                           {alert.field_name && (
                             <Link
-                              href={`/dashboard/fields/${alert.field_id}`}
+                              href={`/dashboard/analysis?field=${alert.field_id}`}
                               className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                             >
                               <span>📍</span> {alert.field_name}

@@ -64,11 +64,6 @@ export const createField = async (data: {
   return response.data;
 };
 
-export const getField = async (id: number): Promise<Field> => {
-  const response = await api.get(`/fields/${id}`);
-  return response.data;
-};
-
 export const updateField = async (
   id: number,
   data: Partial<Field>

@@ -67,25 +67,27 @@ export function DashboardSidebar() {
       </nav>
 
       <div className="p-4 relative">
-        <div className="bg-gradient-to-br from-slate-50 to-emerald-50/50 rounded-2xl p-5 border border-slate-200/60 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-              <span className="text-white text-lg">⚡</span>
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-cyan-500 rounded-2xl p-5 shadow-lg shadow-emerald-500/20">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-md">
+                Current
+              </span>
+              <span className="text-white/80 text-xs">1/3 fields</span>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Free Plan</p>
-              <p className="text-xs text-slate-500">3 fields limit</p>
-            </div>
+            <p className="text-white font-bold text-lg mb-1">Free Plan</p>
+            <p className="text-emerald-100 text-sm mb-4">Upgrade for unlimited access</p>
+            <Link
+              href="/dashboard/settings?tab=subscription"
+              className="block w-full text-center py-2.5 bg-white text-emerald-600 text-sm font-semibold rounded-xl hover:bg-emerald-50 hover:shadow-lg transition-all duration-200"
+            >
+              Upgrade to Pro
+            </Link>
           </div>
-          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mb-3">
-            <div className="w-1/3 h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" />
-          </div>
-          <Link
-            href="/dashboard/settings?tab=subscription"
-            className="block w-full text-center py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200"
-          >
-            Upgrade to Pro
-          </Link>
         </div>
       </div>
     </aside>

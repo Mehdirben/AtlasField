@@ -341,12 +341,12 @@ class SentinelHubService:
     def _interpret_vegetation(value: float) -> str:
         """Interpret vegetation index value"""
         if value < 0.2:
-            return "Végétation très faible ou sol nu - attention requise"
+            return "Very low vegetation or bare soil - attention required"
         elif value < 0.4:
-            return "Végétation en stress - surveillance et action recommandées"
+            return "Stressed vegetation - monitoring and action recommended"
         elif value < 0.6:
-            return "Végétation modérée - développement normal"
+            return "Moderate vegetation - normal development"
         elif value < 0.8:
-            return "Végétation saine - bonne croissance"
+            return "Healthy vegetation - good growth"
         else:
-            return "Végétation très dense et vigoureuse"
+            return "Very dense and vigorous vegetation"

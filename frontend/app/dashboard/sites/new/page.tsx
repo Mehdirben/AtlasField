@@ -197,7 +197,7 @@ export default function NewSitePage() {
             )}
           </button>
         </div>
-        
+
         {siteType === "forest" && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="flex items-start gap-3">
@@ -205,8 +205,23 @@ export default function NewSitePage() {
               <div>
                 <p className="text-sm font-medium text-blue-900">AI-Powered Forest Detection</p>
                 <p className="text-sm text-blue-700 mt-1">
-                  After you draw your forest boundaries, our satellite analysis will automatically classify the forest type 
+                  After you draw your forest boundaries, our satellite analysis will automatically classify the forest type
                   (coniferous, deciduous, or mixed) using spectral signatures from Sentinel-2 imagery.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {siteType === "field" && (
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">🛰️</span>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">AI-Powered Crop Detection</p>
+                <p className="text-sm text-emerald-700 mt-1">
+                  If you leave the crop type empty, our satellite analysis will automatically identify the crop type
+                  using multispectral temporal analysis from Sentinel-2 data.
                 </p>
               </div>
             </div>
@@ -222,7 +237,7 @@ export default function NewSitePage() {
               <h2 className="font-semibold text-slate-900 flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
                 <span className={cn(
                   "flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg",
-                  siteType === "forest" 
+                  siteType === "forest"
                     ? "bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/25"
                     : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25"
                 )}>
@@ -309,13 +324,16 @@ export default function NewSitePage() {
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all bg-white"
                     >
-                      <option value="">Select...</option>
+                      <option value="">Select or leave for auto-detection...</option>
                       {CROP_TYPES.map((crop) => (
                         <option key={crop} value={crop}>
                           {crop}
                         </option>
                       ))}
                     </select>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Crop type will be auto-detected via satellite if left empty
+                    </p>
                   </div>
                 )}
 
@@ -351,7 +369,7 @@ export default function NewSitePage() {
                         id="protected_status"
                         name="protected_status"
                         checked={formData.protected_status === "protected"}
-                        onChange={(e) => setFormData({...formData, protected_status: e.target.checked ? "protected" : ""})}
+                        onChange={(e) => setFormData({ ...formData, protected_status: e.target.checked ? "protected" : "" })}
                         className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-green-500"
                       />
                       <label htmlFor="protected_status" className="text-sm font-medium text-slate-700">

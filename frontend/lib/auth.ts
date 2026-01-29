@@ -1,7 +1,8 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Use internal URL for server-side requests (Docker container), fallback to public URL
+const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,12 +18,12 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Login uses form-urlencoded for OAuth2PasswordRequestForm
+          // Login with JSON body
           const response = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-              username: credentials.email,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials.email,
               password: credentials.password,
             }),
           });

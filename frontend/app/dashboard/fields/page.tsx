@@ -10,8 +10,11 @@ import { cn } from "@/lib/utils";
 const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-slate-100 rounded-xl">
-      <p className="text-slate-500">Loading map...</p>
+    <div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-100 to-slate-50 rounded-2xl">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-slate-500">Loading map...</p>
+      </div>
     </div>
   ),
 });
@@ -56,69 +59,117 @@ export default function FieldsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-500">Loading fields...</p>
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-500">Loading your fields...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">My Fields</h1>
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">My Fields</h1>
+          <p className="text-slate-500 mt-1">Manage and monitor all your agricultural fields</p>
+        </div>
         <Link
           href="/dashboard/fields/new"
-          className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-medium rounded-lg hover:shadow-lg transition-all"
+          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200"
         >
           + New Field
         </Link>
       </div>
 
+      {/* Map and List Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 h-[500px] bg-white rounded-xl border border-slate-200 overflow-hidden">
+        {/* Map */}
+        <div className="lg:col-span-2 h-[600px] bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
           <FieldMap fields={fields} onFieldClick={handleFieldClick} zoom={fields.length > 0 ? 8 : 6} />
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 h-[500px] overflow-auto">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            {fields.length} field{fields.length !== 1 ? "s" : ""}
-          </h2>
-
-          {fields.length === 0 ? (
-            <div className="text-center py-8">
-              <span className="text-4xl block mb-4">🌱</span>
-              <p className="text-slate-500 mb-4">No fields registered</p>
-              <Link href="/dashboard/fields/new" className="inline-block px-4 py-2 bg-emerald-500 text-white font-medium rounded-lg hover:bg-emerald-600">
-                Add First Field
-              </Link>
+        {/* Fields List */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-5 h-[600px] flex flex-col shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <span className="text-white text-lg">🗺️</span>
+              </div>
+              <div>
+                <h2 className="font-semibold text-slate-900">{fields.length} Field{fields.length !== 1 ? "s" : ""}</h2>
+                <p className="text-xs text-slate-500">Click to view details</p>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {fields.map((field) => (
+          </div>
+
+          <div className="flex-1 overflow-auto space-y-2 pr-1 -mr-1">
+            {fields.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-100 to-cyan-100 flex items-center justify-center">
+                  <span className="text-3xl">🌱</span>
+                </div>
+                <p className="text-slate-600 font-medium mb-2">No fields registered</p>
+                <p className="text-sm text-slate-500 mb-4">Start by adding your first field</p>
+                <Link 
+                  href="/dashboard/fields/new" 
+                  className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all"
+                >
+                  Add First Field
+                </Link>
+              </div>
+            ) : (
+              fields.map((field) => (
                 <div
                   key={field.id}
                   className={cn(
-                    "p-3 rounded-lg border cursor-pointer transition-all",
-                    selectedField === field.id ? "border-emerald-500 bg-emerald-50" : "border-slate-100 hover:border-emerald-200"
+                    "p-4 rounded-xl border cursor-pointer transition-all duration-200 group",
+                    selectedField === field.id 
+                      ? "border-emerald-400 bg-gradient-to-r from-emerald-50 to-cyan-50 shadow-md" 
+                      : "border-slate-200/60 hover:border-emerald-300 hover:bg-slate-50/80"
                   )}
                   onClick={() => handleFieldClick(field.id)}
                 >
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">{field.name}</h3>
-                      <p className="text-sm text-slate-500">{field.crop_type || "Not specified"} • {field.area_hectares?.toFixed(1) || "?"} ha</p>
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors",
+                        selectedField === field.id ? "bg-emerald-100" : "bg-slate-100 group-hover:bg-emerald-50"
+                      )}>
+                        🌾
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">{field.name}</h3>
+                        <p className="text-sm text-slate-500">{field.crop_type || "Not specified"} • {field.area_hectares?.toFixed(1) || "?"} ha</p>
+                      </div>
                     </div>
                     {field.latest_ndvi && (
-                      <span className={cn("px-2 py-0.5 text-xs font-medium rounded-full",
-                        field.latest_ndvi >= 0.6 ? "bg-green-100 text-green-700" : field.latest_ndvi >= 0.4 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-                      )}>{field.latest_ndvi.toFixed(2)}</span>
+                      <span className={cn(
+                        "px-2.5 py-1 text-xs font-semibold rounded-lg",
+                        field.latest_ndvi >= 0.6 ? "bg-emerald-100 text-emerald-700" : 
+                        field.latest_ndvi >= 0.4 ? "bg-amber-100 text-amber-700" : 
+                        "bg-red-100 text-red-700"
+                      )}>
+                        {field.latest_ndvi.toFixed(2)}
+                      </span>
                     )}
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete(field.id); }} className="mt-2 text-xs text-red-500 hover:text-red-700">Delete</button>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs text-slate-400">
+                      {field.latest_analysis_date 
+                        ? `Last analysis: ${new Date(field.latest_analysis_date).toLocaleDateString()}`
+                        : "No analysis yet"}
+                    </span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(field.id); }} 
+                      className="text-xs text-slate-400 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

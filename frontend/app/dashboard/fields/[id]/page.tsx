@@ -13,13 +13,13 @@ import {
   Field,
   Analysis,
 } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/ui";
+import { Badge } from "@/components/ui";
 
 const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-slate-100 rounded-lg">
-      <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center h-full bg-slate-100/50 rounded-2xl">
+      <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
     </div>
   ),
 });
@@ -92,7 +92,7 @@ export default function FieldDetailPage() {
       setBiomassData(biomass);
     } catch (error) {
       console.error("Analysis failed:", error);
-      alert("L'analyse a échoué. Veuillez réessayer.");
+      alert("Analysis failed. Please try again.");
     } finally {
       setAnalyzing(false);
     }
@@ -101,8 +101,8 @@ export default function FieldDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-600">Chargement de la parcelle...</p>
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-500">Loading field...</p>
       </div>
     );
   }
@@ -110,9 +110,12 @@ export default function FieldDetailPage() {
   if (!field) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <h2 className="text-xl font-semibold text-slate-900">Parcelle non trouvée</h2>
-        <Link href="/dashboard/fields" className="text-emerald-600 hover:underline">
-          Retour aux parcelles
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mb-2">
+          <span className="text-4xl">🔍</span>
+        </div>
+        <h2 className="text-xl font-semibold text-slate-900">Field not found</h2>
+        <Link href="/dashboard/fields" className="text-emerald-600 hover:text-emerald-700 font-medium">
+          ← Back to fields
         </Link>
       </div>
     );
@@ -121,13 +124,13 @@ export default function FieldDetailPage() {
   const latestNDVI = analyses.find((a) => a.analysis_type === "ndvi");
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2.5 hover:bg-white/80 rounded-xl transition-all border border-slate-200/60 shadow-sm"
           >
             <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -149,57 +152,59 @@ export default function FieldDetailPage() {
         </div>
         <Link
           href={`/dashboard/chat?field=${fieldId}`}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-medium"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
-          Consulter l'IA
+          Ask AI
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column - Map & Info */}
         <div className="xl:col-span-2 space-y-6">
           {/* Map */}
-          <Card>
-            <CardContent className="p-0">
-              <div className="h-[400px] rounded-lg overflow-hidden">
-                <FieldMap
-                  fields={[field]}
-                  center={getCenterFromGeometry(field.geometry)}
-                  zoom={14}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="h-[400px]">
+              <FieldMap
+                fields={[field]}
+                center={getCenterFromGeometry(field.geometry)}
+                zoom={14}
+              />
+            </div>
+          </div>
 
           {/* Info Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900">Information</h2>
+            </div>
+            <div className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <p className="text-sm text-slate-500">Surface</p>
+                <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 rounded-xl p-4 border border-emerald-100/60">
+                  <p className="text-sm text-slate-500">Area</p>
                   <p className="text-lg font-semibold text-slate-900">
                     {field.area_hectares?.toFixed(2) || "—"} ha
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <p className="text-sm text-slate-500">Culture</p>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100/60">
+                  <p className="text-sm text-slate-500">Crop</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {field.crop_type || "Non spécifiée"}
+                    {field.crop_type || "Not specified"}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <p className="text-sm text-slate-500">Créée le</p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100/60">
+                  <p className="text-sm text-slate-500">Created</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {new Date(field.created_at).toLocaleDateString("fr-FR")}
+                    {new Date(field.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100/60">
                   <p className="text-sm text-slate-500">Analyses</p>
                   <p className="text-lg font-semibold text-slate-900">
                     {analyses.length}
@@ -207,39 +212,42 @@ export default function FieldDetailPage() {
                 </div>
               </div>
               {field.description && (
-                <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+                <div className="mt-4 p-4 bg-slate-50/80 rounded-xl border border-slate-200/60">
                   <p className="text-sm text-slate-500 mb-1">Description</p>
                   <p className="text-slate-700">{field.description}</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Analysis History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique des analyses</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900">Analysis History</h2>
+            </div>
+            <div className="p-6">
               {analyses.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <p>Aucune analyse effectuée</p>
-                  <p className="text-sm mt-1">Lancez une analyse pour voir les résultats ici</p>
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <span className="text-3xl">📊</span>
+                  </div>
+                  <p className="text-slate-900 font-medium">No analyses yet</p>
+                  <p className="text-sm text-slate-500 mt-1">Run an analysis to see results here</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {analyses.slice(0, 5).map((analysis) => (
                     <div
                       key={analysis.id}
-                      className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 hover:bg-slate-100/80 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
                           analysis.analysis_type === "ndvi"
-                            ? "bg-green-100 text-green-600"
+                            ? "bg-gradient-to-br from-green-100 to-emerald-100 border border-green-200/60"
                             : analysis.analysis_type === "rvi"
-                            ? "bg-blue-100 text-blue-600"
-                            : "bg-purple-100 text-purple-600"
+                            ? "bg-gradient-to-br from-blue-100 to-cyan-100 border border-blue-200/60"
+                            : "bg-gradient-to-br from-purple-100 to-pink-100 border border-purple-200/60"
                         }`}>
                           {analysis.analysis_type === "ndvi" ? "🌿" : 
                            analysis.analysis_type === "rvi" ? "📡" : "🔄"}
@@ -249,7 +257,7 @@ export default function FieldDetailPage() {
                             {analysis.analysis_type.toUpperCase()}
                           </p>
                           <p className="text-sm text-slate-500">
-                            {new Date(analysis.created_at).toLocaleDateString("fr-FR", {
+                            {new Date(analysis.created_at).toLocaleDateString("en-US", {
                               day: "numeric",
                               month: "short",
                               hour: "2-digit",
@@ -275,7 +283,7 @@ export default function FieldDetailPage() {
                             {analysis.mean_value >= 0.6
                               ? "Excellent"
                               : analysis.mean_value >= 0.4
-                              ? "Modéré"
+                              ? "Moderate"
                               : "Attention"}
                           </Badge>
                         </div>
@@ -284,118 +292,118 @@ export default function FieldDetailPage() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right Column - Actions & Predictions */}
         <div className="space-y-6">
           {/* Analysis Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Analyses satellite</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900">Satellite Analysis</h2>
+            </div>
+            <div className="p-6 space-y-3">
               <button
                 onClick={() => handleRunAnalysis("ndvi")}
                 disabled={analyzing}
-                className="w-full flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl transition-all disabled:opacity-50 border border-green-200/60"
               >
                 <span className="text-2xl">🌿</span>
                 <div className="text-left">
-                  <p className="font-medium text-slate-900">Analyser NDVI</p>
-                  <p className="text-sm text-slate-500">Indice de végétation</p>
+                  <p className="font-medium text-slate-900">Analyze NDVI</p>
+                  <p className="text-sm text-slate-500">Vegetation index</p>
                 </div>
               </button>
               <button
                 onClick={() => handleRunAnalysis("rvi")}
                 disabled={analyzing}
-                className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-xl transition-all disabled:opacity-50 border border-blue-200/60"
               >
                 <span className="text-2xl">📡</span>
                 <div className="text-left">
-                  <p className="font-medium text-slate-900">Analyser RVI</p>
-                  <p className="text-sm text-slate-500">Radar (fonctionne par temps nuageux)</p>
+                  <p className="font-medium text-slate-900">Analyze RVI</p>
+                  <p className="text-sm text-slate-500">Radar (works in cloudy weather)</p>
                 </div>
               </button>
               <button
                 onClick={() => handleRunAnalysis("fusion")}
                 disabled={analyzing}
-                className="w-full flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-xl transition-all disabled:opacity-50 border border-purple-200/60"
               >
                 <span className="text-2xl">🔄</span>
                 <div className="text-left">
-                  <p className="font-medium text-slate-900">Analyse fusionnée</p>
-                  <p className="text-sm text-slate-500">Combine optique et radar</p>
+                  <p className="font-medium text-slate-900">Fusion Analysis</p>
+                  <p className="text-sm text-slate-500">Combines optical and radar</p>
                 </div>
               </button>
               {analyzing && (
                 <div className="flex items-center justify-center gap-2 py-4 text-emerald-600">
                   <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                  <span>Analyse en cours...</span>
+                  <span className="font-medium">Analysis in progress...</span>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Yield Prediction */}
           {yieldData && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🌾 Prédiction de rendement
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100">
+                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+                  <span>🌾</span> Yield Prediction
+                </h2>
+              </div>
+              <div className="p-6">
                 <div className="text-center py-4">
-                  <p className="text-4xl font-bold text-emerald-600">
+                  <p className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
                     {yieldData.predicted_yield?.toFixed(1) || "—"}
                   </p>
                   <p className="text-slate-500 mt-1">tonnes/hectare</p>
                 </div>
-                <div className="mt-4 p-3 bg-slate-50 rounded-lg">
-                  <p className="text-sm text-slate-500">Confiance</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div className="mt-4 p-4 bg-slate-50/80 rounded-xl border border-slate-200/60">
+                  <p className="text-sm text-slate-500 mb-2">Confidence</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
                         style={{ width: `${(yieldData.confidence || 0.7) * 100}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-slate-700">
+                    <span className="text-sm font-semibold text-slate-700">
                       {((yieldData.confidence || 0.7) * 100).toFixed(0)}%
                     </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Biomass Estimate */}
           {biomassData && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🌱 Estimation biomasse
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100">
+                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+                  <span>🌱</span> Biomass Estimate
+                </h2>
+              </div>
+              <div className="p-6">
                 <div className="text-center py-4">
-                  <p className="text-4xl font-bold text-green-600">
+                  <p className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                     {biomassData.estimated_biomass?.toFixed(1) || "—"}
                   </p>
                   <p className="text-slate-500 mt-1">tonnes/hectare</p>
                 </div>
                 {biomassData.growth_stage && (
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg text-center">
-                    <p className="text-sm text-slate-500">Stade de croissance</p>
-                    <p className="font-medium text-green-700 mt-1">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl text-center border border-green-200/60">
+                    <p className="text-sm text-slate-500">Growth Stage</p>
+                    <p className="font-semibold text-green-700 mt-1">
                       {biomassData.growth_stage}
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
       </div>

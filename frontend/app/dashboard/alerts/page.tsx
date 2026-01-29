@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAlerts, markAlertRead, markAllAlertsRead, Alert } from "@/lib/api";
-import { Card, CardContent, Badge } from "@/components/ui";
+import { Badge } from "@/components/ui";
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -87,11 +87,11 @@ export default function AlertsPage() {
 
       let key: string;
       if (date.toDateString() === today.toDateString()) {
-        key = "Aujourd'hui";
+        key = "Today";
       } else if (date.toDateString() === yesterday.toDateString()) {
-        key = "Hier";
+        key = "Yesterday";
       } else {
-        key = date.toLocaleDateString("fr-FR", {
+        key = date.toLocaleDateString("en-US", {
           weekday: "long",
           day: "numeric",
           month: "long",
@@ -110,155 +110,151 @@ export default function AlertsPage() {
   const groupedAlerts = groupAlertsByDate(alerts);
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Alertes</h1>
-          <p className="text-slate-600 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900">Alerts</h1>
+          <p className="text-slate-500 mt-1">
             {unreadCount > 0
-              ? `${unreadCount} alerte${unreadCount > 1 ? "s" : ""} non lue${
-                  unreadCount > 1 ? "s" : ""
-                }`
-              : "Toutes les alertes sont lues"}
+              ? `${unreadCount} unread alert${unreadCount > 1 ? "s" : ""}`
+              : "All alerts are read"}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="inline-flex bg-slate-100 rounded-lg p-1">
+          <div className="inline-flex bg-white/80 backdrop-blur-sm rounded-xl p-1.5 border border-slate-200/60 shadow-sm">
             <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === "all"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
               onClick={() => setFilter("all")}
             >
-              Toutes
+              All
             </button>
             <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === "unread"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
               onClick={() => setFilter("unread")}
             >
-              Non lues
+              Unread
             </button>
           </div>
 
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              className="px-4 py-2.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors border border-emerald-200"
             >
-              Tout marquer comme lu
+              Mark all as read
             </button>
           )}
         </div>
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-600 mt-4">Chargement des alertes...</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 mt-4">Loading alerts...</p>
         </div>
       ) : alerts.length === 0 ? (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <span className="text-6xl mb-4 block">✅</span>
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">Aucune alerte</h2>
-            <p className="text-slate-500 max-w-md mx-auto">
-              {filter === "unread"
-                ? "Vous avez lu toutes vos alertes. Bravo !"
-                : "Vos cultures se portent bien. Continuez ainsi !"}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 py-20 text-center shadow-sm">
+          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-100 to-cyan-100 flex items-center justify-center">
+            <span className="text-4xl">✅</span>
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">No alerts</h2>
+          <p className="text-slate-500 max-w-md mx-auto">
+            {filter === "unread"
+              ? "You've read all your alerts. Great job!"
+              : "Your crops are doing well. Keep it up!"}
+          </p>
+        </div>
       ) : (
         <div className="space-y-8">
           {Object.entries(groupedAlerts).map(([date, dateAlerts]) => (
             <div key={date}>
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 px-1">
                 {date}
               </h2>
               <div className="space-y-3">
                 {dateAlerts.map((alert) => (
-                  <Card
+                  <div
                     key={alert.id}
-                    className={`transition-all ${
-                      !alert.is_read ? "ring-2 ring-emerald-500/20" : ""
+                    className={`bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm transition-all hover:shadow-md ${
+                      !alert.is_read ? "ring-2 ring-emerald-500/20 border-emerald-200" : "border-slate-200/60"
                     }`}
                   >
-                    <CardContent className="p-0">
-                      <div className="flex items-start gap-4 p-4">
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border ${getSeverityColor(
-                            alert.severity
-                          )}`}
-                        >
-                          {getSeverityIcon(alert.severity)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h3 className="font-semibold text-slate-900">
-                                {alert.title}
-                              </h3>
-                              <p className="text-slate-600 mt-1">{alert.message}</p>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Badge
-                                variant={
-                                  alert.severity === "critical"
-                                    ? "error"
-                                    : alert.severity === "high"
-                                    ? "warning"
-                                    : "default"
-                                }
-                              >
-                                {alert.severity === "critical"
-                                  ? "Critique"
+                    <div className="flex items-start gap-4 p-5">
+                      <div
+                        className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl border shrink-0 ${getSeverityColor(
+                          alert.severity
+                        )}`}
+                      >
+                        {getSeverityIcon(alert.severity)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold text-slate-900 mb-1">
+                              {alert.title}
+                            </h3>
+                            <p className="text-slate-600">{alert.message}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge
+                              variant={
+                                alert.severity === "critical"
+                                  ? "error"
                                   : alert.severity === "high"
-                                  ? "Important"
-                                  : alert.severity === "medium"
-                                  ? "Moyen"
-                                  : "Info"}
-                              </Badge>
-                              {!alert.is_read && (
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 mt-3">
-                            {alert.field_name && (
-                              <Link
-                                href={`/dashboard/fields/${alert.field_id}`}
-                                className="text-sm text-emerald-600 hover:underline"
-                              >
-                                📍 {alert.field_name}
-                              </Link>
-                            )}
-                            <span className="text-sm text-slate-400">
-                              {new Date(alert.created_at).toLocaleTimeString("fr-FR", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
+                                  ? "warning"
+                                  : "default"
+                              }
+                            >
+                              {alert.severity === "critical"
+                                ? "Critical"
+                                : alert.severity === "high"
+                                ? "High"
+                                : alert.severity === "medium"
+                                ? "Medium"
+                                : "Info"}
+                            </Badge>
                             {!alert.is_read && (
-                              <button
-                                onClick={() => handleMarkRead(alert.id)}
-                                className="text-sm text-slate-500 hover:text-slate-700"
-                              >
-                                Marquer comme lu
-                              </button>
+                              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
                             )}
                           </div>
+                        </div>
+                        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100">
+                          {alert.field_name && (
+                            <Link
+                              href={`/dashboard/fields/${alert.field_id}`}
+                              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                            >
+                              <span>📍</span> {alert.field_name}
+                            </Link>
+                          )}
+                          <span className="text-sm text-slate-400">
+                            {new Date(alert.created_at).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          {!alert.is_read && (
+                            <button
+                              onClick={() => handleMarkRead(alert.id)}
+                              className="text-sm text-slate-500 hover:text-emerald-600 transition-colors ml-auto"
+                            >
+                              Mark as read
+                            </button>
+                          )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

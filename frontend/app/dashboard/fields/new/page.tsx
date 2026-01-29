@@ -4,32 +4,31 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createField } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 
 const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-slate-100 rounded-lg">
+    <div className="flex items-center justify-center h-full bg-slate-100/50 rounded-2xl">
       <div className="flex items-center gap-3">
-        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-slate-600">Chargement de la carte...</span>
+        <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-slate-500 font-medium">Loading map...</span>
       </div>
     </div>
   ),
 });
 
 const CROP_TYPES = [
-  "Blé",
-  "Orge",
-  "Maïs",
-  "Tournesol",
+  "Wheat",
+  "Barley",
+  "Corn",
+  "Sunflower",
   "Olives",
-  "Agrumes",
-  "Tomates",
-  "Pommes de terre",
-  "Raisins",
-  "Amandes",
-  "Autre",
+  "Citrus",
+  "Tomatoes",
+  "Potatoes",
+  "Grapes",
+  "Almonds",
+  "Other",
 ];
 
 export default function NewFieldPage() {
@@ -64,12 +63,12 @@ export default function NewFieldPage() {
     setError("");
 
     if (!geometry) {
-      setError("Veuillez dessiner les limites de votre parcelle sur la carte");
+      setError("Please draw the boundaries of your field on the map");
       return;
     }
 
     if (!formData.name.trim()) {
-      setError("Veuillez donner un nom à votre parcelle");
+      setError("Please give your field a name");
       return;
     }
 
@@ -85,36 +84,36 @@ export default function NewFieldPage() {
 
       router.push("/dashboard/fields");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Erreur lors de la création");
+      setError(err.response?.data?.detail || "Error creating field");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Nouvelle parcelle</h1>
-        <p className="text-slate-600 mt-1">
-          Dessinez votre parcelle sur la carte et remplissez les informations
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">New Field</h1>
+        <p className="text-slate-500 mt-1">
+          Draw your field on the map and fill in the information
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Map Section */}
         <div className="xl:col-span-2">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full text-sm font-semibold">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden h-full">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900 flex items-center gap-3">
+                <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/25">
                   1
                 </span>
-                Dessinez les limites de votre parcelle
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[500px] rounded-lg overflow-hidden border border-slate-200">
+                Draw your field boundaries
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="h-[500px] rounded-xl overflow-hidden border border-slate-200/60">
                 <FieldMap
                   editable={true}
                   onPolygonComplete={handlePolygonComplete}
@@ -122,39 +121,39 @@ export default function NewFieldPage() {
                 />
               </div>
               {geometry && (
-                <div className="mt-4 flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-3 rounded-lg">
+                <div className="mt-4 flex items-center gap-2 text-emerald-700 bg-gradient-to-r from-emerald-50 to-cyan-50 px-4 py-3 rounded-xl border border-emerald-200/60">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="font-medium">Parcelle dessinée ! Vous pouvez la modifier ou continuer.</span>
+                  <span className="font-medium">Field drawn! You can edit it or continue.</span>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Form Section */}
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full text-sm font-semibold">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900 flex items-center gap-3">
+                <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/25">
                   2
                 </span>
-                Informations de la parcelle
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+                Field information
+              </h2>
+            </div>
+            <div className="p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+                  <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-200/60">
                     {error}
                   </div>
                 )}
 
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
-                    Nom de la parcelle *
+                    Field Name *
                   </label>
                   <input
                     id="name"
@@ -162,24 +161,24 @@ export default function NewFieldPage() {
                     type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                    placeholder="Ex: Champ Nord"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    placeholder="e.g. North Field"
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="crop_type" className="block text-sm font-medium text-slate-700 mb-2">
-                    Type de culture
+                    Crop Type
                   </label>
                   <select
                     id="crop_type"
                     name="crop_type"
                     value={formData.crop_type}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all bg-white"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all bg-white"
                   >
-                    <option value="">Sélectionner...</option>
+                    <option value="">Select...</option>
                     {CROP_TYPES.map((crop) => (
                       <option key={crop} value={crop}>
                         {crop}
@@ -198,8 +197,8 @@ export default function NewFieldPage() {
                     value={formData.description}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
-                    placeholder="Notes sur la parcelle..."
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
+                    placeholder="Notes about the field..."
                   />
                 </div>
 
@@ -207,28 +206,28 @@ export default function NewFieldPage() {
                   <button
                     type="button"
                     onClick={() => router.back()}
-                    className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                    className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all font-medium"
                   >
-                    Annuler
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading || !geometry}
-                    className="flex-1 px-4 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Création...
+                        Creating...
                       </span>
                     ) : (
-                      "Créer la parcelle"
+                      "Create Field"
                     )}
                   </button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

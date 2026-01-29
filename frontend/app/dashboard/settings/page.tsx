@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -25,76 +25,76 @@ export default function SettingsPage() {
 
   const subscriptionTiers = [
     {
-      name: "Gratuit",
-      price: "0€",
-      period: "/mois",
+      name: "Free",
+      price: "$0",
+      period: "/month",
       features: [
-        "1 parcelle",
-        "5 analyses/mois",
-        "Données NDVI basiques",
-        "7 jours d'historique",
+        "1 field",
+        "5 analyses/month",
+        "Basic NDVI data",
+        "7 days history",
       ],
       current: true,
     },
     {
       name: "Pro",
-      price: "29€",
-      period: "/mois",
+      price: "$29",
+      period: "/month",
       features: [
-        "10 parcelles",
-        "100 analyses/mois",
+        "10 fields",
+        "100 analyses/month",
         "NDVI + RVI + Fusion",
-        "1 an d'historique",
-        "Export des données",
-        "Support prioritaire",
+        "1 year history",
+        "Data export",
+        "Priority support",
       ],
       current: false,
       popular: true,
     },
     {
-      name: "Entreprise",
-      price: "Sur devis",
+      name: "Enterprise",
+      price: "Custom",
       period: "",
       features: [
-        "Parcelles illimitées",
-        "Analyses illimitées",
-        "API dédiée",
-        "Historique illimité",
-        "Formation personnalisée",
-        "Support 24/7",
+        "Unlimited fields",
+        "Unlimited analyses",
+        "Dedicated API",
+        "Unlimited history",
+        "Custom training",
+        "24/7 support",
       ],
       current: false,
     },
   ];
 
   const tabs = [
-    { id: "profile", label: "Profil", icon: "👤" },
+    { id: "profile", label: "Profile", icon: "👤" },
     { id: "notifications", label: "Notifications", icon: "🔔" },
-    { id: "subscription", label: "Abonnement", icon: "💳" },
+    { id: "subscription", label: "Subscription", icon: "💳" },
   ] as const;
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Paramètres</h1>
-        <p className="text-slate-600 mt-1">Gérez votre compte et vos préférences</p>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+        <p className="text-slate-500 mt-1">Manage your account and preferences</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar Tabs */}
-        <nav className="lg:w-64 flex lg:flex-col gap-2">
+        <nav className="lg:w-64 flex lg:flex-col gap-2 bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-slate-200/60 shadow-sm h-fit">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 activeTab === tab.id
-                  ? "bg-emerald-50 text-emerald-700 font-medium"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium shadow-lg shadow-emerald-500/25"
+                  : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              <span>{tab.icon}</span>
+              <span className="text-xl">{tab.icon}</span>
               <span>{tab.label}</span>
             </button>
           ))}
@@ -105,20 +105,20 @@ export default function SettingsPage() {
           {/* Profile Tab */}
           {activeTab === "profile" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Informations personnelles</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form className="space-y-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100">
+                  <h2 className="font-semibold text-slate-900">Personal Information</h2>
+                </div>
+                <div className="p-6">
+                  <form className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nom complet
+                        Full Name
                       </label>
                       <input
                         type="text"
                         defaultValue={session?.user?.name || ""}
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
                     <div>
@@ -128,120 +128,119 @@ export default function SettingsPage() {
                       <input
                         type="email"
                         defaultValue={session?.user?.email || ""}
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-500"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-500"
                         disabled
                       />
-                      <p className="text-sm text-slate-500 mt-1">
-                        L'email ne peut pas être modifié
+                      <p className="text-sm text-slate-500 mt-1.5">
+                        Email cannot be changed
                       </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Téléphone
+                        Phone
                       </label>
                       <input
                         type="tel"
-                        placeholder="+33 6 00 00 00 00"
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        placeholder="+1 (555) 000-0000"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
                     <Button type="submit" className="mt-4">
-                      Enregistrer les modifications
+                      Save Changes
                     </Button>
                   </form>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Changer le mot de passe</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form className="space-y-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100">
+                  <h2 className="font-semibold text-slate-900">Change Password</h2>
+                </div>
+                <div className="p-6">
+                  <form className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Mot de passe actuel
+                        Current Password
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nouveau mot de passe
+                        New Password
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Confirmer le nouveau mot de passe
+                        Confirm New Password
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
                     <Button type="submit" variant="secondary" className="mt-4">
-                      Mettre à jour le mot de passe
+                      Update Password
                     </Button>
                   </form>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="border-red-200">
-                <CardHeader>
-                  <CardTitle className="text-red-600">Zone de danger</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-red-200/60 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-red-100">
+                  <h2 className="font-semibold text-red-600">Danger Zone</h2>
+                </div>
+                <div className="p-6">
                   <p className="text-slate-600 mb-4">
-                    La suppression de votre compte est irréversible. Toutes vos données
-                    seront définitivement supprimées.
+                    Deleting your account is irreversible. All your data will be permanently deleted.
                   </p>
-                  <button className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium">
-                    Supprimer mon compte
+                  <button className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium border border-red-200">
+                    Delete My Account
                   </button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Notifications Tab */}
           {activeTab === "notifications" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Préférences de notifications</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100">
+                <h2 className="font-semibold text-slate-900">Notification Preferences</h2>
+              </div>
+              <div className="p-6">
                 <div className="space-y-4">
                   {[
                     {
                       key: "email_alerts" as const,
-                      title: "Alertes par email",
-                      description: "Recevez les alertes importantes par email",
+                      title: "Email Alerts",
+                      description: "Receive important alerts via email",
                     },
                     {
                       key: "critical_only" as const,
-                      title: "Alertes critiques uniquement",
-                      description: "Ne recevoir que les alertes critiques",
+                      title: "Critical Alerts Only",
+                      description: "Only receive critical alerts",
                     },
                     {
                       key: "weekly_report" as const,
-                      title: "Rapport hebdomadaire",
-                      description: "Résumé de l'état de vos parcelles chaque semaine",
+                      title: "Weekly Report",
+                      description: "Summary of your fields status every week",
                     },
                     {
                       key: "analysis_complete" as const,
-                      title: "Analyses terminées",
-                      description: "Notification quand une analyse satellite est terminée",
+                      title: "Analysis Complete",
+                      description: "Notification when a satellite analysis is complete",
                     },
                   ].map((item) => (
                     <div
                       key={item.key}
-                      className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-slate-50/80 rounded-xl border border-slate-200/60"
                     >
                       <div>
                         <h3 className="font-medium text-slate-900">{item.title}</h3>
@@ -249,58 +248,60 @@ export default function SettingsPage() {
                       </div>
                       <button
                         onClick={() => handleNotificationChange(item.key)}
-                        className={`relative w-12 h-6 rounded-full transition-colors ${
+                        className={`relative w-14 h-7 rounded-full transition-all shadow-inner ${
                           notifications[item.key] ? "bg-emerald-500" : "bg-slate-300"
                         }`}
                       >
                         <span
-                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                            notifications[item.key] ? "translate-x-7" : "translate-x-1"
+                          className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+                            notifications[item.key] ? "translate-x-8" : "translate-x-1"
                           }`}
                         />
                       </button>
                     </div>
                   ))}
                 </div>
-                <Button className="mt-6">Enregistrer les préférences</Button>
-              </CardContent>
-            </Card>
+                <Button className="mt-6">Save Preferences</Button>
+              </div>
+            </div>
           )}
 
           {/* Subscription Tab */}
           {activeTab === "subscription" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Votre abonnement actuel</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100">
+                  <h2 className="font-semibold text-slate-900">Current Subscription</h2>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl border border-emerald-200/60">
                     <div>
-                      <h3 className="font-semibold text-slate-900">Plan Gratuit</h3>
+                      <h3 className="font-semibold text-slate-900">Free Plan</h3>
                       <p className="text-sm text-slate-600">
-                        1 parcelle • 5 analyses/mois
+                        1 field • 5 analyses/month
                       </p>
                     </div>
-                    <Badge variant="primary">Actif</Badge>
+                    <Badge variant="primary">Active</Badge>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {subscriptionTiers.map((tier) => (
-                  <Card
+                  <div
                     key={tier.name}
-                    className={`relative ${
-                      tier.popular ? "ring-2 ring-emerald-500" : ""
+                    className={`relative bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${
+                      tier.popular ? "ring-2 ring-emerald-500 border-emerald-200" : "border-slate-200/60"
                     }`}
                   >
                     {tier.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge variant="primary">Populaire</Badge>
+                      <div className="absolute -top-0 left-0 right-0">
+                        <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-center py-1.5 text-sm font-medium">
+                          Most Popular
+                        </div>
                       </div>
                     )}
-                    <CardContent className="pt-6">
+                    <div className={`p-6 ${tier.popular ? "pt-12" : ""}`}>
                       <h3 className="text-lg font-semibold text-slate-900">
                         {tier.name}
                       </h3>
@@ -312,9 +313,9 @@ export default function SettingsPage() {
                       </div>
                       <ul className="mt-6 space-y-3">
                         {tier.features.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm">
+                          <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
                             <svg
-                              className="w-5 h-5 text-emerald-500"
+                              className="w-5 h-5 text-emerald-500 shrink-0"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -331,19 +332,19 @@ export default function SettingsPage() {
                         ))}
                       </ul>
                       <button
-                        className={`w-full mt-6 px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                        className={`w-full mt-6 px-4 py-3 rounded-xl font-medium transition-all ${
                           tier.current
-                            ? "bg-slate-100 text-slate-500 cursor-not-allowed"
+                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                             : tier.popular
-                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                            ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-emerald-500/25"
                             : "border border-slate-200 text-slate-700 hover:bg-slate-50"
                         }`}
                         disabled={tier.current}
                       >
-                        {tier.current ? "Plan actuel" : "Choisir ce plan"}
+                        {tier.current ? "Current Plan" : "Choose Plan"}
                       </button>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

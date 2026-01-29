@@ -30,12 +30,12 @@ export default function RegisterPage() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
+      setError("Passwords do not match");
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
+      setError("Password must be at least 8 characters");
       return;
     }
 
@@ -65,7 +65,7 @@ export default function RegisterPage() {
       if (err.response?.data?.detail) {
         setError(err.response.data.detail);
       } else {
-        setError("Une erreur est survenue lors de l'inscription");
+        setError("An error occurred during registration");
       }
     } finally {
       setLoading(false);
@@ -84,9 +84,9 @@ export default function RegisterPage() {
                 AtlasField
               </span>
             </Link>
-            <h1 className="text-2xl font-bold text-slate-900">Créer un compte</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Create an account</h1>
             <p className="text-slate-500 mt-2">
-              Commencez à surveiller vos cultures gratuitement
+              Start monitoring your crops for free
             </p>
           </div>
 
@@ -99,7 +99,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
-                Nom complet <span className="text-slate-400">(optionnel)</span>
+                Full name <span className="text-slate-400">(optional)</span>
               </label>
               <input
                 id="fullName"
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 value={formData.fullName}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                placeholder="Jean Dupont"
+                placeholder="John Doe"
               />
             </div>
 
@@ -123,14 +123,14 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                placeholder="votre@email.com"
+                placeholder="your@email.com"
                 required
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-                Mot de passe
+                Password
               </label>
               <input
                 id="password"
@@ -143,12 +143,12 @@ export default function RegisterPage() {
                 required
                 minLength={8}
               />
-              <p className="text-xs text-slate-500 mt-1">Minimum 8 caractères</p>
+              <p className="text-xs text-slate-500 mt-1">Minimum 8 characters</p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
-                Confirmer le mot de passe
+                Confirm password
               </label>
               <input
                 id="confirmPassword"
@@ -171,35 +171,35 @@ export default function RegisterPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Inscription...
+                  Signing up...
                 </span>
               ) : (
-                "Créer mon compte"
+                "Create my account"
               )}
             </button>
           </form>
 
           {/* Terms */}
           <p className="text-xs text-slate-500 text-center mt-6">
-            En créant un compte, vous acceptez nos{" "}
+            By creating an account, you agree to our{" "}
             <Link href="/terms" className="text-emerald-600 hover:underline">
-              conditions d'utilisation
+              terms of service
             </Link>{" "}
-            et notre{" "}
+            and our{" "}
             <Link href="/privacy" className="text-emerald-600 hover:underline">
-              politique de confidentialité
+              privacy policy
             </Link>
           </p>
 
           {/* Footer */}
           <div className="mt-8 text-center pt-6 border-t border-slate-100">
             <p className="text-slate-500">
-              Déjà inscrit ?{" "}
+              Already have an account?{" "}
               <Link
                 href="/login"
                 className="text-emerald-600 hover:text-emerald-700 font-medium"
               >
-                Connectez-vous
+                Sign in
               </Link>
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function RegisterPage() {
         {/* Back to home */}
         <div className="text-center mt-6">
           <Link href="/" className="text-slate-500 hover:text-slate-700 text-sm">
-            ← Retour à l'accueil
+            ← Back to home
           </Link>
         </div>
       </div>

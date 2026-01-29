@@ -15,11 +15,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
       <DashboardNav user={session.user} />
       <div className="flex">
         <DashboardSidebar />
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto min-h-[calc(100vh-64px)]">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -29,13 +29,13 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Email ou mot de passe incorrect");
+        setError("Incorrect email or password");
       } else {
         router.push(callbackUrl);
         router.refresh();
       }
     } catch (err) {
-      setError("Une erreur est survenue");
+      setError("An error occurred");
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       {registered && (
         <div className="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-lg text-sm">
-          ✅ Inscription réussie ! Vous pouvez maintenant vous connecter.
+          ✅ Registration successful! You can now sign in.
         </div>
       )}
       
@@ -65,14 +65,14 @@ function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-          placeholder="votre@email.com"
+          placeholder="your@email.com"
           required
         />
       </div>
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-          Mot de passe
+          Password
         </label>
         <input
           id="password"
@@ -94,10 +94,10 @@ function LoginForm() {
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Connexion...
+            Signing in...
           </span>
         ) : (
-          "Se connecter"
+          "Sign in"
         )}
       </button>
     </form>
@@ -117,9 +117,9 @@ export default function LoginPage() {
                 AtlasField
               </span>
             </Link>
-            <h1 className="text-2xl font-bold text-slate-900">Connexion</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Sign in</h1>
             <p className="text-slate-500 mt-2">
-              Accédez à votre tableau de bord agricole
+              Access your agricultural dashboard
             </p>
           </div>
 
@@ -134,12 +134,12 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-slate-500">
-              Pas encore de compte ?{" "}
+              Don't have an account?{" "}
               <Link
                 href="/register"
                 className="text-emerald-600 hover:text-emerald-700 font-medium"
               >
-                Inscrivez-vous gratuitement
+                Sign up for free
               </Link>
             </p>
           </div>
@@ -148,7 +148,7 @@ export default function LoginPage() {
         {/* Back to home */}
         <div className="text-center mt-6">
           <Link href="/" className="text-slate-500 hover:text-slate-700 text-sm">
-            ← Retour à l'accueil
+            ← Back to home
           </Link>
         </div>
       </div>

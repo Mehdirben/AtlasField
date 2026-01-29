@@ -8,7 +8,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import User, Field, Analysis, Alert
+from app.models import User, Field, Analysis, Alert, AnalysisType
 from app.schemas import FieldCreate, FieldUpdate, FieldResponse, FieldWithAnalysis
 from app.auth import get_current_user
 
@@ -67,14 +67,18 @@ async def list_fields(
     
     response = []
     for field in fields:
-        # Get latest NDVI analysis
+        # Get latest NDVI or COMPLETE analysis
         latest_ndvi = None
         latest_date = None
         
         if field.analyses:
-            ndvi_analyses = [a for a in field.analyses if a.analysis_type.value == "ndvi"]
-            if ndvi_analyses:
-                latest = max(ndvi_analyses, key=lambda x: x.created_at)
+            # Look for NDVI or COMPLETE analyses
+            relevant_analyses = [
+                a for a in field.analyses 
+                if a.analysis_type in (AnalysisType.NDVI, AnalysisType.COMPLETE)
+            ]
+            if relevant_analyses:
+                latest = max(relevant_analyses, key=lambda x: x.created_at)
                 latest_ndvi = latest.mean_value
                 latest_date = latest.created_at
         

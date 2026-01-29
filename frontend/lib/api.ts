@@ -85,7 +85,7 @@ export const deleteField = async (id: number): Promise<void> => {
 export interface Analysis {
   id: number;
   field_id: number;
-  analysis_type: "ndvi" | "rvi" | "moisture" | "fusion" | "yield" | "biomass";
+  analysis_type: "NDVI" | "RVI" | "MOISTURE" | "FUSION" | "YIELD" | "BIOMASS" | "COMPLETE";
   satellite_date?: string;
   data: Record<string, unknown>;
   mean_value?: number;
@@ -98,7 +98,7 @@ export interface Analysis {
 
 export const runAnalysis = async (
   fieldId: number,
-  analysisType: string = "ndvi"
+  analysisType: string = "NDVI"
 ): Promise<Analysis> => {
   const response = await api.post(`/analysis/${fieldId}`, {
     analysis_type: analysisType,

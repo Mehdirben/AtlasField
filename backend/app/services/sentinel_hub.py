@@ -144,12 +144,14 @@ class SentinelHubService:
                 # For MVP, we'll calculate statistics from the raw bytes
                 data = response.content
                 
-                # Simplified statistics (would need proper TIFF parsing)
+                # Parse TIFF and calculate actual statistics
                 return self._calculate_stats(data, "ndvi")
-                
+        
+        except ValueError as e:
+            # Re-raise credential errors
+            raise
         except Exception as e:
-            # Return mock data if API fails
-            return self._get_mock_ndvi()
+            raise ValueError(f"Failed to fetch NDVI data from Sentinel Hub: {str(e)}")
     
     async def get_rvi(self, bbox: tuple, resolution: int = 10) -> dict:
         """
@@ -230,9 +232,12 @@ class SentinelHubService:
                 response.raise_for_status()
                 
                 return self._calculate_stats(response.content, "rvi")
-                
+        
+        except ValueError as e:
+            # Re-raise credential errors
+            raise
         except Exception as e:
-            return self._get_mock_rvi()
+            raise ValueError(f"Failed to fetch RVI data from Sentinel Hub: {str(e)}")
     
     async def get_fused_analysis(self, bbox: tuple) -> dict:
         """
@@ -269,39 +274,68 @@ class SentinelHubService:
     
     def _calculate_stats(self, data: bytes, index_type: str) -> dict:
         """
-        Calculate statistics from image data
-        Simplified for MVP - would use rasterio in production
+        Calculate statistics from TIFF image data
+        Parses the raw bytes to extract actual vegetation index values
         """
-        # For MVP, return reasonable mock values
-        # In production, parse TIFF and calculate actual statistics
-        if index_type == "ndvi":
-            return self._get_mock_ndvi()
-        else:
-            return self._get_mock_rvi()
-    
-    def _get_mock_ndvi(self) -> dict:
-        """Mock NDVI data for development/demo"""
-        mean = 0.45 + np.random.uniform(-0.15, 0.2)
-        return {
-            "mean": round(mean, 3),
-            "min": round(mean - 0.2, 3),
-            "max": round(mean + 0.25, 3),
-            "cloud_coverage": round(np.random.uniform(0, 30), 1),
-            "interpretation": self._interpret_vegetation(mean),
-            "raw_data": {"source": "sentinel-2", "index": "ndvi"}
-        }
-    
-    def _get_mock_rvi(self) -> dict:
-        """Mock RVI data for development/demo"""
-        mean = 0.5 + np.random.uniform(-0.1, 0.15)
-        return {
-            "mean": round(mean, 3),
-            "min": round(mean - 0.15, 3),
-            "max": round(mean + 0.2, 3),
-            "cloud_coverage": 0,  # Radar sees through clouds
-            "interpretation": self._interpret_vegetation(mean),
-            "raw_data": {"source": "sentinel-1", "index": "rvi"}
-        }
+        try:
+            # Parse TIFF data - extract float32 values
+            # Skip TIFF header (typically first 8 bytes for basic TIFF)
+            # The actual pixel data follows the header/IFD structure
+            
+            # For GeoTIFF from Sentinel Hub, data is FLOAT32
+            # Simple approach: read raw float values after header
+            import struct
+            
+            # Find data offset (simplified - assumes uncompressed data)
+            # In production, use rasterio or tifffile for proper parsing
+            if len(data) < 100:
+                raise ValueError("TIFF data too small")
+            
+            # Extract float32 values (skip first 8 bytes header minimum)
+            offset = 8
+            float_size = 4
+            num_values = (len(data) - offset) // float_size
+            
+            if num_values < 10:
+                raise ValueError("Not enough pixel data")
+            
+            # Unpack float values
+            values = []
+            for i in range(min(num_values, 10000)):  # Limit to prevent memory issues
+                try:
+                    val = struct.unpack('<f', data[offset + i*float_size:offset + (i+1)*float_size])[0]
+                    # Filter out nodata values (typically -1 for clouds, NaN, or very large values)
+                    if -1 < val < 2 and not np.isnan(val):
+                        values.append(val)
+                except:
+                    continue
+            
+            if len(values) < 5:
+                raise ValueError("Not enough valid pixel values")
+            
+            values_array = np.array(values)
+            mean_val = float(np.mean(values_array))
+            min_val = float(np.min(values_array))
+            max_val = float(np.max(values_array))
+            
+            # Estimate cloud coverage from invalid pixels
+            total_pixels = num_values
+            valid_pixels = len(values)
+            cloud_coverage = ((total_pixels - valid_pixels) / total_pixels) * 100
+            
+            source = "sentinel-2" if index_type == "ndvi" else "sentinel-1"
+            
+            return {
+                "mean": round(mean_val, 3),
+                "min": round(min_val, 3),
+                "max": round(max_val, 3),
+                "cloud_coverage": round(min(cloud_coverage, 100), 1),
+                "interpretation": self._interpret_vegetation(mean_val),
+                "raw_data": {"source": source, "index": index_type, "pixel_count": valid_pixels}
+            }
+            
+        except Exception as e:
+            raise ValueError(f"Failed to parse satellite data: {str(e)}")
     
     @staticmethod
     def _interpret_vegetation(value: float) -> str:

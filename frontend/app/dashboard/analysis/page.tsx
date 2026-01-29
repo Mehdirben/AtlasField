@@ -127,7 +127,7 @@ function DetailedReportPanel({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-slate-500">Type:</span>{" "}
-                <span className="font-medium">{analysis.analysis_type.toUpperCase()}</span>
+                <span className="font-medium">{analysis.analysis_type === "COMPLETE" ? "Complete Analysis" : analysis.analysis_type}</span>
               </div>
               <div>
                 <span className="text-slate-500">Mean Value:</span>{" "}
@@ -172,26 +172,46 @@ function DetailedReportPanel({
             <h3 className="font-semibold text-slate-900 mb-3">📊 Summary</h3>
             <p className="text-sm text-slate-600 mb-4">{report.summary?.description}</p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <p className="text-xs text-slate-500">Mean Value</p>
-                <p className="text-xl font-bold text-slate-900">{report.summary?.mean_value?.toFixed(3)}</p>
+            {report.summary?.overall_health_score !== undefined ? (
+              // Complete analysis summary
+              <div className="flex items-center gap-4 mb-4">
+                <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                  <p className="text-xs text-slate-500">Overall Health Score</p>
+                  <p className={`text-4xl font-bold ${
+                    report.summary.overall_health_score >= 60 ? 'text-green-600' :
+                    report.summary.overall_health_score >= 40 ? 'text-amber-600' : 'text-red-600'
+                  }`}>{report.summary.overall_health_score}%</p>
+                  <Badge variant={
+                    report.summary.health_status === "Excellent" || report.summary.health_status === "Good" ? "success" :
+                    report.summary.health_status === "Moderate" ? "warning" : "error"
+                  }>
+                    {report.summary.health_status}
+                  </Badge>
+                </div>
               </div>
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <p className="text-xs text-slate-500">Min Value</p>
-                <p className="text-xl font-bold text-slate-900">{report.summary?.min_value?.toFixed(3)}</p>
+            ) : (
+              // Standard analysis summary
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <p className="text-xs text-slate-500">Mean Value</p>
+                  <p className="text-xl font-bold text-slate-900">{report.summary?.mean_value?.toFixed(3)}</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <p className="text-xs text-slate-500">Min Value</p>
+                  <p className="text-xl font-bold text-slate-900">{report.summary?.min_value?.toFixed(3)}</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <p className="text-xs text-slate-500">Max Value</p>
+                  <p className="text-xl font-bold text-slate-900">{report.summary?.max_value?.toFixed(3)}</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <p className="text-xs text-slate-500">Variability</p>
+                  <p className="text-xl font-bold text-slate-900">{report.summary?.variability?.toFixed(3)}</p>
+                </div>
               </div>
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <p className="text-xs text-slate-500">Max Value</p>
-                <p className="text-xl font-bold text-slate-900">{report.summary?.max_value?.toFixed(3)}</p>
-              </div>
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <p className="text-xs text-slate-500">Variability</p>
-                <p className="text-xl font-bold text-slate-900">{report.summary?.variability?.toFixed(3)}</p>
-              </div>
-            </div>
+            )}
 
-            {report.summary?.health_status && (
+            {report.summary?.health_status && !report.summary?.overall_health_score && (
               <div className="mt-4 flex items-center gap-3">
                 <span className="text-sm text-slate-500">Health Status:</span>
                 <Badge variant={
@@ -206,6 +226,163 @@ function DetailedReportPanel({
               </div>
             )}
           </div>
+
+          {/* Vegetation Health - Complete Analysis */}
+          {report.vegetation_health && (
+            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
+              <h3 className="font-semibold text-slate-900 mb-3">🌿 Vegetation Health</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-slate-500">NDVI Mean</p>
+                  <p className="text-xl font-bold text-green-700">{report.vegetation_health.ndvi_mean?.toFixed(3)}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Vegetation Density</p>
+                  <p className="font-medium text-slate-900">{report.vegetation_health.vegetation_density}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Chlorophyll Activity</p>
+                  <p className="font-medium text-slate-900">{report.vegetation_health.chlorophyll_activity}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Growth Stage</p>
+                  <p className="font-medium text-slate-900">{report.vegetation_health.growth_stage}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Health Status</p>
+                  <Badge variant={
+                    report.vegetation_health.health_status === "Excellent" || report.vegetation_health.health_status === "Good" ? "success" :
+                    report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
+                  }>
+                    {report.vegetation_health.health_status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Biomass Analysis - Complete Analysis */}
+          {report.biomass_analysis && (
+            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
+              <h3 className="font-semibold text-slate-900 mb-3">🌱 Biomass Analysis</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200/60">
+                  <p className="text-xs text-slate-500">Estimated Biomass</p>
+                  <p className="text-2xl font-bold text-green-700">{report.biomass_analysis.estimated_biomass_t_ha}</p>
+                  <p className="text-sm text-green-600">tonnes/hectare</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Biomass Level</p>
+                  <p className="font-medium text-slate-900">{report.biomass_analysis.biomass_level}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Canopy Structure</p>
+                  <p className="font-medium text-slate-900">{report.biomass_analysis.canopy_structure}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg col-span-2 md:col-span-3">
+                  <p className="text-xs text-slate-500">Carbon Content</p>
+                  <p className="font-medium text-slate-900">{report.biomass_analysis.carbon_content_t_ha} tonnes CO₂/ha</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Moisture Assessment - Complete Analysis */}
+          {report.moisture_assessment && (
+            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
+              <h3 className="font-semibold text-slate-900 mb-3">💧 Moisture Assessment</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Moisture Status</p>
+                  <Badge variant={
+                    report.moisture_assessment.moisture_status === "Optimal" || report.moisture_assessment.moisture_status === "Good" ? "success" :
+                    report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
+                  }>
+                    {report.moisture_assessment.moisture_status}
+                  </Badge>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Irrigation Need</p>
+                  <p className="font-medium text-slate-900">{report.moisture_assessment.irrigation_need}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Water Stress Risk</p>
+                  <Badge variant={
+                    report.moisture_assessment.water_stress_risk === "Low" ? "success" :
+                    report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
+                  }>
+                    {report.moisture_assessment.water_stress_risk}
+                  </Badge>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Estimated Moisture</p>
+                  <p className="font-medium text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Yield Prediction - Complete Analysis */}
+          {report.yield_prediction && (
+            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
+              <h3 className="font-semibold text-slate-900 mb-3">🌾 Yield Prediction</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200/60 text-center">
+                  <p className="text-xs text-slate-500">Predicted Total Yield</p>
+                  <p className="text-3xl font-bold text-amber-700">{report.yield_prediction.total_predicted_yield_tonnes}</p>
+                  <p className="text-sm text-amber-600">tonnes</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
+                    <span className="text-slate-600">Per Hectare</span>
+                    <span className="font-medium text-slate-900">{report.yield_prediction.predicted_yield_per_ha} t/ha</span>
+                  </div>
+                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
+                    <span className="text-slate-600">Crop Type</span>
+                    <span className="font-medium text-slate-900">{report.yield_prediction.crop_type}</span>
+                  </div>
+                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
+                    <span className="text-slate-600">Yield Potential</span>
+                    <Badge variant={
+                      report.yield_prediction.yield_potential === "High" ? "success" :
+                      report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
+                    }>
+                      {report.yield_prediction.yield_potential}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
+                    <span className="text-slate-600">Confidence</span>
+                    <span className="font-medium text-slate-900">{report.yield_prediction.confidence_level}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Environmental Factors - Complete Analysis */}
+          {report.environmental_factors && (
+            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
+              <h3 className="font-semibold text-slate-900 mb-3">🌤️ Environmental Factors</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Data Quality</p>
+                  <p className="font-medium text-slate-900">{report.environmental_factors.data_quality}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Cloud Coverage</p>
+                  <p className="font-medium text-slate-900">{report.environmental_factors.cloud_coverage_percent}%</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Satellite Data</p>
+                  <p className="font-medium text-slate-900">{report.environmental_factors.satellite_data_age}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500">Season</p>
+                  <p className="font-medium text-slate-900 text-sm">{report.environmental_factors.seasonal_context}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Health Assessment */}
           {report.health_assessment && (
@@ -505,10 +682,13 @@ export default function AnalysisPage() {
     }
   };
 
-  const latestNDVI = analyses.find((a) => a.analysis_type === "ndvi");
-  const latestRVI = analyses.find((a) => a.analysis_type === "rvi");
-  const ndviHistory = analyses
-    .filter((a) => a.analysis_type === "ndvi" && a.mean_value)
+  const latestAnalysis = analyses[0];
+  const latestComplete = analyses.find((a) => a.analysis_type === "COMPLETE");
+  const latestNDVI = latestComplete || analyses.find((a) => a.analysis_type === "NDVI");
+  const latestRVI = analyses.find((a) => a.analysis_type === "RVI");
+  const latestMoisture = analyses.find((a) => a.analysis_type === "MOISTURE");
+  const analysisHistory = analyses
+    .filter((a) => a.mean_value)
     .slice(0, 10)
     .reverse()
     .map((a) => a.mean_value!);
@@ -560,15 +740,22 @@ export default function AnalysisPage() {
   }
 
   const getAnalysisTypeStyle = (type: string) => {
-    if (type === "ndvi") return "bg-green-100";
-    if (type === "rvi") return "bg-blue-100";
+    if (type === "COMPLETE") return "bg-gradient-to-br from-emerald-100 to-teal-100";
+    if (type === "NDVI") return "bg-green-100";
+    if (type === "RVI") return "bg-blue-100";
     return "bg-purple-100";
   };
 
   const getAnalysisTypeIcon = (type: string) => {
-    if (type === "ndvi") return "🌿";
-    if (type === "rvi") return "📡";
+    if (type === "COMPLETE") return "🛰️";
+    if (type === "NDVI") return "🌿";
+    if (type === "RVI") return "📡";
     return "🔄";
+  };
+
+  const getAnalysisTypeName = (type: string) => {
+    if (type === "COMPLETE") return "Complete Analysis";
+    return type;
   };
 
   return (
@@ -621,7 +808,7 @@ export default function AnalysisPage() {
                   🌿
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Latest NDVI</p>
+                  <p className="text-sm text-slate-500">NDVI (Health)</p>
                   <p className="text-2xl font-bold text-slate-900">
                     {latestNDVI?.mean_value?.toFixed(3) || "—"}
                   </p>
@@ -631,12 +818,12 @@ export default function AnalysisPage() {
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-2xl">
-                  📡
+                  💧
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Latest RVI</p>
+                  <p className="text-sm text-slate-500">Soil Moisture</p>
                   <p className="text-2xl font-bold text-slate-900">
-                    {latestRVI?.mean_value?.toFixed(3) || "—"}
+                    {latestMoisture?.mean_value ? `${(latestMoisture.mean_value * 100).toFixed(0)}%` : "—"}
                   </p>
                 </div>
               </div>
@@ -712,10 +899,10 @@ export default function AnalysisPage() {
                         </div>
                         
                         <div className="md:col-span-2">
-                          {ndviHistory.length > 0 ? (
+                          {analysisHistory.length > 0 ? (
                             <BarChart 
-                              data={ndviHistory} 
-                              label="NDVI Trend (Last Analyses)" 
+                              data={analysisHistory} 
+                              label="Health Score Trend (Last Analyses)" 
                               color="bg-emerald-500"
                             />
                           ) : (
@@ -786,7 +973,7 @@ export default function AnalysisPage() {
                               </div>
                               <div>
                                 <p className="font-medium text-slate-900">
-                                  {analysis.analysis_type.toUpperCase()}
+                                  {analysis.analysis_type === "COMPLETE" ? "Complete Analysis" : analysis.analysis_type}
                                   {(analysis.data as any)?.detailed_report && (
                                     <span className="ml-2 text-xs text-emerald-600">📄 Report</span>
                                   )}
@@ -890,49 +1077,52 @@ export default function AnalysisPage() {
             <div className="space-y-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100">
-                  <h2 className="font-semibold text-slate-900">Run Analysis</h2>
-                  <p className="text-sm text-slate-500 mt-1">Get real-time satellite data</p>
+                  <h2 className="font-semibold text-slate-900">Field Analysis</h2>
+                  <p className="text-sm text-slate-500 mt-1">Comprehensive satellite analysis</p>
                 </div>
-                <div className="p-5 space-y-3">
+                <div className="p-5 space-y-4">
                   <button
-                    onClick={() => handleRunAnalysis("ndvi")}
+                    onClick={() => handleRunAnalysis("COMPLETE")}
                     disabled={analyzing !== null}
-                    className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl transition-all disabled:opacity-50 border border-green-200/60"
+                    className="w-full flex items-center gap-4 p-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
                   >
-                    <span className="text-2xl">{analyzing === "ndvi" ? "⏳" : "🌿"}</span>
+                    <span className="text-3xl">{analyzing === "COMPLETE" ? "⏳" : "🛰️"}</span>
                     <div className="text-left">
-                      <p className="font-medium text-slate-900">NDVI Analysis</p>
-                      <p className="text-sm text-slate-500">Vegetation health index</p>
+                      <p className="font-semibold text-lg">Run Complete Analysis</p>
+                      <p className="text-sm text-emerald-100">Vegetation • Biomass • Moisture • Yield</p>
                     </div>
                   </button>
-                  <button
-                    onClick={() => handleRunAnalysis("rvi")}
-                    disabled={analyzing !== null}
-                    className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-xl transition-all disabled:opacity-50 border border-blue-200/60"
-                  >
-                    <span className="text-2xl">{analyzing === "rvi" ? "⏳" : "📡"}</span>
-                    <div className="text-left">
-                      <p className="font-medium text-slate-900">RVI Analysis</p>
-                      <p className="text-sm text-slate-500">Works through clouds</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleRunAnalysis("fusion")}
-                    disabled={analyzing !== null}
-                    className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-xl transition-all disabled:opacity-50 border border-purple-200/60"
-                  >
-                    <span className="text-2xl">{analyzing === "fusion" ? "⏳" : "🔄"}</span>
-                    <div className="text-left">
-                      <p className="font-medium text-slate-900">Fusion Analysis</p>
-                      <p className="text-sm text-slate-500">Optical + Radar combined</p>
-                    </div>
-                  </button>
+                  
                   {analyzing && (
-                    <div className="flex items-center justify-center gap-2 py-2 text-emerald-600">
-                      <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm">Processing satellite data...</span>
+                    <div className="flex items-center justify-center gap-2 py-3 text-emerald-600 bg-emerald-50 rounded-xl">
+                      <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm font-medium">Processing satellite data...</span>
                     </div>
                   )}
+
+                  <div className="text-sm text-slate-500 p-3 bg-slate-50 rounded-xl">
+                    <p className="font-medium text-slate-700 mb-2">Analysis includes:</p>
+                    <ul className="space-y-1.5">
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Vegetation health (NDVI)
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Biomass estimation
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Soil moisture assessment
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Yield prediction
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Problem detection & alerts
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Recommendations
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 

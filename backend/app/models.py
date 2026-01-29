@@ -18,12 +18,13 @@ class SubscriptionTier(str, enum.Enum):
 
 
 class AnalysisType(str, enum.Enum):
-    NDVI = "ndvi"
-    RVI = "rvi"
-    MOISTURE = "moisture"
-    FUSION = "fusion"
-    YIELD = "yield"
-    BIOMASS = "biomass"
+    NDVI = "NDVI"
+    RVI = "RVI"
+    MOISTURE = "MOISTURE"
+    FUSION = "FUSION"
+    YIELD = "YIELD"
+    BIOMASS = "BIOMASS"
+    COMPLETE = "COMPLETE"  # Comprehensive analysis combining all metrics
 
 
 class AlertSeverity(str, enum.Enum):

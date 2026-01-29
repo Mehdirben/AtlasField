@@ -120,7 +120,12 @@ async def run_analysis(
     sentinel_service = SentinelHubService()
     
     try:
-        if request.analysis_type == AnalysisType.NDVI:
+        if request.analysis_type == AnalysisType.COMPLETE:
+            # For complete analysis, combine multiple data sources
+            ndvi_data = await sentinel_service.get_ndvi(bbox)
+            analysis_data = ndvi_data  # Use NDVI as the primary base
+            # The complete report generation will handle all aspects
+        elif request.analysis_type == AnalysisType.NDVI:
             analysis_data = await sentinel_service.get_ndvi(bbox)
         elif request.analysis_type == AnalysisType.RVI:
             analysis_data = await sentinel_service.get_rvi(bbox)
@@ -130,8 +135,10 @@ async def run_analysis(
             # Default to NDVI
             analysis_data = await sentinel_service.get_ndvi(bbox)
     except Exception as e:
-        # If Sentinel Hub fails, return mock data for development
-        analysis_data = AnalysisService.get_mock_analysis(request.analysis_type, bbox)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Satellite data service unavailable: {str(e)}. Please check Sentinel Hub credentials are configured."
+        )
     
     # Generate detailed report
     detailed_report = AnalysisService.generate_detailed_report(

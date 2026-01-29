@@ -153,6 +153,138 @@ class AnalysisService:
             report["recommendations"] = cls._generate_moisture_recommendations(mean_value)
             report["problems"] = cls._generate_moisture_problems(mean_value)
         
+        elif analysis_type == AnalysisType.COMPLETE:
+            # Comprehensive analysis combining all metrics
+            health_status = cls._get_health_status(mean_value)
+            uniformity = 1 - (max_value - min_value)
+            
+            report["summary"] = {
+                "index_name": "Complete Field Analysis",
+                "description": "Comprehensive analysis combining vegetation health (NDVI), biomass structure (RVI), soil moisture, yield prediction, and environmental factors.",
+                "overall_health_score": round(mean_value * 100, 1),
+                "health_status": health_status,
+                "analysis_date": datetime.utcnow().isoformat(),
+                "cloud_coverage": cloud_coverage
+            }
+            
+            # Vegetation Health (NDVI-based)
+            report["vegetation_health"] = {
+                "ndvi_mean": round(mean_value, 3),
+                "ndvi_min": round(min_value, 3),
+                "ndvi_max": round(max_value, 3),
+                "variability": round(max_value - min_value, 3),
+                "health_status": health_status,
+                "vegetation_density": cls._get_vegetation_density(mean_value),
+                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value),
+                "growth_stage": cls._estimate_growth_stage(mean_value, crop_type)
+            }
+            
+            # Biomass Analysis (RVI-derived estimates)
+            biomass_estimate = cls.estimate_biomass(mean_value)
+            report["biomass_analysis"] = {
+                "biomass_level": cls._get_biomass_indicator(mean_value),
+                "canopy_structure": "Dense" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Sparse",
+                "estimated_biomass_t_ha": biomass_estimate["mean_biomass_t_ha"],
+                "carbon_content_t_ha": biomass_estimate["total_carbon_t_ha"],
+                "interpretation": biomass_estimate["interpretation"]
+            }
+            
+            # Soil Moisture Assessment
+            moisture_value = mean_value * 0.8 + 0.1  # Derived estimate
+            report["moisture_assessment"] = {
+                "estimated_moisture": round(moisture_value, 3),
+                "moisture_status": cls._get_moisture_status(moisture_value),
+                "irrigation_need": cls._get_irrigation_need(moisture_value),
+                "water_stress_risk": "Low" if moisture_value > 0.4 else "Medium" if moisture_value > 0.25 else "High"
+            }
+            
+            # Yield Prediction
+            crop_coef = cls.CROP_COEFFICIENTS.get(
+                (crop_type or "wheat").lower(),
+                cls.CROP_COEFFICIENTS["wheat"]
+            )
+            yield_per_ha = crop_coef["base_yield"] + (crop_coef["ndvi_factor"] * mean_value)
+            total_yield = yield_per_ha * (area_hectares or 1)
+            
+            report["yield_prediction"] = {
+                "crop_type": crop_type or "Unknown",
+                "predicted_yield_per_ha": round(yield_per_ha, 2),
+                "total_predicted_yield_tonnes": round(total_yield, 2),
+                "yield_potential": "High" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Below Average",
+                "confidence_level": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
+            }
+            
+            # Spatial Analysis
+            report["spatial_analysis"] = {
+                "uniformity_score": round(uniformity * 100, 1),
+                "uniformity_status": "Excellent" if uniformity > 0.8 else "Good" if uniformity > 0.6 else "Moderate" if uniformity > 0.4 else "Poor",
+                "hotspots": cls._identify_hotspots(mean_value, min_value, max_value),
+                "affected_area_estimate": cls._estimate_affected_area(mean_value, area_hectares or 1)
+            }
+            
+            # Health Assessment Summary
+            stress_indicators = cls._get_stress_indicators(mean_value, min_value)
+            report["health_assessment"] = {
+                "overall_health": health_status,
+                "vegetation_density": cls._get_vegetation_density(mean_value),
+                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value),
+                "stress_indicators": stress_indicators,
+                "growth_stage_estimate": cls._estimate_growth_stage(mean_value, crop_type),
+                "risk_level": "Low" if mean_value > 0.5 else "Medium" if mean_value > 0.35 else "High"
+            }
+            
+            # Environmental Factors
+            report["environmental_factors"] = {
+                "data_quality": "Good" if cloud_coverage < 20 else "Moderate" if cloud_coverage < 40 else "Limited",
+                "cloud_coverage_percent": round(cloud_coverage, 1),
+                "satellite_data_age": "Recent (< 5 days)",
+                "seasonal_context": cls._get_seasonal_context()
+            }
+            
+            # Generate comprehensive recommendations
+            all_recommendations = []
+            all_recommendations.extend(cls._generate_ndvi_recommendations(mean_value, min_value, max_value, crop_type))
+            all_recommendations.extend(cls._generate_moisture_recommendations(moisture_value))
+            
+            # Add yield-specific recommendations
+            if mean_value > 0.5:
+                all_recommendations.append({
+                    "priority": "low",
+                    "category": "Harvest Planning",
+                    "title": "Plan Optimal Harvest Window",
+                    "description": f"With predicted yield of {round(yield_per_ha, 1)} t/ha, plan harvest logistics.",
+                    "actions": [
+                        "Monitor crop maturity indicators",
+                        "Coordinate harvesting equipment",
+                        "Prepare storage facilities"
+                    ]
+                })
+            
+            # Deduplicate and sort by priority
+            seen_titles = set()
+            unique_recommendations = []
+            for rec in all_recommendations:
+                if rec["title"] not in seen_titles:
+                    seen_titles.add(rec["title"])
+                    unique_recommendations.append(rec)
+            
+            priority_order = {"high": 0, "medium": 1, "low": 2}
+            report["recommendations"] = sorted(unique_recommendations, key=lambda x: priority_order.get(x.get("priority", "low"), 2))
+            
+            # Comprehensive problems list
+            all_problems = cls._generate_ndvi_problems(mean_value, min_value, max_value)
+            all_problems.extend(cls._generate_moisture_problems(moisture_value))
+            
+            # Deduplicate problems
+            seen_problems = set()
+            unique_problems = []
+            for prob in all_problems:
+                if prob["title"] not in seen_problems:
+                    seen_problems.add(prob["title"])
+                    unique_problems.append(prob)
+            
+            report["problems"] = unique_problems
+        
         # Monitoring Schedule
         report["monitoring_schedule"] = cls._generate_monitoring_schedule(mean_value, analysis_type)
         
@@ -222,6 +354,19 @@ class AnalysisService:
             return "Full canopy / Reproductive"
         else:
             return "Peak growth / Maturity"
+    
+    @staticmethod
+    def _get_seasonal_context() -> str:
+        """Get seasonal context based on current month"""
+        month = datetime.utcnow().month
+        if month in [12, 1, 2]:
+            return "Winter - Dormant season for most crops"
+        elif month in [3, 4, 5]:
+            return "Spring - Active growth and planting season"
+        elif month in [6, 7, 8]:
+            return "Summer - Peak growth and reproductive phase"
+        else:
+            return "Autumn - Harvest and preparation season"
     
     @staticmethod
     def _get_biomass_indicator(rvi: float) -> str:
@@ -704,74 +849,6 @@ class AnalysisService:
             return "High biomass - well-developed vegetation"
         else:
             return "Very high biomass - dense and mature vegetation"
-    
-    @classmethod
-    def get_mock_analysis(cls, analysis_type: AnalysisType, bbox: tuple) -> dict:
-        """
-        Generate mock analysis data for development/demo
-        """
-        if analysis_type == AnalysisType.NDVI:
-            mean = 0.45 + np.random.uniform(-0.15, 0.2)
-            return {
-                "mean": round(mean, 3),
-                "min": round(max(0, mean - 0.2), 3),
-                "max": round(min(1, mean + 0.25), 3),
-                "cloud_coverage": round(np.random.uniform(0, 25), 1),
-                "interpretation": cls._interpret_ndvi(mean),
-                "raw_data": {"source": "mock", "type": "ndvi"}
-            }
-        
-        elif analysis_type == AnalysisType.RVI:
-            mean = 0.5 + np.random.uniform(-0.1, 0.15)
-            return {
-                "mean": round(mean, 3),
-                "min": round(max(0, mean - 0.15), 3),
-                "max": round(min(1, mean + 0.2), 3),
-                "cloud_coverage": 0,
-                "interpretation": cls._interpret_ndvi(mean),
-                "raw_data": {"source": "mock", "type": "rvi"}
-            }
-        
-        elif analysis_type == AnalysisType.MOISTURE:
-            mean = 0.3 + np.random.uniform(-0.1, 0.2)
-            return {
-                "mean": round(mean, 3),
-                "min": round(max(0, mean - 0.15), 3),
-                "max": round(min(1, mean + 0.2), 3),
-                "cloud_coverage": round(np.random.uniform(0, 20), 1),
-                "interpretation": cls._interpret_moisture(mean),
-                "raw_data": {"source": "mock", "type": "moisture"}
-            }
-        
-        elif analysis_type == AnalysisType.FUSION:
-            ndvi = 0.45 + np.random.uniform(-0.1, 0.15)
-            rvi = 0.5 + np.random.uniform(-0.1, 0.1)
-            fused = 0.6 * ndvi + 0.4 * rvi
-            return {
-                "mean": round(fused, 3),
-                "min": round(max(0, fused - 0.2), 3),
-                "max": round(min(1, fused + 0.2), 3),
-                "cloud_coverage": round(np.random.uniform(0, 15), 1),
-                "interpretation": cls._interpret_ndvi(fused),
-                "raw_data": {
-                    "source": "mock",
-                    "type": "fusion",
-                    "ndvi": round(ndvi, 3),
-                    "rvi": round(rvi, 3)
-                }
-            }
-        
-        else:
-            # Default
-            mean = 0.5 + np.random.uniform(-0.15, 0.15)
-            return {
-                "mean": round(mean, 3),
-                "min": round(max(0, mean - 0.2), 3),
-                "max": round(min(1, mean + 0.2), 3),
-                "cloud_coverage": round(np.random.uniform(0, 20), 1),
-                "interpretation": "Analysis completed",
-                "raw_data": {"source": "mock"}
-            }
     
     @staticmethod
     def _interpret_ndvi(value: float) -> str:

@@ -171,7 +171,73 @@ npm run dev
 - **Gemini**: Get your key at [Google AI Studio](https://makersuite.google.com/app/apikey)
 - **MapTiler**: Register at [MapTiler](https://www.maptiler.com/) (100k free tiles/month)
 
-## 📖 API Documentation
+## �️ Database Migrations
+
+AtlasField uses **Alembic** for database migrations. Migrations run automatically on application startup, but you can also manage them manually.
+
+### Automatic Migrations
+
+When the backend starts, it automatically runs any pending migrations. This ensures the database schema is always up-to-date with the code.
+
+### Manual Migration Commands
+
+```bash
+# Run inside the backend container
+docker compose exec backend bash
+
+# Check current migration status
+alembic current
+
+# Run all pending migrations
+alembic upgrade head
+
+# Rollback one migration
+alembic downgrade -1
+
+# View migration history
+alembic history
+```
+
+### Creating New Migrations
+
+When you modify the models in `app/models.py`, create a new migration:
+
+```bash
+# Auto-generate migration from model changes
+docker compose exec backend alembic revision --autogenerate -m "description_of_change"
+
+# Or create an empty migration for custom SQL
+docker compose exec backend alembic revision -m "description_of_change"
+```
+
+Then edit the generated file in `backend/alembic/versions/` if needed.
+
+### Migration Files
+
+```
+backend/
+├── alembic.ini              # Alembic configuration
+└── alembic/
+    ├── env.py               # Migration environment setup
+    ├── script.py.mako       # Template for new migrations
+    └── versions/            # Migration scripts
+        ├── 001_initial.py   # Initial schema
+        └── 002_add_complete_enum.py  # Example migration
+```
+
+### Fresh Database Setup
+
+For a completely fresh database, migrations will create all tables automatically:
+
+```bash
+# Start only the database
+docker compose up -d db
+
+# Run migrations
+docker compose exec backend alembic upgrade head
+```
+
+## �📖 API Documentation
 
 Once the backend is running, visit:
 - **Swagger UI**: http://localhost:8000/docs

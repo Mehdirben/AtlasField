@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import User, Field, Analysis, AnalysisType
+from app.models import User, Field, Analysis, AnalysisType, Alert, AlertSeverity
 from app.schemas import AnalysisRequest, AnalysisResponse, YieldPrediction, BiomassEstimate
 from app.auth import get_current_user
 from app.services.sentinel_hub import SentinelHubService
@@ -16,6 +16,70 @@ from app.services.analysis import AnalysisService
 
 
 router = APIRouter(prefix="/analysis", tags=["Analysis"])
+
+
+async def create_alert_from_analysis(
+    db: AsyncSession,
+    field: Field,
+    analysis_type: AnalysisType,
+    mean_value: float,
+    interpretation: str
+):
+    """Create an alert if the analysis results indicate problems"""
+    alert = None
+    
+    if analysis_type == AnalysisType.NDVI:
+        if mean_value < 0.2:
+            alert = Alert(
+                field_id=field.id,
+                severity=AlertSeverity.CRITICAL,
+                title=f"Critical: Very Low Vegetation on {field.name}",
+                message=f"NDVI analysis shows critically low vegetation (value: {mean_value:.3f}). "
+                        f"This indicates very sparse or severely stressed crops. Immediate inspection required. "
+                        f"Possible causes: pest infestation, severe drought, disease outbreak, or crop failure.",
+            )
+        elif mean_value < 0.3:
+            alert = Alert(
+                field_id=field.id,
+                severity=AlertSeverity.HIGH,
+                title=f"Warning: Low Vegetation Health on {field.name}",
+                message=f"NDVI analysis indicates low vegetation health (value: {mean_value:.3f}). "
+                        f"Your crops may be experiencing significant stress. "
+                        f"Recommended actions: Check irrigation system, inspect for pests/disease, verify soil nutrients.",
+            )
+        elif mean_value < 0.4:
+            alert = Alert(
+                field_id=field.id,
+                severity=AlertSeverity.MEDIUM,
+                title=f"Attention: Moderate Vegetation Stress on {field.name}",
+                message=f"NDVI analysis shows moderate stress levels (value: {mean_value:.3f}). "
+                        f"Consider increasing monitoring frequency and reviewing irrigation schedules.",
+            )
+    
+    elif analysis_type == AnalysisType.MOISTURE:
+        if mean_value < 0.1:
+            alert = Alert(
+                field_id=field.id,
+                severity=AlertSeverity.CRITICAL,
+                title=f"Critical: Severe Drought on {field.name}",
+                message=f"Moisture analysis indicates severe drought conditions (value: {mean_value:.3f}). "
+                        f"Urgent irrigation required to prevent crop loss.",
+            )
+        elif mean_value < 0.2:
+            alert = Alert(
+                field_id=field.id,
+                severity=AlertSeverity.HIGH,
+                title=f"Warning: Low Soil Moisture on {field.name}",
+                message=f"Moisture analysis shows low soil moisture (value: {mean_value:.3f}). "
+                        f"Plan irrigation within the next 24-48 hours.",
+            )
+    
+    if alert:
+        db.add(alert)
+        await db.commit()
+        return alert
+    
+    return None
 
 
 @router.post("/{field_id}", response_model=AnalysisResponse)
@@ -69,12 +133,28 @@ async def run_analysis(
         # If Sentinel Hub fails, return mock data for development
         analysis_data = AnalysisService.get_mock_analysis(request.analysis_type, bbox)
     
+    # Generate detailed report
+    detailed_report = AnalysisService.generate_detailed_report(
+        analysis_type=request.analysis_type,
+        mean_value=analysis_data.get("mean"),
+        min_value=analysis_data.get("min"),
+        max_value=analysis_data.get("max"),
+        cloud_coverage=analysis_data.get("cloud_coverage"),
+        crop_type=field.crop_type,
+        area_hectares=field.area_hectares,
+        field_name=field.name
+    )
+    
+    # Merge detailed report into raw_data
+    raw_data = analysis_data.get("raw_data", {})
+    raw_data["detailed_report"] = detailed_report
+    
     # Create analysis record
     new_analysis = Analysis(
         field_id=field.id,
         analysis_type=request.analysis_type,
         satellite_date=datetime.utcnow() - timedelta(days=2),  # Approximate
-        data=analysis_data.get("raw_data", {}),
+        data=raw_data,
         mean_value=analysis_data.get("mean"),
         min_value=analysis_data.get("min"),
         max_value=analysis_data.get("max"),
@@ -85,6 +165,15 @@ async def run_analysis(
     db.add(new_analysis)
     await db.commit()
     await db.refresh(new_analysis)
+    
+    # Create alert if needed
+    await create_alert_from_analysis(
+        db=db,
+        field=field,
+        analysis_type=request.analysis_type,
+        mean_value=analysis_data.get("mean", 0.5),
+        interpretation=analysis_data.get("interpretation", "")
+    )
     
     return new_analysis
 

@@ -290,6 +290,576 @@ class AnalysisService:
         
         return report
     
+    @classmethod
+    def generate_forest_detailed_report(
+        cls,
+        mean_value: float,
+        min_value: float,
+        max_value: float,
+        cloud_coverage: float,
+        nbr: float,
+        ndmi: float,
+        fire_risk_level: str,
+        canopy_health: str,
+        carbon_estimate: float,
+        deforestation_risk: str,
+        forest_classification: dict,
+        area_hectares: Optional[float],
+        forest_name: str,
+        forest_type: Optional[str],
+        baseline_carbon: Optional[float] = None,
+        baseline_canopy: Optional[float] = None
+    ) -> dict:
+        """Generate a detailed forest analysis report with forest-specific metrics"""
+        
+        # Calculate overall forest health score (0-100)
+        ndvi_score = mean_value * 40  # 40% weight
+        nbr_score = ((nbr + 1) / 2) * 30  # Normalize NBR (-1 to 1) -> (0 to 1), 30% weight
+        ndmi_score = ((ndmi + 1) / 2) * 30  # Normalize NDMI, 30% weight
+        overall_health_score = ndvi_score + nbr_score + ndmi_score
+        overall_health_score = min(100, max(0, overall_health_score))
+        
+        health_status = cls._get_forest_health_status(overall_health_score)
+        canopy_cover = forest_classification.get("canopy_cover_percent", mean_value * 100)
+        
+        report = {
+            "summary": {
+                "index_name": "Complete Forest Analysis",
+                "description": "Comprehensive forest health assessment combining vegetation indices (NDVI), burn ratio (NBR), moisture content (NDMI), fire risk assessment, deforestation monitoring, and carbon sequestration analysis.",
+                "overall_health_score": round(overall_health_score, 1),
+                "health_status": health_status,
+                "analysis_date": datetime.utcnow().isoformat(),
+                "cloud_coverage": cloud_coverage
+            },
+            "canopy_health": {
+                "ndvi_mean": round(mean_value, 3),
+                "ndvi_min": round(min_value, 3),
+                "ndvi_max": round(max_value, 3),
+                "variability": round(max_value - min_value, 3),
+                "health_status": canopy_health,
+                "canopy_cover_percent": round(canopy_cover, 1),
+                "canopy_density": cls._get_canopy_density(mean_value),
+                "vegetation_vigor": cls._get_vegetation_vigor(mean_value),
+                "stress_indicators": cls._get_forest_stress_indicators(mean_value, nbr, ndmi)
+            },
+            "fire_risk_assessment": {
+                "nbr_value": round(nbr, 3),
+                "ndmi_value": round(ndmi, 3),
+                "fire_risk_level": fire_risk_level,
+                "fire_risk_score": cls._calculate_fire_risk_score(nbr, ndmi),
+                "moisture_status": cls._get_forest_moisture_status(ndmi),
+                "burn_severity": cls._get_burn_severity(nbr),
+                "recent_fire_detected": nbr < -0.1,
+                "fire_prevention_priority": "Critical" if fire_risk_level == "critical" else "High" if fire_risk_level == "high" else "Medium" if fire_risk_level == "medium" else "Normal"
+            },
+            "deforestation_monitoring": {
+                "deforestation_risk": deforestation_risk,
+                "canopy_loss_indicator": "Detected" if mean_value < 0.4 and deforestation_risk in ["medium", "high"] else "Not detected",
+                "forest_fragmentation": cls._assess_forest_fragmentation(max_value - min_value),
+                "protected_area_alert": deforestation_risk in ["medium", "high"],
+                "change_detection_confidence": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
+            },
+            "carbon_sequestration": {
+                "current_carbon_stock_t_ha": round(carbon_estimate, 2),
+                "total_carbon_stock_tonnes": round(carbon_estimate * (area_hectares or 1), 2),
+                "carbon_status": cls._get_carbon_status(carbon_estimate),
+                "sequestration_potential": cls._get_sequestration_potential(mean_value, canopy_cover),
+                "baseline_carbon_t_ha": round(baseline_carbon, 2) if baseline_carbon else None,
+                "carbon_change_percent": round(((carbon_estimate - baseline_carbon) / baseline_carbon) * 100, 1) if baseline_carbon and baseline_carbon > 0 else None,
+                "carbon_trend": cls._get_carbon_trend(carbon_estimate, baseline_carbon) if baseline_carbon else "Baseline not set"
+            },
+            "forest_classification": {
+                "detected_type": forest_classification.get("detected_type", forest_type or "mixed"),
+                "classification_confidence": forest_classification.get("confidence", 0.7),
+                "canopy_cover_percent": round(canopy_cover, 1),
+                "forest_maturity": cls._estimate_forest_maturity(mean_value, carbon_estimate)
+            },
+            "spatial_analysis": {
+                "uniformity_score": round((1 - (max_value - min_value)) * 100, 1),
+                "uniformity_status": "Excellent" if (max_value - min_value) < 0.2 else "Good" if (max_value - min_value) < 0.3 else "Moderate" if (max_value - min_value) < 0.4 else "Variable",
+                "healthy_area_estimate": cls._estimate_healthy_forest_area(mean_value, area_hectares or 1),
+                "hotspots": cls._identify_forest_hotspots(mean_value, min_value, nbr, ndmi)
+            },
+            "environmental_factors": {
+                "data_quality": "Good" if cloud_coverage < 20 else "Moderate" if cloud_coverage < 40 else "Limited",
+                "cloud_coverage_percent": round(cloud_coverage, 1),
+                "satellite_data_age": "Recent (< 5 days)",
+                "seasonal_context": cls._get_forest_seasonal_context()
+            },
+            "recommendations": cls._generate_forest_recommendations(
+                mean_value, nbr, ndmi, fire_risk_level, deforestation_risk, canopy_health
+            ),
+            "problems": cls._generate_forest_problems(
+                mean_value, nbr, ndmi, fire_risk_level, deforestation_risk
+            ),
+            "monitoring_schedule": cls._generate_forest_monitoring_schedule(
+                mean_value, fire_risk_level, deforestation_risk
+            ),
+            "metadata": {
+                "generated_at": datetime.utcnow().isoformat(),
+                "forest_name": forest_name,
+                "forest_type": forest_type or forest_classification.get("detected_type", "Unknown"),
+                "area_hectares": area_hectares or 0,
+                "analysis_type": "FOREST"
+            }
+        }
+        
+        return report
+    
+    # ============== Forest-specific helper methods ==============
+    
+    @staticmethod
+    def _get_forest_health_status(score: float) -> str:
+        if score >= 75:
+            return "Excellent"
+        elif score >= 60:
+            return "Good"
+        elif score >= 45:
+            return "Moderate"
+        elif score >= 30:
+            return "Poor"
+        else:
+            return "Critical"
+    
+    @staticmethod
+    def _get_canopy_density(ndvi: float) -> str:
+        if ndvi >= 0.7:
+            return "Very Dense - Closed canopy"
+        elif ndvi >= 0.5:
+            return "Dense - Continuous canopy"
+        elif ndvi >= 0.35:
+            return "Moderate - Open canopy"
+        elif ndvi >= 0.2:
+            return "Sparse - Fragmented canopy"
+        else:
+            return "Very Sparse - Minimal canopy"
+    
+    @staticmethod
+    def _get_vegetation_vigor(ndvi: float) -> str:
+        if ndvi >= 0.65:
+            return "High - Active growth"
+        elif ndvi >= 0.45:
+            return "Moderate - Normal activity"
+        elif ndvi >= 0.3:
+            return "Low - Reduced activity"
+        else:
+            return "Very Low - Stressed or dormant"
+    
+    @staticmethod
+    def _get_forest_stress_indicators(ndvi: float, nbr: float, ndmi: float) -> list:
+        indicators = []
+        if ndvi < 0.4:
+            indicators.append("Low vegetation vigor - possible canopy stress")
+        if ndmi < 0:
+            indicators.append("Low moisture content - drought stress detected")
+        if nbr < 0:
+            indicators.append("Potential burn damage or dead vegetation")
+        if ndvi < 0.3 and ndmi < -0.1:
+            indicators.append("Severe stress - multiple indicators present")
+        if not indicators:
+            indicators.append("No significant stress indicators detected")
+        return indicators
+    
+    @staticmethod
+    def _calculate_fire_risk_score(nbr: float, ndmi: float) -> int:
+        """Calculate fire risk score from 0-100"""
+        # Lower NDMI = drier = higher fire risk
+        # Lower/negative NBR can indicate recent fire or dry conditions
+        moisture_factor = max(0, min(100, (1 - ndmi) * 50))
+        dryness_factor = max(0, min(50, (0.5 - nbr) * 50))
+        return int(min(100, moisture_factor + dryness_factor))
+    
+    @staticmethod
+    def _get_forest_moisture_status(ndmi: float) -> str:
+        if ndmi >= 0.4:
+            return "Well hydrated"
+        elif ndmi >= 0.2:
+            return "Adequate moisture"
+        elif ndmi >= 0:
+            return "Moderate - Monitor closely"
+        elif ndmi >= -0.2:
+            return "Low - Drought stress likely"
+        else:
+            return "Critical - Severe drought"
+    
+    @staticmethod
+    def _get_burn_severity(nbr: float) -> str:
+        if nbr >= 0.3:
+            return "No burn detected"
+        elif nbr >= 0.1:
+            return "Healthy vegetation"
+        elif nbr >= -0.1:
+            return "Low severity / Recovery"
+        elif nbr >= -0.3:
+            return "Moderate burn severity"
+        else:
+            return "High burn severity"
+    
+    @staticmethod
+    def _assess_forest_fragmentation(variability: float) -> str:
+        if variability < 0.2:
+            return "Low - Continuous forest"
+        elif variability < 0.35:
+            return "Moderate - Some gaps"
+        elif variability < 0.5:
+            return "High - Significant fragmentation"
+        else:
+            return "Severe - Highly fragmented"
+    
+    @staticmethod
+    def _get_carbon_status(carbon_t_ha: float) -> str:
+        if carbon_t_ha >= 150:
+            return "Very High - Mature forest"
+        elif carbon_t_ha >= 100:
+            return "High - Established forest"
+        elif carbon_t_ha >= 50:
+            return "Moderate - Growing forest"
+        elif carbon_t_ha >= 20:
+            return "Low - Young forest"
+        else:
+            return "Very Low - Early succession"
+    
+    @staticmethod
+    def _get_sequestration_potential(ndvi: float, canopy_cover: float) -> str:
+        if ndvi >= 0.6 and canopy_cover >= 70:
+            return "High - Actively sequestering carbon"
+        elif ndvi >= 0.45 and canopy_cover >= 50:
+            return "Moderate - Good sequestration capacity"
+        elif ndvi >= 0.3:
+            return "Limited - Reduced capacity"
+        else:
+            return "Low - Minimal sequestration"
+    
+    @staticmethod
+    def _get_carbon_trend(current: float, baseline: Optional[float]) -> str:
+        if baseline is None:
+            return "Baseline not set"
+        change_pct = ((current - baseline) / baseline) * 100
+        if change_pct >= 5:
+            return "Increasing - Carbon gain"
+        elif change_pct >= -2:
+            return "Stable"
+        elif change_pct >= -10:
+            return "Decreasing - Minor carbon loss"
+        else:
+            return "Declining - Significant carbon loss"
+    
+    @staticmethod
+    def _estimate_forest_maturity(ndvi: float, carbon: float) -> str:
+        if ndvi >= 0.65 and carbon >= 100:
+            return "Mature / Old growth"
+        elif ndvi >= 0.55 and carbon >= 60:
+            return "Maturing forest"
+        elif ndvi >= 0.4 and carbon >= 30:
+            return "Young forest"
+        elif ndvi >= 0.25:
+            return "Regenerating / Early succession"
+        else:
+            return "Disturbed / Recently cleared"
+    
+    @staticmethod
+    def _estimate_healthy_forest_area(ndvi: float, total_area: float) -> dict:
+        if ndvi >= 0.6:
+            healthy_pct = 85
+        elif ndvi >= 0.5:
+            healthy_pct = 70
+        elif ndvi >= 0.4:
+            healthy_pct = 55
+        elif ndvi >= 0.3:
+            healthy_pct = 40
+        else:
+            healthy_pct = 25
+        
+        return {
+            "healthy_percent": healthy_pct,
+            "healthy_hectares": round(total_area * healthy_pct / 100, 2),
+            "at_risk_percent": 100 - healthy_pct,
+            "at_risk_hectares": round(total_area * (100 - healthy_pct) / 100, 2)
+        }
+    
+    @staticmethod
+    def _identify_forest_hotspots(ndvi: float, min_ndvi: float, nbr: float, ndmi: float) -> dict:
+        return {
+            "low_canopy_areas": "Detected" if min_ndvi < ndvi * 0.6 else "None",
+            "fire_risk_zones": "Detected" if ndmi < 0 and nbr < 0.1 else "None",
+            "drought_stress_areas": "Detected" if ndmi < -0.1 else "None",
+            "potential_deforestation": "Detected" if ndvi < 0.3 else "None"
+        }
+    
+    @staticmethod
+    def _get_forest_seasonal_context() -> str:
+        month = datetime.utcnow().month
+        if month in [12, 1, 2]:
+            return "Winter - Reduced growth, dormant deciduous"
+        elif month in [3, 4, 5]:
+            return "Spring - Active growth resuming, leaf emergence"
+        elif month in [6, 7, 8]:
+            return "Summer - Peak canopy, fire risk season"
+        else:
+            return "Autumn - Senescence, reduced fire risk"
+    
+    @staticmethod
+    def _generate_forest_recommendations(
+        ndvi: float, nbr: float, ndmi: float, 
+        fire_risk: str, deforestation_risk: str, canopy_health: str
+    ) -> list:
+        recommendations = []
+        
+        # Fire risk recommendations
+        if fire_risk in ["critical", "high"]:
+            recommendations.append({
+                "priority": "critical" if fire_risk == "critical" else "high",
+                "category": "Fire Prevention",
+                "title": "Implement Fire Prevention Measures",
+                "description": f"Fire risk is {fire_risk}. Dry conditions detected with NDMI: {ndmi:.3f}.",
+                "actions": [
+                    "Clear firebreaks around perimeter",
+                    "Increase patrol frequency",
+                    "Alert local fire services",
+                    "Restrict access during high-risk periods"
+                ]
+            })
+        
+        # Drought stress recommendations
+        if ndmi < 0:
+            recommendations.append({
+                "priority": "high",
+                "category": "Drought Management",
+                "title": "Monitor Drought Stress",
+                "description": "Low moisture content detected. Trees may be experiencing water stress.",
+                "actions": [
+                    "Monitor for signs of tree mortality",
+                    "Consider supplemental watering for high-value areas",
+                    "Assess groundwater levels",
+                    "Plan for potential pest outbreaks (drought-weakened trees)"
+                ]
+            })
+        
+        # Deforestation recommendations
+        if deforestation_risk in ["medium", "high"]:
+            recommendations.append({
+                "priority": "high",
+                "category": "Forest Protection",
+                "title": "Investigate Potential Deforestation",
+                "description": "Vegetation loss indicators detected. Verify cause and take protective action.",
+                "actions": [
+                    "Conduct ground verification",
+                    "Review satellite imagery timeline",
+                    "Report unauthorized clearing if detected",
+                    "Strengthen boundary monitoring"
+                ]
+            })
+        
+        # Canopy health recommendations
+        if ndvi < 0.4:
+            recommendations.append({
+                "priority": "medium",
+                "category": "Canopy Restoration",
+                "title": "Address Canopy Degradation",
+                "description": "Low canopy density detected. Consider restoration activities.",
+                "actions": [
+                    "Assess cause of canopy loss",
+                    "Plan reforestation for bare areas",
+                    "Protect remaining mature trees",
+                    "Consider assisted natural regeneration"
+                ]
+            })
+        
+        # Healthy forest maintenance
+        if ndvi >= 0.6 and fire_risk == "low":
+            recommendations.append({
+                "priority": "low",
+                "category": "Maintenance",
+                "title": "Continue Current Management",
+                "description": "Forest health is good. Maintain current conservation practices.",
+                "actions": [
+                    "Continue regular monitoring",
+                    "Maintain fire prevention infrastructure",
+                    "Document biodiversity",
+                    "Plan long-term carbon monitoring"
+                ]
+            })
+        
+        # Carbon monitoring recommendation
+        recommendations.append({
+            "priority": "low",
+            "category": "Carbon Management",
+            "title": "Track Carbon Sequestration",
+            "description": "Regular monitoring helps track carbon credits and forest value.",
+            "actions": [
+                "Run quarterly forest analyses",
+                "Document carbon stock changes",
+                "Consider carbon credit certification",
+                "Monitor year-over-year trends"
+            ]
+        })
+        
+        return recommendations
+    
+    @staticmethod
+    def _generate_forest_problems(
+        ndvi: float, nbr: float, ndmi: float,
+        fire_risk: str, deforestation_risk: str
+    ) -> list:
+        problems = []
+        
+        if fire_risk == "critical":
+            problems.append({
+                "severity": "critical",
+                "title": "Critical Fire Risk",
+                "description": f"Extremely dry conditions detected. NBR: {nbr:.3f}, NDMI: {ndmi:.3f}. Immediate action required.",
+                "possible_causes": [
+                    "Extended drought",
+                    "Low humidity",
+                    "Accumulated dry fuel load",
+                    "Recent heat wave"
+                ],
+                "urgent_actions": [
+                    "Implement emergency fire protocols",
+                    "Clear firebreaks immediately",
+                    "Coordinate with fire services",
+                    "Consider controlled burns if appropriate"
+                ]
+            })
+        elif fire_risk == "high":
+            problems.append({
+                "severity": "high",
+                "title": "Elevated Fire Risk",
+                "description": "Dry vegetation conditions increase fire vulnerability.",
+                "possible_causes": [
+                    "Below-normal rainfall",
+                    "Dry vegetation",
+                    "Seasonal drought"
+                ],
+                "urgent_actions": [
+                    "Increase monitoring frequency",
+                    "Review firebreak condition",
+                    "Prepare firefighting resources"
+                ]
+            })
+        
+        if deforestation_risk == "high":
+            problems.append({
+                "severity": "critical",
+                "title": "Significant Vegetation Loss Detected",
+                "description": "Major canopy reduction observed. Possible deforestation or severe damage.",
+                "possible_causes": [
+                    "Illegal logging",
+                    "Land clearing",
+                    "Severe storm damage",
+                    "Disease outbreak"
+                ],
+                "urgent_actions": [
+                    "Immediate ground investigation",
+                    "Report to authorities if illegal",
+                    "Document extent of damage",
+                    "Secure area from further clearing"
+                ]
+            })
+        elif deforestation_risk == "medium":
+            problems.append({
+                "severity": "medium",
+                "title": "Canopy Loss Indicators",
+                "description": "Some vegetation decline detected. Monitor for progression.",
+                "possible_causes": [
+                    "Selective logging",
+                    "Natural die-off",
+                    "Pest infestation",
+                    "Edge effects"
+                ],
+                "urgent_actions": [
+                    "Investigate affected areas",
+                    "Increase monitoring frequency",
+                    "Assess boundary security"
+                ]
+            })
+        
+        if ndmi < -0.2:
+            problems.append({
+                "severity": "high",
+                "title": "Severe Drought Stress",
+                "description": f"Very low moisture content (NDMI: {ndmi:.3f}). Trees at risk of mortality.",
+                "possible_causes": [
+                    "Prolonged drought",
+                    "Groundwater depletion",
+                    "Climate stress"
+                ],
+                "urgent_actions": [
+                    "Monitor for tree mortality",
+                    "Assess vulnerable species",
+                    "Consider emergency measures for critical trees"
+                ]
+            })
+        
+        if nbr < -0.2:
+            problems.append({
+                "severity": "high",
+                "title": "Recent Burn Damage Detected",
+                "description": f"Low NBR ({nbr:.3f}) indicates recent fire damage or severely stressed vegetation.",
+                "possible_causes": [
+                    "Recent wildfire",
+                    "Prescribed burn",
+                    "Severe drought damage"
+                ],
+                "urgent_actions": [
+                    "Assess burn extent and severity",
+                    "Plan post-fire recovery",
+                    "Prevent erosion in burned areas"
+                ]
+            })
+        
+        return problems
+    
+    @staticmethod
+    def _generate_forest_monitoring_schedule(
+        ndvi: float, fire_risk: str, deforestation_risk: str
+    ) -> list:
+        schedule = []
+        
+        # Determine monitoring urgency
+        if fire_risk in ["critical", "high"] or deforestation_risk == "high":
+            analysis_interval = "2-3 days"
+            urgency = "High"
+        elif fire_risk == "medium" or deforestation_risk == "medium" or ndvi < 0.4:
+            analysis_interval = "Weekly"
+            urgency = "Medium"
+        else:
+            analysis_interval = "Every 2 weeks"
+            urgency = "Low"
+        
+        schedule.append({
+            "task": "Next forest analysis",
+            "recommended_interval": analysis_interval,
+            "urgency": urgency
+        })
+        
+        schedule.append({
+            "task": "Fire risk assessment",
+            "recommended_interval": "Weekly during fire season" if fire_risk != "low" else "Monthly",
+            "urgency": "High" if fire_risk in ["critical", "high"] else "Medium"
+        })
+        
+        schedule.append({
+            "task": "Ground patrol / inspection",
+            "recommended_interval": "Weekly" if deforestation_risk in ["medium", "high"] else "Monthly",
+            "urgency": "High" if deforestation_risk == "high" else "Medium"
+        })
+        
+        schedule.append({
+            "task": "Carbon stock assessment",
+            "recommended_interval": "Quarterly",
+            "urgency": "Low"
+        })
+        
+        if fire_risk in ["critical", "high"]:
+            schedule.append({
+                "task": "Weather monitoring",
+                "recommended_interval": "Daily",
+                "urgency": "High"
+            })
+        
+        return schedule
+
     @staticmethod
     def _get_health_status(ndvi: float) -> str:
         if ndvi >= 0.7:

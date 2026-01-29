@@ -96,6 +96,11 @@ class Site(Base):
     tree_species: Mapped[Optional[str]] = mapped_column(String(100))  # e.g., oak, pine, eucalyptus
     protected_status: Mapped[Optional[str]] = mapped_column(String(100))  # e.g., none, national_park, reserve
     
+    # Forest baseline columns for year-over-year comparison
+    baseline_carbon_t_ha: Mapped[Optional[float]] = mapped_column(Float)
+    baseline_canopy_cover: Mapped[Optional[float]] = mapped_column(Float)
+    baseline_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

@@ -172,6 +172,44 @@ export const getBiomassEstimate = async (siteId: number) => {
   return response.data;
 };
 
+// Forest Trends (Analysis-by-Analysis)
+export interface ForestAnalysisData {
+  analysis_id: number;
+  date: string;
+  ndvi: number;
+  nbr: number;
+  ndmi: number;
+  carbon_stock_t_ha: number;
+  canopy_cover_percent: number;
+  fire_risk_level: string;
+  deforestation_risk: string;
+  ndvi_change_pct?: number;
+  nbr_change_pct?: number;
+  carbon_change_pct?: number;
+  canopy_change_pct?: number;
+}
+
+export interface ForestTrends {
+  analyses: ForestAnalysisData[];
+  overall_trend: "improving" | "stable" | "declining" | "unknown";
+  avg_ndvi_change?: number;
+  avg_carbon_change?: number;
+  baseline_comparison?: {
+    baseline_date?: string;
+    baseline_carbon_t_ha?: number;
+    baseline_canopy_cover?: number;
+    carbon_change_from_baseline_pct?: number;
+    canopy_change_from_baseline_pct?: number;
+  };
+  has_sufficient_data: boolean;
+  message?: string;
+}
+
+export const getForestTrends = async (siteId: number, limit: number = 10): Promise<ForestTrends> => {
+  const response = await api.get(`/analysis/${siteId}/forest-trends`, { params: { limit } });
+  return response.data;
+};
+
 // Chat
 export interface ChatMessage {
   role: "user" | "assistant";

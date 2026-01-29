@@ -236,3 +236,34 @@ class ForestAnalysis(BaseModel):
     deforestation_detected: bool
     carbon_estimate_tonnes_ha: float
     interpretation: str
+
+
+# ============== Forest Trends Schemas (Analysis-by-Analysis Comparison) ==============
+
+class ForestAnalysisData(BaseModel):
+    """Forest data for a single analysis"""
+    analysis_id: int
+    date: datetime
+    ndvi: float
+    nbr: float
+    ndmi: float
+    carbon_stock_t_ha: float
+    canopy_cover_percent: float
+    fire_risk_level: str
+    deforestation_risk: str
+    # Change from previous analysis
+    ndvi_change_pct: Optional[float] = None
+    nbr_change_pct: Optional[float] = None
+    carbon_change_pct: Optional[float] = None
+    canopy_change_pct: Optional[float] = None
+
+
+class ForestTrends(BaseModel):
+    """Analysis-by-analysis forest trends with baseline comparison"""
+    analyses: list[ForestAnalysisData]
+    overall_trend: str  # improving, stable, declining, unknown
+    avg_ndvi_change: Optional[float] = None  # Average change across all analyses
+    avg_carbon_change: Optional[float] = None
+    baseline_comparison: Optional[dict] = None  # comparison to first recorded baseline
+    has_sufficient_data: bool = True
+    message: Optional[str] = None

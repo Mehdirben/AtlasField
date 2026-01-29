@@ -824,3 +824,275 @@ class SentinelHubService:
         
         return " ".join(parts)
 
+    async def get_crop_classification(self, bbox: tuple, resolution: int = 10) -> dict:
+        """
+        Classify crop type using spectral indices.
+        Uses NDVI temporal patterns, Red Edge, and SWIR bands to distinguish crops.
+        
+        Spectral signatures:
+        - Wheat/Cereals: Moderate NDVI, low Red Edge during grain fill
+        - Corn/Maize: High NDVI, strong Red Edge signal
+        - Soybeans: Moderate-high NDVI, distinct SWIR response
+        - Rice (paddy): High NDVI with water signature
+        - Vegetables: Variable, typically lower canopy
+        - Pasture/Grassland: Consistent moderate NDVI
+        """
+        try:
+            token = await self._get_token()
+            
+            evalscript = """
+            //VERSION=3
+            function setup() {
+                return {
+                    input: [{
+                        bands: ["B04", "B05", "B06", "B08", "B11", "B12", "SCL"],
+                        units: "DN"
+                    }],
+                    output: {
+                        bands: 5,
+                        sampleType: "FLOAT32"
+                    }
+                };
+            }
+            
+            function evaluatePixel(sample) {
+                // Cloud masking
+                if (sample.SCL == 3 || sample.SCL == 8 || sample.SCL == 9 || sample.SCL == 10 || sample.SCL == 6) {
+                    return [-1, -1, -1, -1, -1];
+                }
+                
+                // NDVI - vegetation vigor
+                let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04);
+                
+                // RENDVI - Red Edge NDVI, sensitive to chlorophyll content
+                let rendvi = (sample.B08 - sample.B05) / (sample.B08 + sample.B05);
+                
+                // NDRE - Normalized Difference Red Edge, crop-specific
+                let ndre = (sample.B08 - sample.B06) / (sample.B08 + sample.B06);
+                
+                // NDWI - Water index (for rice detection)
+                let ndwi = (sample.B08 - sample.B11) / (sample.B08 + sample.B11);
+                
+                // SWIR ratio - crop structure indicator
+                let swir_ratio = sample.B11 / sample.B12;
+                
+                return [ndvi, rendvi, ndre, ndwi, swir_ratio];
+            }
+            """
+            
+            width = int((bbox[2] - bbox[0]) * 111320 / resolution)
+            height = int((bbox[3] - bbox[1]) * 110540 / resolution)
+            width = min(max(width, 10), 2500)
+            height = min(max(height, 10), 2500)
+            
+            end_date = datetime.utcnow()
+            start_date = end_date - timedelta(days=30)
+            
+            request_body = {
+                "input": {
+                    "bounds": {
+                        "bbox": list(bbox),
+                        "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/4326"}
+                    },
+                    "data": [{
+                        "type": "sentinel-2-l2a",
+                        "dataFilter": {
+                            "timeRange": {
+                                "from": start_date.strftime("%Y-%m-%dT00:00:00Z"),
+                                "to": end_date.strftime("%Y-%m-%dT23:59:59Z")
+                            },
+                            "mosaickingOrder": "leastCC"
+                        }
+                    }]
+                },
+                "output": {
+                    "width": width,
+                    "height": height,
+                    "responses": [{
+                        "identifier": "default",
+                        "format": {"type": "image/tiff"}
+                    }]
+                },
+                "evalscript": evalscript
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.base_url}/api/v1/process",
+                    json=request_body,
+                    headers={
+                        "Authorization": f"Bearer {token}",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=60.0
+                )
+                response.raise_for_status()
+                
+                return self._classify_crop_type(response.content)
+        
+        except ValueError as e:
+            raise
+        except Exception as e:
+            raise ValueError(f"Failed to classify crop: {str(e)}")
+
+    def _classify_crop_type(self, data: bytes) -> dict:
+        """
+        Classify crop type from multi-band spectral data.
+        Returns crop type classification with confidence.
+        """
+        try:
+            import struct
+            
+            if len(data) < 100:
+                raise ValueError("TIFF data too small")
+            
+            offset = 8
+            float_size = 4
+            num_bands = 5
+            num_pixels = (len(data) - offset) // (float_size * num_bands)
+            
+            ndvi_values = []
+            rendvi_values = []
+            ndre_values = []
+            ndwi_values = []
+            swir_values = []
+            
+            for i in range(min(num_pixels, 5000)):
+                try:
+                    base = offset + i * float_size * num_bands
+                    ndvi = struct.unpack('<f', data[base:base + float_size])[0]
+                    rendvi = struct.unpack('<f', data[base + float_size:base + float_size * 2])[0]
+                    ndre = struct.unpack('<f', data[base + float_size * 2:base + float_size * 3])[0]
+                    ndwi = struct.unpack('<f', data[base + float_size * 3:base + float_size * 4])[0]
+                    swir = struct.unpack('<f', data[base + float_size * 4:base + float_size * 5])[0]
+                    
+                    # Filter valid vegetation pixels
+                    if ndvi > 0.15 and not np.isnan(ndvi) and ndvi < 1:
+                        ndvi_values.append(ndvi)
+                        if not np.isnan(rendvi) and abs(rendvi) < 1:
+                            rendvi_values.append(rendvi)
+                        if not np.isnan(ndre) and abs(ndre) < 1:
+                            ndre_values.append(ndre)
+                        if not np.isnan(ndwi) and abs(ndwi) < 2:
+                            ndwi_values.append(ndwi)
+                        if not np.isnan(swir) and 0 < swir < 10:
+                            swir_values.append(swir)
+                except:
+                    continue
+            
+            if len(ndvi_values) < 10:
+                return {
+                    "detected_type": "unknown",
+                    "confidence": 0.0,
+                    "vegetation_cover_percent": 0.0,
+                    "message": "Insufficient vegetation data for classification"
+                }
+            
+            mean_ndvi = np.mean(ndvi_values)
+            mean_rendvi = np.mean(rendvi_values) if rendvi_values else 0
+            mean_ndre = np.mean(ndre_values) if ndre_values else 0
+            mean_ndwi = np.mean(ndwi_values) if ndwi_values else 0
+            mean_swir = np.mean(swir_values) if swir_values else 1
+            
+            # Get current month for seasonal context
+            month = datetime.utcnow().month
+            
+            # Classification logic based on spectral signatures
+            confidence = 0.65
+            crop_type = "unknown"
+            
+            # Rice detection - high NDVI with water signature
+            if mean_ndwi > 0.2 and mean_ndvi > 0.4:
+                crop_type = "rice"
+                confidence = min(0.85, 0.6 + mean_ndwi * 0.5)
+            
+            # Corn/Maize - high NDVI, strong red edge
+            elif mean_ndvi > 0.65 and mean_ndre > 0.4:
+                crop_type = "corn"
+                confidence = min(0.85, 0.55 + mean_ndvi * 0.3)
+            
+            # Soybeans - moderate-high NDVI, distinctive SWIR
+            elif mean_ndvi > 0.5 and mean_ndvi < 0.75 and mean_swir > 1.1:
+                crop_type = "soybeans"
+                confidence = 0.7
+            
+            # Wheat/Cereals - moderate NDVI (varies by growth stage)
+            elif 0.3 < mean_ndvi < 0.65 and mean_ndre < 0.35:
+                crop_type = "wheat"
+                confidence = 0.7
+            
+            # Pasture/Grassland - consistent moderate NDVI, low SWIR ratio
+            elif 0.25 < mean_ndvi < 0.5 and mean_swir < 1.0:
+                crop_type = "pasture"
+                confidence = 0.65
+            
+            # Vegetables - variable, typically higher variability
+            elif 0.3 < mean_ndvi < 0.6 and np.std(ndvi_values) > 0.1:
+                crop_type = "vegetables"
+                confidence = 0.55
+            
+            # Bare soil / fallow
+            elif mean_ndvi < 0.2:
+                crop_type = "fallow"
+                confidence = 0.75
+            
+            # Default to general crop if no clear match
+            else:
+                crop_type = "mixed_crop"
+                confidence = 0.5
+            
+            # Estimate vegetation cover
+            veg_cover = min(100, max(0, (mean_ndvi - 0.1) / 0.7 * 100))
+            
+            return {
+                "detected_type": crop_type,
+                "confidence": round(confidence, 2),
+                "vegetation_cover_percent": round(veg_cover, 1),
+                "growth_vigor": self._assess_growth_vigor(mean_ndvi, mean_ndre),
+                "spectral_signature": {
+                    "mean_ndvi": round(mean_ndvi, 3),
+                    "mean_rendvi": round(mean_rendvi, 3),
+                    "mean_ndre": round(mean_ndre, 3),
+                    "mean_ndwi": round(mean_ndwi, 3),
+                    "mean_swir_ratio": round(mean_swir, 3)
+                },
+                "interpretation": self._interpret_crop_type(crop_type, veg_cover, mean_ndvi)
+            }
+            
+        except Exception as e:
+            raise ValueError(f"Failed to classify crop type: {str(e)}")
+
+    @staticmethod
+    def _assess_growth_vigor(ndvi: float, ndre: float) -> str:
+        """Assess crop growth vigor based on indices"""
+        if ndvi > 0.7 and ndre > 0.4:
+            return "excellent"
+        elif ndvi > 0.5 and ndre > 0.3:
+            return "good"
+        elif ndvi > 0.35:
+            return "moderate"
+        elif ndvi > 0.2:
+            return "poor"
+        else:
+            return "very_poor"
+
+    @staticmethod
+    def _interpret_crop_type(crop_type: str, cover: float, ndvi: float) -> str:
+        """Generate interpretation for crop classification"""
+        health = "excellent" if ndvi > 0.6 else "good" if ndvi > 0.45 else "moderate" if ndvi > 0.3 else "poor"
+        
+        crop_names = {
+            "wheat": "Wheat/Cereals",
+            "corn": "Corn/Maize",
+            "soybeans": "Soybeans",
+            "rice": "Rice (paddy)",
+            "pasture": "Pasture/Grassland",
+            "vegetables": "Vegetables/Horticulture",
+            "fallow": "Fallow/Bare soil",
+            "mixed_crop": "Mixed crops",
+            "unknown": "Unknown crop"
+        }
+        
+        name = crop_names.get(crop_type, crop_type.title())
+        return f"Detected {name} with {health} health. Vegetation cover: {cover:.0f}%. NDVI: {ndvi:.2f}"
+

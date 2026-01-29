@@ -10,8 +10,10 @@ import {
   getAnalysisHistory,
   getYieldPrediction,
   getBiomassEstimate,
+  getForestTrends,
   Site,
   Analysis,
+  ForestTrends,
 } from "@/lib/api";
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -153,6 +155,9 @@ function DetailedReportPanel({
 
   const healthScore = report.summary?.overall_health_score ?? 0;
   const healthColor = healthScore >= 70 ? 'emerald' : healthScore >= 40 ? 'amber' : 'red';
+  
+  // Detect if this is a forest analysis report
+  const isForestReport = report.metadata?.analysis_type === "FOREST" || report.canopy_health !== undefined;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
@@ -163,12 +168,14 @@ function DetailedReportPanel({
           <div className="flex justify-between items-start gap-4">
             <div className="min-w-0">
               <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
-                {report.summary?.index_name || "Complete Field Analysis"}
+                {report.summary?.index_name || (isForestReport ? "Complete Forest Analysis" : "Complete Field Analysis")}
               </h2>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                 <span className="text-xs sm:text-sm text-slate-500">{report.metadata?.field_name}</span>
                 <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block" />
-                <span className="text-xs sm:text-sm text-slate-500 hidden sm:inline">{report.metadata?.crop_type}</span>
+                <span className="text-xs sm:text-sm text-slate-500 hidden sm:inline">
+                  {isForestReport ? report.metadata?.forest_type || "Forest" : report.metadata?.crop_type}
+                </span>
                 <span className="w-1 h-1 bg-slate-300 rounded-full hidden sm:block" />
                 <span className="text-xs sm:text-sm text-slate-500">{new Date(analysis.created_at).toLocaleDateString()}</span>
               </div>
@@ -200,43 +207,90 @@ function DetailedReportPanel({
                 </div>
               )}
               
-              {report.vegetation_health?.ndvi_mean !== undefined && (
-                <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-green-100 flex items-center justify-center">
-                      <span className="text-green-600 text-xs sm:text-sm">🌿</span>
+              {/* Forest-specific metrics */}
+              {isForestReport ? (
+                <>
+                  {report.fire_risk_assessment?.nbr_value !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-orange-100 flex items-center justify-center">
+                          <span className="text-orange-600 text-xs sm:text-sm">🔥</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">NBR</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.fire_risk_assessment.nbr_value.toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.fire_risk_assessment.burn_severity}</p>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">NDVI</span>
-                  </div>
-                  <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.vegetation_health.ndvi_mean.toFixed(2)}</p>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.vegetation_health.vegetation_density}</p>
-                </div>
-              )}
-              
-              {report.moisture_assessment?.estimated_moisture !== undefined && (
-                <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-blue-100 flex items-center justify-center">
-                      <span className="text-blue-600 text-xs sm:text-sm">💧</span>
+                  )}
+                  
+                  {report.fire_risk_assessment?.ndmi_value !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-blue-100 flex items-center justify-center">
+                          <span className="text-blue-600 text-xs sm:text-sm">💧</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">NDMI</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.fire_risk_assessment.ndmi_value.toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.fire_risk_assessment.moisture_status}</p>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Moisture</span>
-                  </div>
-                  <p className="text-xl sm:text-3xl font-bold text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</p>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.moisture_assessment.moisture_status}</p>
-                </div>
-              )}
-              
-              {report.yield_prediction?.predicted_yield_per_ha !== undefined && (
-                <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-100 flex items-center justify-center">
-                      <span className="text-amber-600 text-xs sm:text-sm">🌾</span>
+                  )}
+                  
+                  {report.carbon_sequestration?.current_carbon_stock_t_ha !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-green-100 flex items-center justify-center">
+                          <span className="text-green-600 text-xs sm:text-sm">🌳</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Carbon</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.carbon_sequestration.current_carbon_stock_t_ha}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">t CO₂/ha</p>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Yield</span>
-                  </div>
-                  <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.yield_prediction.predicted_yield_per_ha}</p>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">tonnes/ha</p>
-                </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Field/Agriculture metrics */}
+                  {report.vegetation_health?.ndvi_mean !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-green-100 flex items-center justify-center">
+                          <span className="text-green-600 text-xs sm:text-sm">🌿</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">NDVI</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.vegetation_health.ndvi_mean.toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.vegetation_health.vegetation_density}</p>
+                    </div>
+                  )}
+                  
+                  {report.moisture_assessment?.estimated_moisture !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-blue-100 flex items-center justify-center">
+                          <span className="text-blue-600 text-xs sm:text-sm">💧</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Moisture</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.moisture_assessment.moisture_status}</p>
+                    </div>
+                  )}
+                  
+                  {report.yield_prediction?.predicted_yield_per_ha !== undefined && (
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-100 flex items-center justify-center">
+                          <span className="text-amber-600 text-xs sm:text-sm">🌾</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Yield</span>
+                      </div>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.yield_prediction.predicted_yield_per_ha}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">tonnes/ha</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -250,8 +304,160 @@ function DetailedReportPanel({
             {/* Detailed Sections in Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               
-              {/* Vegetation Health */}
-              {report.vegetation_health && (
+              {/* Forest-specific: Canopy Health */}
+              {isForestReport && report.canopy_health && (
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                      <span className="text-base sm:text-lg">🌲</span> Canopy Health
+                    </h3>
+                  </div>
+                  <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Canopy Cover</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.canopy_health.canopy_cover_percent}%</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Canopy Density</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.canopy_health.canopy_density}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Vegetation Vigor</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.canopy_health.vegetation_vigor}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2">
+                      <span className="text-xs sm:text-base text-slate-600">Health Status</span>
+                      <Badge variant={
+                        report.canopy_health.health_status === "Excellent" || report.canopy_health.health_status === "Good" ? "success" :
+                        report.canopy_health.health_status === "Moderate" ? "warning" : "error"
+                      }>
+                        {report.canopy_health.health_status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Forest-specific: Fire Risk Assessment */}
+              {isForestReport && report.fire_risk_assessment && (
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-orange-50 to-red-50 border-b border-orange-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                      <span className="text-base sm:text-lg">🔥</span> Fire Risk Assessment
+                    </h3>
+                  </div>
+                  <div className="p-4 sm:p-6">
+                    <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl">
+                      <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Fire Risk Level</p>
+                      <Badge variant={
+                        report.fire_risk_assessment.fire_risk_level === "low" ? "success" :
+                        report.fire_risk_assessment.fire_risk_level === "medium" ? "warning" : "error"
+                      } className="text-sm sm:text-lg px-3 py-1">
+                        {report.fire_risk_assessment.fire_risk_level?.toUpperCase()}
+                      </Badge>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-2">Score: {report.fire_risk_assessment.fire_risk_score}/100</p>
+                    </div>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                        <span className="text-xs sm:text-base text-slate-600">Moisture Status</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.fire_risk_assessment.moisture_status}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                        <span className="text-xs sm:text-base text-slate-600">Burn Severity</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.fire_risk_assessment.burn_severity}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-base text-slate-600">Prevention Priority</span>
+                        <Badge variant={
+                          report.fire_risk_assessment.fire_prevention_priority === "Normal" ? "success" :
+                          report.fire_risk_assessment.fire_prevention_priority === "Medium" ? "warning" : "error"
+                        }>
+                          {report.fire_risk_assessment.fire_prevention_priority}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Forest-specific: Deforestation Monitoring */}
+              {isForestReport && report.deforestation_monitoring && (
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-yellow-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                      <span className="text-base sm:text-lg">🌳</span> Deforestation Monitoring
+                    </h3>
+                  </div>
+                  <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Deforestation Risk</span>
+                      <Badge variant={
+                        report.deforestation_monitoring.deforestation_risk === "low" ? "success" :
+                        report.deforestation_monitoring.deforestation_risk === "medium" ? "warning" : "error"
+                      }>
+                        {report.deforestation_monitoring.deforestation_risk}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Canopy Loss</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.deforestation_monitoring.canopy_loss_indicator}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                      <span className="text-xs sm:text-base text-slate-600">Forest Fragmentation</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.deforestation_monitoring.forest_fragmentation}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 sm:py-2">
+                      <span className="text-xs sm:text-base text-slate-600">Detection Confidence</span>
+                      <span className="font-medium text-xs sm:text-base text-slate-900">{report.deforestation_monitoring.change_detection_confidence}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Forest-specific: Carbon Sequestration */}
+              {isForestReport && report.carbon_sequestration && (
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                      <span className="text-base sm:text-lg">🌿</span> Carbon Sequestration
+                    </h3>
+                  </div>
+                  <div className="p-4 sm:p-6">
+                    <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg sm:rounded-xl">
+                      <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Total Carbon Stock</p>
+                      <p className="text-2xl sm:text-4xl font-bold text-teal-600">{report.carbon_sequestration.total_carbon_stock_tonnes}</p>
+                      <p className="text-xs sm:text-sm text-teal-600">tonnes CO₂</p>
+                    </div>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                        <span className="text-xs sm:text-base text-slate-600">Per Hectare</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.current_carbon_stock_t_ha} t/ha</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                        <span className="text-xs sm:text-base text-slate-600">Carbon Status</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.carbon_status}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
+                        <span className="text-xs sm:text-base text-slate-600">Sequestration Potential</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.sequestration_potential}</span>
+                      </div>
+                      {report.carbon_sequestration.carbon_change_percent !== null && (
+                        <div className="flex justify-between items-center py-1.5 sm:py-2">
+                          <span className="text-xs sm:text-base text-slate-600">Change from Baseline</span>
+                          <Badge variant={
+                            (report.carbon_sequestration.carbon_change_percent || 0) >= 0 ? "success" : "error"
+                          }>
+                            {(report.carbon_sequestration.carbon_change_percent || 0) >= 0 ? "+" : ""}{report.carbon_sequestration.carbon_change_percent}%
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Field/Agriculture: Vegetation Health */}
+              {!isForestReport && report.vegetation_health && (
                 <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
                     <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
@@ -284,8 +490,8 @@ function DetailedReportPanel({
                 </div>
               )}
 
-              {/* Moisture Assessment */}
-              {report.moisture_assessment && (
+              {/* Field/Agriculture: Moisture Assessment */}
+              {!isForestReport && report.moisture_assessment && (
                 <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
                     <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
@@ -323,8 +529,8 @@ function DetailedReportPanel({
                 </div>
               )}
 
-              {/* Biomass Analysis */}
-              {report.biomass_analysis && (
+              {/* Field/Agriculture: Biomass Analysis */}
+              {!isForestReport && report.biomass_analysis && (
                 <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
                     <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
@@ -355,8 +561,8 @@ function DetailedReportPanel({
                 </div>
               )}
 
-              {/* Yield Prediction */}
-              {report.yield_prediction && (
+              {/* Field/Agriculture: Yield Prediction */}
+              {!isForestReport && report.yield_prediction && (
                 <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
                     <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
@@ -601,9 +807,10 @@ export default function AnalysisPage() {
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [yieldData, setYieldData] = useState<any>(null);
   const [biomassData, setBiomassData] = useState<any>(null);
+  const [forestTrends, setForestTrends] = useState<ForestTrends | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "history" | "recommendations">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "history" | "recommendations" | "trends">("overview");
   const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(null);
 
   useEffect(() => {
@@ -641,14 +848,19 @@ export default function AnalysisPage() {
 
   async function loadSiteData(siteId: number) {
     try {
-      const [analysisData, yieldRes, biomassRes] = await Promise.all([
+      const site = sites.find(s => s.id === siteId) || selectedSite;
+      const isForestSite = site?.site_type === "forest";
+      
+      const [analysisData, yieldRes, biomassRes, trendsRes] = await Promise.all([
         getAnalysisHistory(siteId),
-        getYieldPrediction(siteId).catch(() => null),
+        isForestSite ? Promise.resolve(null) : getYieldPrediction(siteId).catch(() => null),
         getBiomassEstimate(siteId).catch(() => null),
+        isForestSite ? getForestTrends(siteId).catch(() => null) : Promise.resolve(null),
       ]);
       setAnalyses(analysisData);
       setYieldData(yieldRes);
       setBiomassData(biomassRes);
+      setForestTrends(trendsRes);
     } catch (error) {
       console.error("Failed to load site data:", error);
     }
@@ -821,58 +1033,122 @@ export default function AnalysisPage() {
       {selectedSite && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
-                  🌿
+            {isForest ? (
+              <>
+                {/* Forest-specific metric cards */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🌲
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">NDVI</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {latestNDVI?.mean_value?.toFixed(3) || "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-slate-500 truncate">NDVI</p>
-                  <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                    {latestNDVI?.mean_value?.toFixed(3) || "—"}
-                  </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🔥
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">Fire Risk</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900 capitalize">
+                        {(latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.fire_risk_level || 
+                         (latestComplete?.data as any)?.forest_data?.fire_risk_level || "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
-                  💧
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      💧
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">NDMI</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {((latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.ndmi_value ?? 
+                         (latestComplete?.data as any)?.forest_data?.ndmi)?.toFixed(2) || "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-slate-500 truncate">Moisture</p>
-                  <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                    {moistureValue ? `${(moistureValue * 100).toFixed(0)}%` : "—"}
-                  </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🌳
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">Carbon</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {((latestComplete?.data?.detailed_report as any)?.carbon_sequestration?.current_carbon_stock_t_ha ?? 
+                         (latestComplete?.data as any)?.forest_data?.carbon_estimate_tonnes_ha)?.toFixed(0) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
-                  🌾
+              </>
+            ) : (
+              <>
+                {/* Field/Agriculture metric cards */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🌿
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">NDVI</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {latestNDVI?.mean_value?.toFixed(3) || "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-slate-500 truncate">Yield</p>
-                  <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                    {yieldFromComplete?.predicted_yield_per_ha?.toFixed(1) || yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
-                  </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      💧
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">Moisture</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {moistureValue ? `${(moistureValue * 100).toFixed(0)}%` : "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
-                  🌱
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🌾
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">Yield</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {yieldFromComplete?.predicted_yield_per_ha?.toFixed(1) || yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-slate-500 truncate">Biomass</p>
-                  <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                    {biomassFromComplete?.estimated_biomass_t_ha?.toFixed(1) || biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
-                  </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
+                      🌱
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-slate-500 truncate">Biomass</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900">
+                        {biomassFromComplete?.estimated_biomass_t_ha?.toFixed(1) || biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -889,7 +1165,10 @@ export default function AnalysisPage() {
 
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="flex border-b border-slate-200/60 overflow-x-auto">
-                  {(["overview", "history", "recommendations"] as const).map((tab) => (
+                  {(isForest 
+                    ? ["overview", "trends", "history", "recommendations"] as const
+                    : ["overview", "history", "recommendations"] as const
+                  ).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
@@ -900,7 +1179,8 @@ export default function AnalysisPage() {
                       }`}
                     >
                       {tab === "overview" && <><span className="hidden sm:inline">📊 </span>Overview</>}
-                      {tab === "history" && <><span className="hidden sm:inline">📈 </span>History</>}
+                      {tab === "trends" && <><span className="hidden sm:inline">📈 </span>Trends</>}
+                      {tab === "history" && <><span className="hidden sm:inline">📜 </span>History</>}
                       {tab === "recommendations" && <><span className="hidden sm:inline">💡 </span>Tips</>}
                     </button>
                   ))}
@@ -913,7 +1193,7 @@ export default function AnalysisPage() {
                         <div className="flex justify-center">
                           <HealthGauge 
                             value={latestNDVI?.mean_value || 0.5} 
-                            label="Vegetation Health" 
+                            label={isForest ? "Canopy Health" : "Vegetation Health"} 
                           />
                         </div>
                         
@@ -921,8 +1201,8 @@ export default function AnalysisPage() {
                           {analysisHistory.length > 0 ? (
                             <BarChart 
                               data={analysisHistory} 
-                              label="Health Score Trend (Last Analyses)" 
-                              color="bg-emerald-500"
+                              label={isForest ? "Forest Health Trend" : "Health Score Trend (Last Analyses)"} 
+                              color={isForest ? "bg-teal-500" : "bg-emerald-500"}
                             />
                           ) : (
                             <div className="h-24 flex items-center justify-center text-slate-400 text-xs sm:text-sm">
@@ -932,9 +1212,57 @@ export default function AnalysisPage() {
                         </div>
                       </div>
 
+                      {/* Forest-specific quick stats */}
+                      {isForest && latestNDVI?.data && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                          <div className="p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-200/60">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">🔥</span>
+                              <p className="text-xs text-slate-500">Fire Risk</p>
+                            </div>
+                            <p className="font-bold text-slate-900 capitalize">
+                              {(latestNDVI.data as any)?.fire_risk_level || "Unknown"}
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/60">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">💧</span>
+                              <p className="text-xs text-slate-500">NDMI</p>
+                            </div>
+                            <p className="font-bold text-slate-900">
+                              {(latestNDVI.data as any)?.ndmi?.toFixed(3) || "—"}
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200/60">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">🌲</span>
+                              <p className="text-xs text-slate-500">Carbon Stock</p>
+                            </div>
+                            <p className="font-bold text-slate-900">
+                              {(latestNDVI.data as any)?.carbon_estimate_tonnes_ha?.toFixed(1) || "—"} t/ha
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border border-amber-200/60">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">🌳</span>
+                              <p className="text-xs text-slate-500">Canopy Cover</p>
+                            </div>
+                            <p className="font-bold text-slate-900">
+                              {(latestNDVI.data as any)?.canopy_cover_percent?.toFixed(0) || "—"}%
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {latestNDVI?.interpretation && (
-                        <div className="p-3 sm:p-4 bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-lg sm:rounded-xl border border-emerald-200/60">
-                          <h4 className="font-medium text-slate-900 mb-1.5 sm:mb-2 text-sm sm:text-base">Latest Analysis Interpretation</h4>
+                        <div className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${
+                          isForest 
+                            ? "bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200/60"
+                            : "bg-gradient-to-r from-emerald-50 to-cyan-50 border-emerald-200/60"
+                        }`}>
+                          <h4 className="font-medium text-slate-900 mb-1.5 sm:mb-2 text-sm sm:text-base">
+                            {isForest ? "Latest Forest Analysis" : "Latest Analysis Interpretation"}
+                          </h4>
                           <p className="text-slate-600 text-xs sm:text-base">{String(latestNDVI.interpretation)}</p>
                           {(latestNDVI.data as any)?.detailed_report && (
                             <button
@@ -1091,6 +1419,157 @@ export default function AnalysisPage() {
                       )}
                     </div>
                   )}
+
+                  {activeTab === "trends" && isForest && (
+                    <div className="space-y-4 sm:space-y-6">
+                      {!forestTrends?.has_sufficient_data ? (
+                        <div className="text-center py-8 sm:py-12">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+                            <span className="text-3xl">📈</span>
+                          </div>
+                          <h3 className="font-semibold text-slate-900 mb-2">Trends Coming Soon</h3>
+                          <p className="text-slate-500 text-sm max-w-md mx-auto">
+                            {forestTrends?.message || "Run more forest analyses to see trends in carbon sequestration, canopy coverage, and forest health."}
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Overall Trend Banner */}
+                          <div className={`p-4 rounded-xl border ${
+                            forestTrends.overall_trend === "improving" 
+                              ? "bg-emerald-50 border-emerald-200" 
+                              : forestTrends.overall_trend === "declining"
+                              ? "bg-red-50 border-red-200"
+                              : "bg-slate-50 border-slate-200"
+                          }`}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-3xl">
+                                {forestTrends.overall_trend === "improving" ? "📈" : 
+                                 forestTrends.overall_trend === "declining" ? "📉" : "➡️"}
+                              </span>
+                              <div>
+                                <h4 className="font-semibold text-slate-900 capitalize">
+                                  Forest Health: {forestTrends.overall_trend}
+                                </h4>
+                                <p className="text-sm text-slate-600">
+                                  Based on {forestTrends.analyses.length} analyses
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Average Changes Summary */}
+                          {(forestTrends.avg_ndvi_change !== null || forestTrends.avg_carbon_change !== null) && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                                <p className="text-xs text-slate-500 mb-1">Avg NDVI Change</p>
+                                <p className={`text-xl font-bold ${(forestTrends.avg_ndvi_change || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                  {(forestTrends.avg_ndvi_change || 0) >= 0 ? "+" : ""}{forestTrends.avg_ndvi_change?.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">per analysis</p>
+                              </div>
+                              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                                <p className="text-xs text-slate-500 mb-1">Avg Carbon Change</p>
+                                <p className={`text-xl font-bold ${(forestTrends.avg_carbon_change || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                  {(forestTrends.avg_carbon_change || 0) >= 0 ? "+" : ""}{forestTrends.avg_carbon_change?.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">per analysis</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Analysis-by-Analysis Data Table */}
+                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                              <h4 className="font-semibold text-slate-900">Analysis History & Trends</h4>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full min-w-[600px]">
+                                <thead>
+                                  <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Date</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">NDVI</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Carbon (t/ha)</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Canopy</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Fire Risk</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Change</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {forestTrends.analyses.map((analysis, idx) => (
+                                    <tr key={analysis.analysis_id} className="hover:bg-slate-50">
+                                      <td className="px-4 py-3 font-medium text-slate-900">
+                                        {new Date(analysis.date).toLocaleDateString()}
+                                      </td>
+                                      <td className="px-4 py-3 text-slate-600">{analysis.ndvi.toFixed(3)}</td>
+                                      <td className="px-4 py-3 text-slate-600">{analysis.carbon_stock_t_ha.toFixed(1)}</td>
+                                      <td className="px-4 py-3 text-slate-600">{analysis.canopy_cover_percent.toFixed(0)}%</td>
+                                      <td className="px-4 py-3">
+                                        <Badge variant={
+                                          analysis.fire_risk_level === "low" ? "success" : 
+                                          analysis.fire_risk_level === "medium" ? "warning" : "error"
+                                        }>
+                                          {analysis.fire_risk_level}
+                                        </Badge>
+                                      </td>
+                                      <td className="px-4 py-3">
+                                        {analysis.ndvi_change_pct !== null && analysis.ndvi_change_pct !== undefined ? (
+                                          <span className={`text-sm font-medium ${analysis.ndvi_change_pct >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                            {analysis.ndvi_change_pct >= 0 ? "+" : ""}{analysis.ndvi_change_pct.toFixed(1)}%
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-400 text-sm">baseline</span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Baseline Comparison */}
+                          {forestTrends.baseline_comparison && (
+                            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-4 border border-teal-200">
+                              <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                <span>📊</span> Baseline Comparison
+                              </h4>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                  <p className="text-slate-500">Baseline Date</p>
+                                  <p className="font-medium text-slate-900">
+                                    {forestTrends.baseline_comparison.baseline_date 
+                                      ? new Date(forestTrends.baseline_comparison.baseline_date).toLocaleDateString()
+                                      : "N/A"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-slate-500">Baseline Carbon</p>
+                                  <p className="font-medium text-slate-900">
+                                    {forestTrends.baseline_comparison.baseline_carbon_t_ha?.toFixed(1)} t/ha
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-slate-500">Carbon vs Baseline</p>
+                                  <p className={`font-medium ${(forestTrends.baseline_comparison.carbon_change_from_baseline_pct || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                    {(forestTrends.baseline_comparison.carbon_change_from_baseline_pct || 0) >= 0 ? "+" : ""}
+                                    {forestTrends.baseline_comparison.carbon_change_from_baseline_pct?.toFixed(1)}%
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-slate-500">Canopy vs Baseline</p>
+                                  <p className={`font-medium ${(forestTrends.baseline_comparison.canopy_change_from_baseline_pct || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                    {(forestTrends.baseline_comparison.canopy_change_from_baseline_pct || 0) >= 0 ? "+" : ""}
+                                    {forestTrends.baseline_comparison.canopy_change_from_baseline_pct?.toFixed(1)}%
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1098,19 +1577,27 @@ export default function AnalysisPage() {
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
-                  <h2 className="font-semibold text-slate-900 text-sm sm:text-base">Field Analysis</h2>
+                  <h2 className="font-semibold text-slate-900 text-sm sm:text-base">
+                    {isForest ? "Forest Analysis" : "Field Analysis"}
+                  </h2>
                   <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">Comprehensive satellite analysis</p>
                 </div>
                 <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                   <button
-                    onClick={() => handleRunAnalysis("COMPLETE")}
+                    onClick={() => handleRunAnalysis(isForest ? "FOREST" : "COMPLETE")}
                     disabled={analyzing !== null}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                    className={`w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 ${
+                      isForest 
+                        ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-teal-500/25 hover:shadow-teal-500/40"
+                        : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                    } text-white rounded-xl transition-all disabled:opacity-50 shadow-lg`}
                   >
-                    <span className="text-2xl sm:text-3xl">{analyzing === "COMPLETE" ? "⏳" : "🛰️"}</span>
+                    <span className="text-2xl sm:text-3xl">{analyzing ? "⏳" : isForest ? "🌲" : "🛰️"}</span>
                     <div className="text-left">
                       <p className="font-semibold text-base sm:text-lg">Run Analysis</p>
-                      <p className="text-xs sm:text-sm text-emerald-100">NDVI • Biomass • Moisture • Yield</p>
+                      <p className="text-xs sm:text-sm text-emerald-100">
+                        {isForest ? "NBR • NDMI • Carbon • Fire Risk" : "NDVI • Biomass • Moisture • Yield"}
+                      </p>
                     </div>
                   </button>
                   
@@ -1123,26 +1610,49 @@ export default function AnalysisPage() {
 
                   <div className="text-xs sm:text-sm text-slate-500 p-2.5 sm:p-3 bg-slate-50 rounded-lg sm:rounded-xl">
                     <p className="font-medium text-slate-700 mb-1.5 sm:mb-2">Analysis includes:</p>
-                    <ul className="space-y-1 sm:space-y-1.5">
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Vegetation health (NDVI)
-                      </li>
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Biomass estimation
-                      </li>
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Soil moisture assessment
-                      </li>
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Yield prediction
-                      </li>
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Problem detection & alerts
-                      </li>
-                      <li className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-green-500 text-xs sm:text-sm">✓</span> Recommendations
-                      </li>
-                    </ul>
+                    {isForest ? (
+                      <ul className="space-y-1 sm:space-y-1.5">
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Canopy health (NDVI)
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Fire risk assessment (NBR)
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Moisture index (NDMI)
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Carbon sequestration estimate
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Deforestation monitoring
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Year-over-year trends
+                        </li>
+                      </ul>
+                    ) : (
+                      <ul className="space-y-1 sm:space-y-1.5">
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Vegetation health (NDVI)
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Biomass estimation
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Soil moisture assessment
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Yield prediction
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Problem detection & alerts
+                        </li>
+                        <li className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-green-500 text-xs sm:text-sm">✓</span> Recommendations
+                        </li>
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>

@@ -35,18 +35,22 @@ export default function FieldMap({
       style: {
         version: 8,
         sources: {
-          osm: {
+          satellite: {
             type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tiles: [
+              "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            ],
             tileSize: 256,
-            attribution: "© OpenStreetMap contributors",
+            attribution:
+              "© Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+            maxzoom: 19,
           },
         },
         layers: [
           {
-            id: "osm",
+            id: "satellite",
             type: "raster",
-            source: "osm",
+            source: "satellite",
           },
         ],
       },

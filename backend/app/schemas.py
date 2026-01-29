@@ -267,3 +267,28 @@ class ForestTrends(BaseModel):
     baseline_comparison: Optional[dict] = None  # comparison to first recorded baseline
     has_sufficient_data: bool = True
     message: Optional[str] = None
+
+# ============== Field Trends Schemas (Analysis-by-Analysis Comparison) ==============
+
+class FieldAnalysisData(BaseModel):
+    """Field data for a single analysis"""
+    analysis_id: int
+    date: datetime
+    ndvi: float
+    yield_per_ha: Optional[float] = None
+    biomass_t_ha: Optional[float] = None
+    moisture_pct: Optional[float] = None
+    # Change from previous analysis
+    ndvi_change_pct: Optional[float] = None
+    yield_change_pct: Optional[float] = None
+
+
+class FieldTrends(BaseModel):
+    """Analysis-by-analysis field trends"""
+    analyses: list[FieldAnalysisData]
+    overall_trend: str  # improving, stable, declining, unknown
+    avg_ndvi_change: Optional[float] = None
+    avg_yield_change: Optional[float] = None
+    baseline_comparison: Optional[dict] = None
+    has_sufficient_data: bool = True
+    message: Optional[str] = None

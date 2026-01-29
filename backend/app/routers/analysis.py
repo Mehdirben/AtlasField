@@ -10,7 +10,7 @@ from sqlalchemy import select, extract
 
 from app.database import get_db
 from app.models import User, Site, Analysis, AnalysisType, Alert, AlertSeverity, AlertType, SiteType
-from app.schemas import AnalysisRequest, AnalysisResponse, YieldPrediction, BiomassEstimate, ForestTrends, ForestAnalysisData
+from app.schemas import AnalysisRequest, AnalysisResponse, YieldPrediction, BiomassEstimate, ForestTrends, ForestAnalysisData, FieldTrends, FieldAnalysisData
 from app.auth import get_current_user
 from app.services.sentinel_hub import SentinelHubService
 from app.services.analysis import AnalysisService
@@ -602,6 +602,161 @@ async def get_forest_trends(
         overall_trend=overall_trend,
         avg_ndvi_change=avg_ndvi_change,
         avg_carbon_change=avg_carbon_change,
+        baseline_comparison=baseline_comparison,
+        has_sufficient_data=True,
+        message=None
+    )
+
+
+@router.get("/{site_id}/field-trends", response_model=FieldTrends)
+async def get_field_trends(
+    site_id: int,
+    limit: int = 10,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get analysis-by-analysis field trends from stored analysis records"""
+    # Get site
+    result = await db.execute(
+        select(Site)
+        .where(Site.id == site_id, Site.user_id == current_user.id)
+    )
+    site = result.scalar_one_or_none()
+    
+    if not site:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Site not found"
+        )
+    
+    # Only available for field sites
+    if site.site_type != SiteType.FIELD:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Field trends are only available for agricultural fields"
+        )
+    
+    # Get all COMPLETE or NDVI analyses for this site, ordered by date (oldest first for change calculation)
+    result = await db.execute(
+        select(Analysis)
+        .where(
+            Analysis.site_id == site_id, 
+            Analysis.analysis_type.in_([AnalysisType.COMPLETE, AnalysisType.NDVI])
+        )
+        .order_by(Analysis.created_at.asc())
+        .limit(limit)
+    )
+    analyses = result.scalars().all()
+    
+    if len(analyses) < 2:
+        return FieldTrends(
+            analyses=[],
+            overall_trend="unknown",
+            has_sufficient_data=False,
+            message="Insufficient data: At least 2 analyses are required for trend comparison."
+        )
+    
+    # Extract data from each analysis and calculate changes from previous
+    analysis_data_list = []
+    prev_data = None
+    ndvi_changes = []
+    yield_changes = []
+    
+    first_analysis = analyses[0]
+    baseline_detailed = first_analysis.data.get("detailed_report", {})
+    baseline_ndvi = first_analysis.mean_value or 0.5
+    baseline_yield = baseline_detailed.get("yield_prediction", {}).get("predicted_yield_per_ha")
+    
+    for analysis in analyses:
+        detailed_report = analysis.data.get("detailed_report", {})
+        
+        # Extract values with fallbacks
+        ndvi = analysis.mean_value or 0.5
+        yield_val = detailed_report.get("yield_prediction", {}).get("predicted_yield_per_ha")
+        biomass = detailed_report.get("biomass_analysis", {}).get("estimated_biomass_t_ha")
+        moisture = detailed_report.get("moisture_assessment", {}).get("estimated_moisture")
+        
+        # Multiply moisture by 100 for percentage
+        if moisture is not None:
+            moisture = round(moisture * 100, 1)
+            
+        current_data = {
+            "ndvi": ndvi,
+            "yield": yield_val
+        }
+        
+        # Calculate changes from previous analysis
+        ndvi_change = None
+        yield_change = None
+        
+        if prev_data:
+            def calc_pct(curr, prev):
+                if prev is None or curr is None or prev == 0:
+                    return None
+                return round(((curr - prev) / abs(prev)) * 100, 1)
+            
+            ndvi_change = calc_pct(ndvi, prev_data["ndvi"])
+            yield_change = calc_pct(yield_val, prev_data["yield"])
+            
+            if ndvi_change is not None:
+                ndvi_changes.append(ndvi_change)
+            if yield_change is not None:
+                yield_changes.append(yield_change)
+        
+        analysis_entry = FieldAnalysisData(
+            analysis_id=analysis.id,
+            date=analysis.created_at,
+            ndvi=round(ndvi, 3),
+            yield_per_ha=yield_val,
+            biomass_t_ha=biomass,
+            moisture_pct=moisture,
+            ndvi_change_pct=ndvi_change,
+            yield_change_pct=yield_change
+        )
+        analysis_data_list.append(analysis_entry)
+        prev_data = current_data
+    
+    # Reverse to show most recent first
+    analysis_data_list.reverse()
+    
+    # Calculate average changes and overall trend
+    avg_ndvi_change = round(sum(ndvi_changes) / len(ndvi_changes), 1) if ndvi_changes else None
+    avg_yield_change = round(sum(yield_changes) / len(yield_changes), 1) if yield_changes else None
+    
+    last_analysis = analyses[-1]
+    last_detailed = last_analysis.data.get("detailed_report", {})
+    last_ndvi = last_analysis.mean_value or 0.5
+    last_yield = last_detailed.get("yield_prediction", {}).get("predicted_yield_per_ha")
+    
+    def calc_pct_raw(curr, prev):
+        if prev is None or curr is None or prev == 0:
+            return 0
+        return round(((curr - prev) / abs(prev)) * 100, 1)
+
+    baseline_comparison = {
+        "baseline_date": first_analysis.created_at,
+        "baseline_ndvi": baseline_ndvi,
+        "baseline_yield": baseline_yield,
+        "ndvi_change_from_baseline_pct": calc_pct_raw(last_ndvi, baseline_ndvi),
+        "yield_change_from_baseline_pct": calc_pct_raw(last_yield, baseline_yield)
+    }
+
+    # Determine overall trend
+    if avg_ndvi_change is not None:
+        if avg_ndvi_change > 1:
+            overall_trend = "improving"
+        elif avg_ndvi_change < -1:
+            overall_trend = "declining"
+        else:
+            overall_trend = "stable"
+    else:
+        overall_trend = "unknown"
+    
+    return FieldTrends(
+        analyses=analysis_data_list,
+        overall_trend=overall_trend,
+        avg_ndvi_change=avg_ndvi_change,
+        avg_yield_change=avg_yield_change,
         baseline_comparison=baseline_comparison,
         has_sufficient_data=True,
         message=None

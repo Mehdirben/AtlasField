@@ -11,9 +11,11 @@ import {
   getYieldPrediction,
   getBiomassEstimate,
   getForestTrends,
+  getFieldTrends,
   Site,
   Analysis,
   ForestTrends,
+  FieldTrends,
 } from "@/lib/api";
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -62,7 +64,7 @@ function BarChart({ data, label, color }: { data: number[]; label: string; color
 // Gauge component for health score
 function HealthGauge({ value, label }: { value: number; label: string }) {
   const percentage = Math.min(100, Math.max(0, value * 100));
-  
+
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-28 h-28">
@@ -104,15 +106,15 @@ function HealthGauge({ value, label }: { value: number; label: string }) {
 }
 
 // Detailed Report Modal/Panel Component
-function DetailedReportPanel({ 
-  analysis, 
-  onClose 
-}: { 
-  analysis: Analysis; 
+function DetailedReportPanel({
+  analysis,
+  onClose
+}: {
+  analysis: Analysis;
   onClose: () => void;
 }) {
   const report = analysis.data?.detailed_report as any;
-  
+
   if (!report) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -155,14 +157,14 @@ function DetailedReportPanel({
 
   const healthScore = report.summary?.overall_health_score ?? 0;
   const healthColor = healthScore >= 70 ? 'emerald' : healthScore >= 40 ? 'amber' : 'red';
-  
+
   // Detect if this is a forest analysis report
   const isForestReport = report.metadata?.analysis_type === "FOREST" || report.canopy_health !== undefined;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div className="bg-slate-50 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
-        
+
         {/* Header */}
         <div className="bg-white px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-200/80">
           <div className="flex justify-between items-start gap-4">
@@ -191,7 +193,7 @@ function DetailedReportPanel({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-8">
-            
+
             {/* Key Metrics Overview */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
               {report.summary?.overall_health_score !== undefined && (
@@ -206,7 +208,7 @@ function DetailedReportPanel({
                   <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.summary.health_status}</p>
                 </div>
               )}
-              
+
               {/* Forest-specific metrics */}
               {isForestReport ? (
                 <>
@@ -222,7 +224,7 @@ function DetailedReportPanel({
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.fire_risk_assessment.burn_severity}</p>
                     </div>
                   )}
-                  
+
                   {report.fire_risk_assessment?.ndmi_value !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
@@ -235,7 +237,7 @@ function DetailedReportPanel({
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.fire_risk_assessment.moisture_status}</p>
                     </div>
                   )}
-                  
+
                   {report.carbon_sequestration?.current_carbon_stock_t_ha !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
@@ -264,7 +266,7 @@ function DetailedReportPanel({
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.vegetation_health.vegetation_density}</p>
                     </div>
                   )}
-                  
+
                   {report.moisture_assessment?.estimated_moisture !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
@@ -277,7 +279,7 @@ function DetailedReportPanel({
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">{report.moisture_assessment.moisture_status}</p>
                     </div>
                   )}
-                  
+
                   {report.yield_prediction?.predicted_yield_per_ha !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
@@ -303,7 +305,7 @@ function DetailedReportPanel({
 
             {/* Detailed Sections in Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              
+
               {/* Forest-specific: Canopy Health */}
               {isForestReport && report.canopy_health && (
                 <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
@@ -329,7 +331,7 @@ function DetailedReportPanel({
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
                         report.canopy_health.health_status === "Excellent" || report.canopy_health.health_status === "Good" ? "success" :
-                        report.canopy_health.health_status === "Moderate" ? "warning" : "error"
+                          report.canopy_health.health_status === "Moderate" ? "warning" : "error"
                       }>
                         {report.canopy_health.health_status}
                       </Badge>
@@ -351,7 +353,7 @@ function DetailedReportPanel({
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Fire Risk Level</p>
                       <Badge variant={
                         report.fire_risk_assessment.fire_risk_level === "low" ? "success" :
-                        report.fire_risk_assessment.fire_risk_level === "medium" ? "warning" : "error"
+                          report.fire_risk_assessment.fire_risk_level === "medium" ? "warning" : "error"
                       } className="text-sm sm:text-lg px-3 py-1">
                         {report.fire_risk_assessment.fire_risk_level?.toUpperCase()}
                       </Badge>
@@ -370,7 +372,7 @@ function DetailedReportPanel({
                         <span className="text-xs sm:text-base text-slate-600">Prevention Priority</span>
                         <Badge variant={
                           report.fire_risk_assessment.fire_prevention_priority === "Normal" ? "success" :
-                          report.fire_risk_assessment.fire_prevention_priority === "Medium" ? "warning" : "error"
+                            report.fire_risk_assessment.fire_prevention_priority === "Medium" ? "warning" : "error"
                         }>
                           {report.fire_risk_assessment.fire_prevention_priority}
                         </Badge>
@@ -393,7 +395,7 @@ function DetailedReportPanel({
                       <span className="text-xs sm:text-base text-slate-600">Deforestation Risk</span>
                       <Badge variant={
                         report.deforestation_monitoring.deforestation_risk === "low" ? "success" :
-                        report.deforestation_monitoring.deforestation_risk === "medium" ? "warning" : "error"
+                          report.deforestation_monitoring.deforestation_risk === "medium" ? "warning" : "error"
                       }>
                         {report.deforestation_monitoring.deforestation_risk}
                       </Badge>
@@ -481,7 +483,7 @@ function DetailedReportPanel({
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
                         report.vegetation_health.health_status === "Excellent" || report.vegetation_health.health_status === "Good" ? "success" :
-                        report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
+                          report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
                       }>
                         {report.vegetation_health.health_status}
                       </Badge>
@@ -503,7 +505,7 @@ function DetailedReportPanel({
                       <span className="text-xs sm:text-base text-slate-600">Moisture Status</span>
                       <Badge variant={
                         report.moisture_assessment.moisture_status === "Optimal" || report.moisture_assessment.moisture_status === "Good" ? "success" :
-                        report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
+                          report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
                       }>
                         {report.moisture_assessment.moisture_status}
                       </Badge>
@@ -516,7 +518,7 @@ function DetailedReportPanel({
                       <span className="text-xs sm:text-base text-slate-600">Water Stress Risk</span>
                       <Badge variant={
                         report.moisture_assessment.water_stress_risk === "Low" ? "success" :
-                        report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
+                          report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
                       }>
                         {report.moisture_assessment.water_stress_risk}
                       </Badge>
@@ -584,7 +586,7 @@ function DetailedReportPanel({
                         <span className="text-xs sm:text-base text-slate-600">Yield Potential</span>
                         <Badge variant={
                           report.yield_prediction.yield_potential === "High" ? "success" :
-                          report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
+                            report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
                         }>
                           {report.yield_prediction.yield_potential}
                         </Badge>
@@ -719,8 +721,8 @@ function DetailedReportPanel({
                       <div key={i} className="p-3 sm:p-4 bg-emerald-50/50 rounded-lg sm:rounded-xl border border-emerald-100">
                         <div className="flex flex-wrap items-start gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                           <Badge variant={
-                            rec.priority === "low" ? "success" : 
-                            rec.priority === "medium" ? "warning" : "error"
+                            rec.priority === "low" ? "success" :
+                              rec.priority === "medium" ? "warning" : "error"
                           } className="text-[10px] sm:text-xs">
                             {rec.priority}
                           </Badge>
@@ -768,8 +770,8 @@ function DetailedReportPanel({
                           <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600">{item.recommended_interval}</td>
                           <td className="px-3 sm:px-6 py-2 sm:py-4">
                             <Badge variant={
-                              item.urgency === "High" ? "error" : 
-                              item.urgency === "Medium" ? "warning" : "default"
+                              item.urgency === "High" ? "error" :
+                                item.urgency === "Medium" ? "warning" : "default"
                             }>
                               {item.urgency}
                             </Badge>
@@ -801,13 +803,14 @@ function DetailedReportPanel({
 export default function AnalysisPage() {
   const searchParams = useSearchParams();
   const initialSiteId = searchParams.get("site") || searchParams.get("field");
-  
+
   const [sites, setSites] = useState<Site[]>([]);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [yieldData, setYieldData] = useState<any>(null);
   const [biomassData, setBiomassData] = useState<any>(null);
   const [forestTrends, setForestTrends] = useState<ForestTrends | null>(null);
+  const [fieldTrends, setFieldTrends] = useState<FieldTrends | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "history" | "recommendations" | "trends">("overview");
@@ -827,7 +830,7 @@ export default function AnalysisPage() {
     try {
       const data = await getSites();
       setSites(data);
-      
+
       // If site ID is provided in URL, select that site
       if (initialSiteId) {
         const siteFromUrl = data.find((s: Site) => s.id === Number(initialSiteId));
@@ -850,7 +853,7 @@ export default function AnalysisPage() {
     try {
       const site = sites.find(s => s.id === siteId) || selectedSite;
       const isForestSite = site?.site_type === "forest";
-      
+
       const [analysisData, yieldRes, biomassRes, trendsRes] = await Promise.all([
         getAnalysisHistory(siteId),
         isForestSite ? Promise.resolve(null) : getYieldPrediction(siteId).catch(() => null),
@@ -861,6 +864,12 @@ export default function AnalysisPage() {
       setYieldData(yieldRes);
       setBiomassData(biomassRes);
       setForestTrends(trendsRes);
+
+      // Fetch field trends if it's a field site
+      if (!isForestSite) {
+        const fieldTrendsRes = await getFieldTrends(siteId).catch(() => null);
+        setFieldTrends(fieldTrendsRes);
+      }
     } catch (error) {
       console.error("Failed to load site data:", error);
     }
@@ -887,28 +896,28 @@ export default function AnalysisPage() {
   };
 
   const latestAnalysis = analyses[0];
-  const latestComplete = analyses.find((a) => a.analysis_type === "COMPLETE");
+  const latestComplete = analyses.find((a) => a.analysis_type === "COMPLETE" || a.analysis_type === "FOREST");
   const latestNDVI = latestComplete || analyses.find((a) => a.analysis_type === "NDVI");
   const latestRVI = analyses.find((a) => a.analysis_type === "RVI");
   const latestMoisture = analyses.find((a) => a.analysis_type === "MOISTURE");
-  
+
   // Extract moisture from complete analysis if available
-  const moistureValue = latestComplete 
+  const moistureValue = latestComplete
     ? (latestComplete.data?.detailed_report as any)?.moisture_assessment?.estimated_moisture
     : latestMoisture?.mean_value;
-  
+
   // Extract yield and biomass from complete analysis
-  const yieldFromComplete = latestComplete 
+  const yieldFromComplete = latestComplete
     ? (latestComplete.data?.detailed_report as any)?.yield_prediction
     : null;
-  
+
   const biomassFromComplete = latestComplete
     ? (latestComplete.data?.detailed_report as any)?.biomass_analysis
     : null;
-  
+
   // Build analysis history from NDVI/COMPLETE analyses with proper filtering
   const analysisHistory = analyses
-    .filter((a) => (a.analysis_type === "NDVI" || a.analysis_type === "COMPLETE") && a.mean_value != null)
+    .filter((a) => (a.analysis_type === "NDVI" || a.analysis_type === "COMPLETE" || a.analysis_type === "FOREST") && a.mean_value != null)
     .slice(0, 10)
     .map((a) => a.mean_value! * 100) // Convert to health score percentage (0-100)
     .reverse(); // Oldest to newest for the chart
@@ -917,7 +926,7 @@ export default function AnalysisPage() {
   const getRecommendationsFromReport = () => {
     const latestWithReport = analyses.find(a => a.data?.detailed_report);
     const report = latestWithReport?.data?.detailed_report as any;
-    
+
     if (!report) {
       return { recommendations: [], problems: [], monitoring: [] };
     }
@@ -987,9 +996,9 @@ export default function AnalysisPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {selectedAnalysis && (
-        <DetailedReportPanel 
-          analysis={selectedAnalysis} 
-          onClose={() => setSelectedAnalysis(null)} 
+        <DetailedReportPanel
+          analysis={selectedAnalysis}
+          onClose={() => setSelectedAnalysis(null)}
         />
       )}
 
@@ -1000,7 +1009,7 @@ export default function AnalysisPage() {
             Monitor {isForest ? "forest health" : "crop health"} with real-time satellite data
           </p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={selectedSite?.id || ""}
@@ -1020,7 +1029,7 @@ export default function AnalysisPage() {
             href={`/dashboard/chat${selectedSite ? `?site=${selectedSite.id}` : ""}`}
             className={cn(
               "flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-xl font-medium hover:shadow-lg transition-all text-sm sm:text-base",
-              isForest 
+              isForest
                 ? "bg-gradient-to-r from-green-500 to-green-600 hover:shadow-green-500/25"
                 : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:shadow-emerald-500/25"
             )}
@@ -1057,8 +1066,8 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">Fire Risk</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900 capitalize">
-                        {(latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.fire_risk_level || 
-                         (latestComplete?.data as any)?.forest_data?.fire_risk_level || "—"}
+                        {(latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.fire_risk_level ||
+                          (latestComplete?.data as any)?.forest_data?.fire_risk_level || "—"}
                       </p>
                     </div>
                   </div>
@@ -1071,8 +1080,8 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">NDMI</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                        {((latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.ndmi_value ?? 
-                         (latestComplete?.data as any)?.forest_data?.ndmi)?.toFixed(2) || "—"}
+                        {((latestComplete?.data?.detailed_report as any)?.fire_risk_assessment?.ndmi_value ??
+                          (latestComplete?.data as any)?.forest_data?.ndmi)?.toFixed(2) || "—"}
                       </p>
                     </div>
                   </div>
@@ -1085,8 +1094,8 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">Carbon</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                        {((latestComplete?.data?.detailed_report as any)?.carbon_sequestration?.current_carbon_stock_t_ha ?? 
-                         (latestComplete?.data as any)?.forest_data?.carbon_estimate_tonnes_ha)?.toFixed(0) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                        {((latestComplete?.data?.detailed_report as any)?.carbon_sequestration?.current_carbon_stock_t_ha ??
+                          (latestComplete?.data as any)?.forest_data?.carbon_estimate_tonnes_ha)?.toFixed(0) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
                       </p>
                     </div>
                   </div>
@@ -1165,18 +1174,17 @@ export default function AnalysisPage() {
 
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="flex border-b border-slate-200/60 overflow-x-auto">
-                  {(isForest 
+                  {(isForest
                     ? ["overview", "trends", "history", "recommendations"] as const
-                    : ["overview", "history", "recommendations"] as const
+                    : ["overview", "trends", "history", "recommendations"] as const
                   ).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`flex-1 min-w-0 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                        activeTab === tab
-                          ? "text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                      }`}
+                      className={`flex-1 min-w-0 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
+                        ? "text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
                       {tab === "overview" && <><span className="hidden sm:inline">📊 </span>Overview</>}
                       {tab === "trends" && <><span className="hidden sm:inline">📈 </span>Trends</>}
@@ -1191,17 +1199,17 @@ export default function AnalysisPage() {
                     <div className="space-y-4 sm:space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                         <div className="flex justify-center">
-                          <HealthGauge 
-                            value={latestNDVI?.mean_value || 0.5} 
-                            label={isForest ? "Canopy Health" : "Vegetation Health"} 
+                          <HealthGauge
+                            value={latestNDVI?.mean_value || 0.5}
+                            label={isForest ? "Canopy Health" : "Vegetation Health"}
                           />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                           {analysisHistory.length > 0 ? (
-                            <BarChart 
-                              data={analysisHistory} 
-                              label={isForest ? "Forest Health Trend" : "Health Score Trend (Last Analyses)"} 
+                            <BarChart
+                              data={analysisHistory}
+                              label={isForest ? "Forest Health Trend" : "Health Score Trend (Last Analyses)"}
                               color={isForest ? "bg-teal-500" : "bg-emerald-500"}
                             />
                           ) : (
@@ -1212,54 +1220,12 @@ export default function AnalysisPage() {
                         </div>
                       </div>
 
-                      {/* Forest-specific quick stats */}
-                      {isForest && latestNDVI?.data && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                          <div className="p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-200/60">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-lg">🔥</span>
-                              <p className="text-xs text-slate-500">Fire Risk</p>
-                            </div>
-                            <p className="font-bold text-slate-900 capitalize">
-                              {(latestNDVI.data as any)?.fire_risk_level || "Unknown"}
-                            </p>
-                          </div>
-                          <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/60">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-lg">💧</span>
-                              <p className="text-xs text-slate-500">NDMI</p>
-                            </div>
-                            <p className="font-bold text-slate-900">
-                              {(latestNDVI.data as any)?.ndmi?.toFixed(3) || "—"}
-                            </p>
-                          </div>
-                          <div className="p-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200/60">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-lg">🌲</span>
-                              <p className="text-xs text-slate-500">Carbon Stock</p>
-                            </div>
-                            <p className="font-bold text-slate-900">
-                              {(latestNDVI.data as any)?.carbon_estimate_tonnes_ha?.toFixed(1) || "—"} t/ha
-                            </p>
-                          </div>
-                          <div className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border border-amber-200/60">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-lg">🌳</span>
-                              <p className="text-xs text-slate-500">Canopy Cover</p>
-                            </div>
-                            <p className="font-bold text-slate-900">
-                              {(latestNDVI.data as any)?.canopy_cover_percent?.toFixed(0) || "—"}%
-                            </p>
-                          </div>
-                        </div>
-                      )}
 
                       {latestNDVI?.interpretation && (
-                        <div className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${
-                          isForest 
-                            ? "bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200/60"
-                            : "bg-gradient-to-r from-emerald-50 to-cyan-50 border-emerald-200/60"
-                        }`}>
+                        <div className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${isForest
+                          ? "bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200/60"
+                          : "bg-gradient-to-r from-emerald-50 to-cyan-50 border-emerald-200/60"
+                          }`}>
                           <h4 className="font-medium text-slate-900 mb-1.5 sm:mb-2 text-sm sm:text-base">
                             {isForest ? "Latest Forest Analysis" : "Latest Analysis Interpretation"}
                           </h4>
@@ -1293,7 +1259,7 @@ export default function AnalysisPage() {
                         <div className="p-2.5 sm:p-3 bg-slate-50/80 rounded-lg sm:rounded-xl">
                           <p className="text-[10px] sm:text-xs text-slate-500">Last Update</p>
                           <p className="font-semibold text-slate-900 text-sm sm:text-base">
-                            {analyses[0]?.created_at 
+                            {analyses[0]?.created_at
                               ? new Date(analyses[0].created_at).toLocaleDateString()
                               : "Never"}
                           </p>
@@ -1341,15 +1307,15 @@ export default function AnalysisPage() {
                                   (analysis.mean_value || 0) >= 0.6
                                     ? "success"
                                     : (analysis.mean_value || 0) >= 0.4
-                                    ? "warning"
-                                    : "error"
+                                      ? "warning"
+                                      : "error"
                                 }
                               >
                                 {(analysis.mean_value || 0) >= 0.6
                                   ? "Good"
                                   : (analysis.mean_value || 0) >= 0.4
-                                  ? "Fair"
-                                  : "Low"}
+                                    ? "Fair"
+                                    : "Low"}
                               </Badge>
                             </div>
                           </button>
@@ -1388,17 +1354,16 @@ export default function AnalysisPage() {
                           </h4>
                           <div className="space-y-2 sm:space-y-3">
                             {recommendations.map((rec: any, i: number) => (
-                              <div key={i} className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${
-                                rec.priority === "low" 
-                                  ? "bg-emerald-50 border-emerald-200/60" 
-                                  : rec.priority === "medium"
+                              <div key={i} className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${rec.priority === "low"
+                                ? "bg-emerald-50 border-emerald-200/60"
+                                : rec.priority === "medium"
                                   ? "bg-blue-50 border-blue-200/60"
                                   : "bg-amber-50 border-amber-200/60"
-                              }`}>
+                                }`}>
                                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                                   <Badge variant={
-                                    rec.priority === "low" ? "success" : 
-                                    rec.priority === "medium" ? "warning" : "error"
+                                    rec.priority === "low" ? "success" :
+                                      rec.priority === "medium" ? "warning" : "error"
                                   } className="text-[10px] sm:text-xs">
                                     {rec.priority}
                                   </Badge>
@@ -1420,6 +1385,143 @@ export default function AnalysisPage() {
                     </div>
                   )}
 
+                  {activeTab === "trends" && selectedSite?.site_type === "field" && (
+                    <div className="space-y-4 sm:space-y-6">
+                      {!fieldTrends?.has_sufficient_data ? (
+                        <div className="text-center py-8 sm:py-12">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+                            <span className="text-3xl">📈</span>
+                          </div>
+                          <h3 className="font-semibold text-slate-900 mb-2">Trends Coming Soon</h3>
+                          <p className="text-slate-500 text-sm max-w-md mx-auto">
+                            {fieldTrends?.message || "Run more field analyses to see trends in vegetation health, crop yield, and biomass."}
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Overall Trend Banner */}
+                          <div className={`p-4 rounded-xl border ${fieldTrends.overall_trend === "improving"
+                            ? "bg-emerald-50 border-emerald-200"
+                            : fieldTrends.overall_trend === "declining"
+                              ? "bg-red-50 border-red-200"
+                              : "bg-slate-50 border-slate-200"
+                            }`}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-3xl">
+                                {fieldTrends.overall_trend === "improving" ? "📈" :
+                                  fieldTrends.overall_trend === "declining" ? "📉" : "➡️"}
+                              </span>
+                              <div>
+                                <h4 className="font-semibold text-slate-900 capitalize">
+                                  Field Health: {fieldTrends.overall_trend}
+                                </h4>
+                                <p className="text-sm text-slate-600">
+                                  Based on {fieldTrends.analyses.length} analyses
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Average Changes Summary */}
+                          {(fieldTrends.avg_ndvi_change !== null || fieldTrends.avg_yield_change !== null) && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                                <p className="text-xs text-slate-500 mb-1">Avg NDVI Change</p>
+                                <p className={`text-xl font-bold ${(fieldTrends.avg_ndvi_change || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                  {(fieldTrends.avg_ndvi_change || 0) >= 0 ? "+" : ""}{fieldTrends.avg_ndvi_change?.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">per analysis</p>
+                              </div>
+                              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                                <p className="text-xs text-slate-500 mb-1">Avg Yield Change</p>
+                                <p className={`text-xl font-bold ${(fieldTrends.avg_yield_change || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                  {(fieldTrends.avg_yield_change || 0) >= 0 ? "+" : ""}{fieldTrends.avg_yield_change?.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">per analysis</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Analysis History & Trends Table */}
+                          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                              <h4 className="font-semibold text-slate-900">Analysis History & Trends</h4>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full min-w-[600px]">
+                                <thead>
+                                  <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Date</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">NDVI</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Yield (t/ha)</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Biomass (t/ha)</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Moisture</th>
+                                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500">Change</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {fieldTrends.analyses.map((analysis, idx) => (
+                                    <tr key={analysis.analysis_id} className="hover:bg-slate-50">
+                                      <td className="px-4 py-3 font-medium text-slate-900">
+                                        {new Date(analysis.date).toLocaleDateString()}
+                                      </td>
+                                      <td className="px-4 py-3 text-emerald-600 font-medium">{analysis.ndvi.toFixed(3)}</td>
+                                      <td className="px-4 py-3 text-slate-600 font-medium">{analysis.yield_per_ha?.toFixed(1) || "—"}</td>
+                                      <td className="px-4 py-3 text-slate-600">{analysis.biomass_t_ha?.toFixed(1) || "—"}</td>
+                                      <td className="px-4 py-3 text-slate-600">{analysis.moisture_pct ? `${analysis.moisture_pct}%` : "—"}</td>
+                                      <td className="px-4 py-3">
+                                        {analysis.ndvi_change_pct !== null && analysis.ndvi_change_pct !== undefined ? (
+                                          <span className={`text-sm font-medium ${analysis.ndvi_change_pct >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                            {analysis.ndvi_change_pct >= 0 ? "+" : ""}{analysis.ndvi_change_pct.toFixed(1)}%
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-400 text-sm">baseline</span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Baseline Comparison */}
+                          {fieldTrends.baseline_comparison && (
+                            <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl p-4 border border-emerald-200">
+                              <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                                <span>📊</span> Baseline Comparison
+                              </h4>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <p className="text-slate-500">Baseline Date</p>
+                                  <p className="font-medium text-slate-900">
+                                    {fieldTrends.baseline_comparison.baseline_date
+                                      ? new Date(fieldTrends.baseline_comparison.baseline_date).toLocaleDateString()
+                                      : "N/A"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-slate-500">NDVI vs Baseline</p>
+                                  <p className={`font-medium ${(fieldTrends.baseline_comparison.ndvi_change_from_baseline_pct || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                    {(fieldTrends.baseline_comparison.ndvi_change_from_baseline_pct || 0) >= 0 ? "+" : ""}
+                                    {fieldTrends.baseline_comparison.ndvi_change_from_baseline_pct?.toFixed(1)}%
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-slate-500">Yield vs Baseline</p>
+                                  <p className={`font-medium ${(fieldTrends.baseline_comparison.yield_change_from_baseline_pct || 0) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                    {(fieldTrends.baseline_comparison.yield_change_from_baseline_pct || 0) >= 0 ? "+" : ""}
+                                    {fieldTrends.baseline_comparison.yield_change_from_baseline_pct?.toFixed(1)}%
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+
                   {activeTab === "trends" && isForest && (
                     <div className="space-y-4 sm:space-y-6">
                       {!forestTrends?.has_sufficient_data ? (
@@ -1435,17 +1537,16 @@ export default function AnalysisPage() {
                       ) : (
                         <>
                           {/* Overall Trend Banner */}
-                          <div className={`p-4 rounded-xl border ${
-                            forestTrends.overall_trend === "improving" 
-                              ? "bg-emerald-50 border-emerald-200" 
-                              : forestTrends.overall_trend === "declining"
+                          <div className={`p-4 rounded-xl border ${forestTrends.overall_trend === "improving"
+                            ? "bg-emerald-50 border-emerald-200"
+                            : forestTrends.overall_trend === "declining"
                               ? "bg-red-50 border-red-200"
                               : "bg-slate-50 border-slate-200"
-                          }`}>
+                            }`}>
                             <div className="flex items-center gap-3">
                               <span className="text-3xl">
-                                {forestTrends.overall_trend === "improving" ? "📈" : 
-                                 forestTrends.overall_trend === "declining" ? "📉" : "➡️"}
+                                {forestTrends.overall_trend === "improving" ? "📈" :
+                                  forestTrends.overall_trend === "declining" ? "📉" : "➡️"}
                               </span>
                               <div>
                                 <h4 className="font-semibold text-slate-900 capitalize">
@@ -1506,8 +1607,8 @@ export default function AnalysisPage() {
                                       <td className="px-4 py-3 text-slate-600">{analysis.canopy_cover_percent.toFixed(0)}%</td>
                                       <td className="px-4 py-3">
                                         <Badge variant={
-                                          analysis.fire_risk_level === "low" ? "success" : 
-                                          analysis.fire_risk_level === "medium" ? "warning" : "error"
+                                          analysis.fire_risk_level === "low" ? "success" :
+                                            analysis.fire_risk_level === "medium" ? "warning" : "error"
                                         }>
                                           {analysis.fire_risk_level}
                                         </Badge>
@@ -1538,7 +1639,7 @@ export default function AnalysisPage() {
                                 <div>
                                   <p className="text-slate-500">Baseline Date</p>
                                   <p className="font-medium text-slate-900">
-                                    {forestTrends.baseline_comparison.baseline_date 
+                                    {forestTrends.baseline_comparison.baseline_date
                                       ? new Date(forestTrends.baseline_comparison.baseline_date).toLocaleDateString()
                                       : "N/A"}
                                   </p>
@@ -1586,11 +1687,10 @@ export default function AnalysisPage() {
                   <button
                     onClick={() => handleRunAnalysis(isForest ? "FOREST" : "COMPLETE")}
                     disabled={analyzing !== null}
-                    className={`w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 ${
-                      isForest 
-                        ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-teal-500/25 hover:shadow-teal-500/40"
-                        : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25 hover:shadow-emerald-500/40"
-                    } text-white rounded-xl transition-all disabled:opacity-50 shadow-lg`}
+                    className={`w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 ${isForest
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-teal-500/25 hover:shadow-teal-500/40"
+                      : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                      } text-white rounded-xl transition-all disabled:opacity-50 shadow-lg`}
                   >
                     <span className="text-2xl sm:text-3xl">{analyzing ? "⏳" : isForest ? "🌲" : "🛰️"}</span>
                     <div className="text-left">
@@ -1600,7 +1700,7 @@ export default function AnalysisPage() {
                       </p>
                     </div>
                   </button>
-                  
+
                   {analyzing && (
                     <div className="flex items-center justify-center gap-2 py-2.5 sm:py-3 text-emerald-600 bg-emerald-50 rounded-lg sm:rounded-xl">
                       <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />

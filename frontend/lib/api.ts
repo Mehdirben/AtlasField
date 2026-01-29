@@ -194,19 +194,39 @@ export interface ForestTrends {
   overall_trend: "improving" | "stable" | "declining" | "unknown";
   avg_ndvi_change?: number;
   avg_carbon_change?: number;
-  baseline_comparison?: {
-    baseline_date?: string;
-    baseline_carbon_t_ha?: number;
-    baseline_canopy_cover?: number;
-    carbon_change_from_baseline_pct?: number;
-    canopy_change_from_baseline_pct?: number;
-  };
+  baseline_comparison?: any;
   has_sufficient_data: boolean;
   message?: string;
 }
 
-export const getForestTrends = async (siteId: number, limit: number = 10): Promise<ForestTrends> => {
-  const response = await api.get(`/analysis/${siteId}/forest-trends`, { params: { limit } });
+export interface FieldAnalysisData {
+  analysis_id: number;
+  date: string;
+  ndvi: number;
+  yield_per_ha?: number;
+  biomass_t_ha?: number;
+  moisture_pct?: number;
+  ndvi_change_pct?: number;
+  yield_change_pct?: number;
+}
+
+export interface FieldTrends {
+  analyses: FieldAnalysisData[];
+  overall_trend: "improving" | "stable" | "declining" | "unknown";
+  avg_ndvi_change?: number;
+  avg_yield_change?: number;
+  baseline_comparison?: any;
+  has_sufficient_data: boolean;
+  message?: string;
+}
+
+export const getForestTrends = async (siteId: number): Promise<ForestTrends> => {
+  const response = await api.get(`/analysis/${siteId}/forest-trends`);
+  return response.data;
+};
+
+export const getFieldTrends = async (siteId: number): Promise<FieldTrends> => {
+  const response = await api.get(`/analysis/${siteId}/field-trends`);
   return response.data;
 };
 

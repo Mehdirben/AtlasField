@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui";
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const initialSiteId = searchParams.get("site") || searchParams.get("field");
-  
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function ChatPage() {
     try {
       const histories = await getChatHistory(selectedSiteId ?? undefined);
       setChatHistories(histories);
-      
+
       // Load the most recent conversation if available
       if (histories.length > 0 && !activeHistoryId) {
         const latestHistory = histories[0];
@@ -151,11 +151,10 @@ export default function ChatPage() {
           {/* Site Selection */}
           <div className="space-y-2 mb-4">
             <button
-              className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${
-                selectedSiteId === null
+              className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === null
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                   : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
-              }`}
+                }`}
               onClick={() => { setSelectedSiteId(null); startNewChat(); }}
             >
               <span className="text-xl group-hover:scale-110 transition-transform">🌍</span>
@@ -178,11 +177,10 @@ export default function ChatPage() {
             {sites.map((site: Site) => (
               <button
                 key={site.id}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${
-                  selectedSiteId === site.id
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === site.id
                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                     : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
-                }`}
+                  }`}
                 onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
@@ -209,8 +207,8 @@ export default function ChatPage() {
                         site.fire_risk_level === "low"
                           ? "success"
                           : site.fire_risk_level === "moderate"
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                       className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
                     >
@@ -224,8 +222,8 @@ export default function ChatPage() {
                         site.latest_ndvi >= 0.6
                           ? "success"
                           : site.latest_ndvi >= 0.4
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                       className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
                     >
@@ -251,7 +249,7 @@ export default function ChatPage() {
                 + New
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 -mr-1">
               {chatHistories.length === 0 ? (
                 <p className="text-xs text-slate-400 text-center py-4">
@@ -262,20 +260,18 @@ export default function ChatPage() {
                   const firstMessage = history.messages[0]?.content || "New conversation";
                   const preview = firstMessage.length > 40 ? firstMessage.substring(0, 40) + "..." : firstMessage;
                   const siteName = sites.find((s: Site) => s.id === history.field_id)?.name || "General";
-                  
+
                   return (
                     <button
                       key={history.id}
                       onClick={() => selectChatHistory(history)}
-                      className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${
-                        activeHistoryId === history.id
+                      className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${activeHistoryId === history.id
                           ? "bg-emerald-50 border border-emerald-200"
                           : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
-                      }`}
+                        }`}
                     >
-                      <p className={`text-sm font-medium truncate ${
-                        activeHistoryId === history.id ? "text-emerald-700" : "text-slate-700"
-                      }`}>
+                      <p className={`text-sm font-medium truncate ${activeHistoryId === history.id ? "text-emerald-700" : "text-slate-700"
+                        }`}>
                         {preview}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
@@ -300,7 +296,7 @@ export default function ChatPage() {
         {/* Header */}
         <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <button 
+            <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="hidden lg:flex p-2 hover:bg-slate-100 rounded-xl transition-colors"
             >
@@ -370,11 +366,10 @@ export default function ChatPage() {
                   className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[80%] p-4 ${
-                      message.role === "user"
+                    className={`max-w-[80%] p-4 ${message.role === "user"
                         ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl rounded-br-md shadow-lg shadow-emerald-500/20"
                         : "bg-white/80 backdrop-blur border border-slate-200/60 rounded-2xl rounded-bl-md shadow-sm"
-                    }`}
+                      }`}
                   >
                     {message.role === "assistant" && (
                       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
@@ -384,9 +379,8 @@ export default function ChatPage() {
                     )}
                     <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
                     <p
-                      className={`text-xs mt-3 ${
-                        message.role === "user" ? "text-emerald-100" : "text-slate-400"
-                      }`}
+                      className={`text-xs mt-3 ${message.role === "user" ? "text-emerald-100" : "text-slate-400"
+                        }`}
                     >
                       {message.timestamp ? new Date(message.timestamp).toLocaleTimeString("en-US", {
                         hour: "2-digit",

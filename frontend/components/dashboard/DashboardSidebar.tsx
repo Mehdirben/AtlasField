@@ -81,7 +81,7 @@ export function DashboardSidebar() {
             <div className="w-1/3 h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" />
           </div>
           <Link
-            href="/dashboard/upgrade"
+            href="/dashboard/settings?tab=subscription"
             className="block w-full text-center py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200"
           >
             Upgrade to Pro

@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Badge, Button } from "@/components/ui";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"profile" | "notifications" | "subscription">("profile");
+
+  // Check for tab parameter in URL
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "subscription" || tab === "notifications" || tab === "profile") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
   const [saving, setSaving] = useState(false);
 
   const [notifications, setNotifications] = useState({

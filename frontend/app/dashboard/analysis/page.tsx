@@ -687,6 +687,21 @@ export default function AnalysisPage() {
   const latestNDVI = latestComplete || analyses.find((a) => a.analysis_type === "NDVI");
   const latestRVI = analyses.find((a) => a.analysis_type === "RVI");
   const latestMoisture = analyses.find((a) => a.analysis_type === "MOISTURE");
+  
+  // Extract moisture from complete analysis if available
+  const moistureValue = latestComplete 
+    ? (latestComplete.data?.detailed_report as any)?.moisture_assessment?.estimated_moisture
+    : latestMoisture?.mean_value;
+  
+  // Extract yield and biomass from complete analysis
+  const yieldFromComplete = latestComplete 
+    ? (latestComplete.data?.detailed_report as any)?.yield_prediction
+    : null;
+  
+  const biomassFromComplete = latestComplete
+    ? (latestComplete.data?.detailed_report as any)?.biomass_analysis
+    : null;
+  
   const analysisHistory = analyses
     .filter((a) => a.mean_value)
     .slice(0, 10)
@@ -823,7 +838,7 @@ export default function AnalysisPage() {
                 <div>
                   <p className="text-sm text-slate-500">Soil Moisture</p>
                   <p className="text-2xl font-bold text-slate-900">
-                    {latestMoisture?.mean_value ? `${(latestMoisture.mean_value * 100).toFixed(0)}%` : "—"}
+                    {moistureValue ? `${(moistureValue * 100).toFixed(0)}%` : "—"}
                   </p>
                 </div>
               </div>
@@ -836,7 +851,7 @@ export default function AnalysisPage() {
                 <div>
                   <p className="text-sm text-slate-500">Yield Prediction</p>
                   <p className="text-2xl font-bold text-slate-900">
-                    {yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-sm font-normal text-slate-400">t/ha</span>
+                    {yieldFromComplete?.predicted_yield_per_ha?.toFixed(1) || yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-sm font-normal text-slate-400">t/ha</span>
                   </p>
                 </div>
               </div>
@@ -849,7 +864,7 @@ export default function AnalysisPage() {
                 <div>
                   <p className="text-sm text-slate-500">Biomass</p>
                   <p className="text-2xl font-bold text-slate-900">
-                    {biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-sm font-normal text-slate-400">t/ha</span>
+                    {biomassFromComplete?.estimated_biomass_t_ha?.toFixed(1) || biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-sm font-normal text-slate-400">t/ha</span>
                   </p>
                 </div>
               </div>

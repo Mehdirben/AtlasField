@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { sendChatMessage, getFields, Field, ChatMessage } from "@/lib/api";
+import { sendChatMessage, getFields, getChatHistory, Field, ChatMessage, ChatHistory } from "@/lib/api";
 import { Badge } from "@/components/ui";
 
 export default function ChatPage() {
@@ -17,11 +17,19 @@ export default function ChatPage() {
     initialFieldId ? Number(initialFieldId) : null
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
+  const [activeHistoryId, setActiveHistoryId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadFields();
+    loadChatHistory();
   }, []);
+
+  // Load chat history when field changes
+  useEffect(() => {
+    loadChatHistory();
+  }, [selectedFieldId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -35,6 +43,32 @@ export default function ChatPage() {
       console.error("Failed to load fields:", error);
     }
   }
+
+  async function loadChatHistory() {
+    try {
+      const histories = await getChatHistory(selectedFieldId ?? undefined);
+      setChatHistories(histories);
+      
+      // Load the most recent conversation if available
+      if (histories.length > 0 && !activeHistoryId) {
+        const latestHistory = histories[0];
+        setActiveHistoryId(latestHistory.id);
+        setMessages(latestHistory.messages);
+      }
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  }
+
+  const selectChatHistory = (history: ChatHistory) => {
+    setActiveHistoryId(history.id);
+    setMessages(history.messages);
+  };
+
+  const startNewChat = () => {
+    setActiveHistoryId(null);
+    setMessages([]);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,6 +111,8 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
+      // Refresh chat history to update the list
+      loadChatHistory();
     }
   };
 
@@ -108,14 +144,14 @@ export default function ChatPage() {
           </div>
 
           {/* Field Selection */}
-          <div className="space-y-2 flex-1 overflow-y-auto pr-1 -mr-1">
+          <div className="space-y-2 mb-4">
             <button
               className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${
                 selectedFieldId === null
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                   : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
               }`}
-              onClick={() => setSelectedFieldId(null)}
+              onClick={() => { setSelectedFieldId(null); startNewChat(); }}
             >
               <span className="text-xl group-hover:scale-110 transition-transform">🌍</span>
               <div>
@@ -142,7 +178,7 @@ export default function ChatPage() {
                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                     : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                 }`}
-                onClick={() => setSelectedFieldId(field.id)}
+                onClick={() => { setSelectedFieldId(field.id); startNewChat(); }}
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">🗺️</span>
                 <div className="flex-1 min-w-0">
@@ -171,25 +207,61 @@ export default function ChatPage() {
             ))}
           </div>
 
-          {/* Selected Field Info */}
-          {selectedField && (
-            <div className="mt-4 p-4 bg-gradient-to-br from-emerald-50 to-cyan-50/50 rounded-xl border border-emerald-100">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">📊</span>
-                <h3 className="font-semibold text-slate-900">{selectedField.name}</h3>
+          {/* Chat History Section */}
+          <div className="border-t border-slate-200/60 pt-4 flex-1 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💬</span>
+                <h3 className="font-semibold text-slate-900 text-sm">Chat History</h3>
               </div>
-              {selectedField.crop_type && (
-                <p className="text-sm text-slate-600 flex items-center gap-2">
-                  <span>🌾</span> {selectedField.crop_type}
+              <button
+                onClick={startNewChat}
+                className="text-xs px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+              >
+                + New
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 -mr-1">
+              {chatHistories.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-4">
+                  No conversations yet
                 </p>
-              )}
-              {selectedField.area_hectares && (
-                <p className="text-sm text-slate-600 flex items-center gap-2">
-                  <span>📐</span> {selectedField.area_hectares.toFixed(1)} ha
-                </p>
+              ) : (
+                chatHistories.map((history) => {
+                  const firstMessage = history.messages[0]?.content || "New conversation";
+                  const preview = firstMessage.length > 40 ? firstMessage.substring(0, 40) + "..." : firstMessage;
+                  const fieldName = fields.find(f => f.id === history.field_id)?.name || "General";
+                  
+                  return (
+                    <button
+                      key={history.id}
+                      onClick={() => selectChatHistory(history)}
+                      className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${
+                        activeHistoryId === history.id
+                          ? "bg-emerald-50 border border-emerald-200"
+                          : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
+                      }`}
+                    >
+                      <p className={`text-sm font-medium truncate ${
+                        activeHistoryId === history.id ? "text-emerald-700" : "text-slate-700"
+                      }`}>
+                        {preview}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-slate-400">
+                          {new Date(history.updated_at).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs px-1.5 py-0.5 bg-slate-200/60 rounded text-slate-500">
+                          {fieldName}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
               )}
             </div>
-          )}
+          </div>
         </div>
       </aside>
 

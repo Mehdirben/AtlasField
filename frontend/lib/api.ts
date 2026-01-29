@@ -132,12 +132,33 @@ export interface ChatMessage {
   timestamp?: string;
 }
 
+export interface ChatHistory {
+  id: number;
+  field_id: number | null;
+  messages: ChatMessage[];
+  created_at: string;
+  updated_at: string;
+}
+
 export const sendChatMessage = async (
   message: string,
   fieldId?: number
 ): Promise<{ response: string; field_context?: Record<string, unknown> }> => {
   const response = await api.post("/chat", { message, field_id: fieldId });
   return response.data;
+};
+
+export const getChatHistory = async (
+  fieldId?: number
+): Promise<ChatHistory[]> => {
+  const response = await api.get("/chat/history", {
+    params: fieldId !== undefined ? { field_id: fieldId } : {},
+  });
+  return response.data;
+};
+
+export const deleteChatHistory = async (historyId: number): Promise<void> => {
+  await api.delete(`/chat/history/${historyId}`);
 };
 
 // Alerts

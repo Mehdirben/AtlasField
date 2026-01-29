@@ -702,11 +702,13 @@ export default function AnalysisPage() {
     ? (latestComplete.data?.detailed_report as any)?.biomass_analysis
     : null;
   
+  // Build analysis history from NDVI/COMPLETE analyses with proper filtering
   const analysisHistory = analyses
-    .filter((a) => a.mean_value)
+    .filter((a) => (a.analysis_type === "NDVI" || a.analysis_type === "COMPLETE") && a.mean_value != null)
     .slice(0, 10)
-    .reverse()
-    .map((a) => a.mean_value!);
+    .map((a) => a.mean_value! * 100) // Convert to health score percentage (0-100)
+    .reverse(); // Oldest to newest for the chart
+
 
   const getRecommendationsFromReport = () => {
     const latestWithReport = analyses.find(a => a.data?.detailed_report);

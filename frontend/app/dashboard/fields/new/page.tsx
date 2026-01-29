@@ -91,29 +91,29 @@ export default function NewFieldPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">New Field</h1>
-        <p className="text-slate-500 mt-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">New Field</h1>
+        <p className="text-sm sm:text-base text-slate-500 mt-1">
           Draw your field on the map and fill in the information
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Map Section */}
         <div className="xl:col-span-2">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden h-full">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="font-semibold text-slate-900 flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/25">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden h-full">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900 flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                <span className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-emerald-500/25">
                   1
                 </span>
                 Draw your field boundaries
               </h2>
             </div>
-            <div className="p-6">
-              <div className="h-[500px] rounded-xl overflow-hidden border border-slate-200/60">
+            <div className="p-3 sm:p-6">
+              <div className="h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg sm:rounded-xl overflow-hidden border border-slate-200/60">
                 <FieldMap
                   editable={true}
                   onPolygonComplete={handlePolygonComplete}
@@ -134,17 +134,17 @@ export default function NewFieldPage() {
 
         {/* Form Section */}
         <div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="font-semibold text-slate-900 flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/25">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900 flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                <span className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-emerald-500/25">
                   2
                 </span>
                 Field information
               </h2>
             </div>
-            <div className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-4 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {error && (
                   <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-200/60">
                     {error}

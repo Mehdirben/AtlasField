@@ -13,12 +13,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { href: "/dashboard", icon: DashboardIcon, label: "Dashboard", exact: true },
-  { href: "/dashboard/fields", icon: MapIcon, label: "My Fields" },
-  { href: "/dashboard/analysis", icon: SatelliteIcon, label: "Analysis" },
-  { href: "/dashboard/chat", icon: ChatIcon, label: "AI Assistant" },
-  { href: "/dashboard/alerts", icon: BellIcon, label: "Alerts" },
-  { href: "/dashboard/settings", icon: SettingsIcon, label: "Settings" },
+  { href: "/dashboard", icon: DashboardIcon, label: "Dashboard", exact: true, mobileLabel: "Home" },
+  { href: "/dashboard/fields", icon: MapIcon, label: "My Fields", mobileLabel: "Fields" },
+  { href: "/dashboard/analysis", icon: SatelliteIcon, label: "Analysis", mobileLabel: "Analysis" },
+  { href: "/dashboard/chat", icon: ChatIcon, label: "AI Assistant", mobileLabel: "Chat" },
+  { href: "/dashboard/alerts", icon: BellIcon, label: "Alerts", mobileLabel: "Alerts" },
+  { href: "/dashboard/settings", icon: SettingsIcon, label: "Settings", mobileLabel: "Settings" },
 ];
 
 export function DashboardSidebar() {
@@ -30,7 +30,9 @@ export function DashboardSidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 h-[calc(100vh-64px)] sticky top-16">
+    <>
+    {/* Desktop Sidebar */}
+    <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 h-[calc(100vh-64px)] sticky top-16">
       {/* Decorative gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-transparent pointer-events-none" />
       
@@ -67,7 +69,7 @@ export function DashboardSidebar() {
       </nav>
 
       <div className="p-4 relative">
-        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-cyan-500 rounded-2xl p-5 shadow-lg shadow-emerald-500/20">
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-cyan-500 rounded-2xl p-4 lg:p-5 shadow-lg shadow-emerald-500/20">
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -79,11 +81,11 @@ export function DashboardSidebar() {
               </span>
               <span className="text-white/80 text-xs">1/3 fields</span>
             </div>
-            <p className="text-white font-bold text-lg mb-1">Free Plan</p>
-            <p className="text-emerald-100 text-sm mb-4">Upgrade for unlimited access</p>
+            <p className="text-white font-bold text-base lg:text-lg mb-1">Free Plan</p>
+            <p className="text-emerald-100 text-xs lg:text-sm mb-4">Upgrade for unlimited access</p>
             <Link
               href="/dashboard/settings?tab=subscription"
-              className="block w-full text-center py-2.5 bg-white text-emerald-600 text-sm font-semibold rounded-xl hover:bg-emerald-50 hover:shadow-lg transition-all duration-200"
+              className="block w-full text-center py-2 lg:py-2.5 bg-white text-emerald-600 text-sm font-semibold rounded-xl hover:bg-emerald-50 hover:shadow-lg transition-all duration-200"
             >
               Upgrade to Pro
             </Link>
@@ -91,5 +93,30 @@ export function DashboardSidebar() {
         </div>
       </div>
     </aside>
+
+    {/* Mobile Bottom Navigation */}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 px-2 py-2 safe-area-inset-bottom">
+      <div className="flex items-center justify-around">
+        {menuItems.slice(0, 5).map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px]",
+              isActive(item)
+                ? "text-emerald-600 bg-emerald-50"
+                : "text-slate-500 hover:text-slate-700"
+            )}
+          >
+            <item.icon className={cn(
+              "w-5 h-5",
+              isActive(item) && "scale-110"
+            )} />
+            <span className="text-[10px] font-medium">{item.mobileLabel}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
+    </>
   );
 }

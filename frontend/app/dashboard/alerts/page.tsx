@@ -110,22 +110,22 @@ export default function AlertsPage() {
   const groupedAlerts = groupAlertsByDate(alerts);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Alerts</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Alerts</h1>
+          <p className="text-sm sm:text-base text-slate-500 mt-1">
             {unreadCount > 0
               ? `${unreadCount} unread alert${unreadCount > 1 ? "s" : ""}`
               : "All alerts are read"}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="inline-flex bg-white/80 backdrop-blur-sm rounded-xl p-1.5 border border-slate-200/60 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="inline-flex bg-white/80 backdrop-blur-sm rounded-xl p-1 sm:p-1.5 border border-slate-200/60 shadow-sm">
             <button
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === "all"
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -135,7 +135,7 @@ export default function AlertsPage() {
               All
             </button>
             <button
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === "unread"
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -149,9 +149,9 @@ export default function AlertsPage() {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="px-4 py-2.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors border border-emerald-200"
+              className="px-4 py-2 sm:py-2.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors border border-emerald-200 text-center"
             >
-              Mark all as read
+              Mark all read
             </button>
           )}
         </div>

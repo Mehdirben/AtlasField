@@ -126,10 +126,10 @@ export default function ChatPage() {
   ];
 
   return (
-    <div className="flex h-[calc(100vh-64px)] -m-4 md:-m-6 lg:-m-8">
-      {/* Context Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden`}>
-        <div className="w-80 h-full bg-white/80 backdrop-blur-xl border-r border-slate-200/60 p-5 flex flex-col">
+    <div className="flex h-[calc(100vh-64px)] -m-3 sm:-m-4 md:-m-6 lg:-m-8">
+      {/* Context Sidebar - Hidden on mobile */}
+      <aside className={`hidden lg:block ${sidebarOpen ? 'lg:w-80' : 'lg:w-0'} transition-all duration-300 overflow-hidden`}>
+        <div className="w-80 h-full bg-white/80 backdrop-blur-xl border-r border-slate-200/60 p-4 lg:p-5 flex flex-col">
           {/* Header */}
           <div className="mb-5">
             <div className="flex items-center gap-3 mb-2">
@@ -268,27 +268,38 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 min-w-0">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+              className="hidden lg:flex p-2 hover:bg-slate-100 rounded-xl transition-colors"
             >
               <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <span className="text-2xl">🤖</span> AI Assistant
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span className="text-xl sm:text-2xl">🤖</span> <span className="hidden sm:inline">AI</span> Assistant
               </h1>
-              <p className="text-sm text-slate-500">
-                Ask questions about your crops and get personalized advice
+              <p className="text-xs sm:text-sm text-slate-500 truncate hidden sm:block">
+                Ask questions about your crops
               </p>
             </div>
           </div>
+          {/* Mobile field selector */}
+          <select
+            value={selectedFieldId || ""}
+            onChange={(e) => { setSelectedFieldId(e.target.value ? Number(e.target.value) : null); startNewChat(); }}
+            className="lg:hidden px-2 py-1.5 text-sm bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 max-w-[120px] truncate"
+          >
+            <option value="">General</option>
+            {fields.map((field) => (
+              <option key={field.id} value={field.id}>{field.name}</option>
+            ))}
+          </select>
           {selectedField && (
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-100">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-100">
               <span className="text-sm">🎯</span>
               <span className="text-sm font-medium text-emerald-700">{selectedField.name}</span>
             </div>

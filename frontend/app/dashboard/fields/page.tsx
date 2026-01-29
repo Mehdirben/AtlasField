@@ -68,28 +68,28 @@ export default function FieldsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Fields</h1>
-          <p className="text-slate-500 mt-1">Manage and monitor all your agricultural fields</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">My Fields</h1>
+          <p className="text-sm sm:text-base text-slate-500 mt-1">Manage and monitor your agricultural fields</p>
         </div>
         <Link
           href="/dashboard/fields/new"
-          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200"
+          className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200 text-center text-sm sm:text-base"
         >
           + New Field
         </Link>
       </div>
 
       {/* Map and List Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Map */}
-        <div className="lg:col-span-2 h-[600px] bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
+        <div className="lg:col-span-2 h-[300px] sm:h-[450px] lg:h-[600px] bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
           <FieldMap fields={fields} onFieldClick={handleFieldClick} zoom={fields.length > 0 ? 8 : 6} />
         </div>
 
         {/* Fields List */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-5 h-[600px] flex flex-col shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-4 sm:p-5 max-h-[400px] lg:h-[600px] lg:max-h-none flex flex-col shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">

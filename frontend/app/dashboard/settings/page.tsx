@@ -84,28 +84,28 @@ export default function SettingsPage() {
   ] as const;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500 mt-1">Manage your account and preferences</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Settings</h1>
+        <p className="text-sm sm:text-base text-slate-500 mt-1">Manage your account and preferences</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Tabs */}
-        <nav className="lg:w-64 flex lg:flex-col gap-2 bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-slate-200/60 shadow-sm h-fit">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+        {/* Sidebar Tabs - Horizontal on mobile, vertical on desktop */}
+        <nav className="lg:w-56 flex lg:flex-col gap-1 sm:gap-2 bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1.5 sm:p-2 border border-slate-200/60 shadow-sm h-fit overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-left transition-all whitespace-nowrap text-sm sm:text-base ${
                 activeTab === tab.id
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium shadow-lg shadow-emerald-500/25"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              <span className="text-xl">{tab.icon}</span>
-              <span>{tab.label}</span>
+              <span className="text-lg sm:text-xl">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </nav>

@@ -44,36 +44,36 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500 mt-1">Welcome back! Here's an overview of your fields.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm sm:text-base text-slate-500 mt-1">Welcome back! Here's an overview of your fields.</p>
         </div>
         <Link
           href="/dashboard/fields/new"
-          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200"
+          className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-200 text-center text-sm sm:text-base"
         >
           + Add Field
         </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {[
           { icon: "🗺️", value: fields.length, label: "Fields", color: "from-blue-500 to-blue-600" },
-          { icon: "📐", value: totalArea.toFixed(1), label: "Total Hectares", color: "from-purple-500 to-purple-600" },
-          { icon: "✅", value: healthyFields, label: "Healthy Fields", color: "from-emerald-500 to-emerald-600" },
-          { icon: "⚠️", value: fieldsNeedingAttention, label: "Need Attention", color: "from-amber-500 to-amber-600" },
-          { icon: "🔔", value: alerts.length, label: "Unread Alerts", color: "from-red-500 to-red-600" },
+          { icon: "📐", value: totalArea.toFixed(1), label: "Hectares", color: "from-purple-500 to-purple-600" },
+          { icon: "✅", value: healthyFields, label: "Healthy", color: "from-emerald-500 to-emerald-600" },
+          { icon: "⚠️", value: fieldsNeedingAttention, label: "Attention", color: "from-amber-500 to-amber-600" },
+          { icon: "🔔", value: alerts.length, label: "Alerts", color: "from-red-500 to-red-600" },
         ].map((stat, i) => (
-          <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
-                <span className="text-xl text-white drop-shadow">{stat.icon}</span>
+          <div key={i} className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg shrink-0`}>
+                <span className="text-base sm:text-xl text-white drop-shadow">{stat.icon}</span>
               </div>
-              <div>
-                <span className="block text-2xl font-bold text-slate-900">{stat.value}</span>
-                <span className="text-sm text-slate-500">{stat.label}</span>
+              <div className="min-w-0">
+                <span className="block text-lg sm:text-2xl font-bold text-slate-900">{stat.value}</span>
+                <span className="text-xs sm:text-sm text-slate-500 truncate block">{stat.label}</span>
               </div>
             </div>
           </div>
@@ -82,24 +82,24 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-3 gap-4">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { href: "/dashboard/fields/new", icon: "➕", label: "New Field", desc: "Add a field to monitor" },
-            { href: "/dashboard/analysis", icon: "🛰️", label: "Run Analysis", desc: "Analyze satellite data" },
+            { href: "/dashboard/analysis", icon: "🛰️", label: "Analysis", desc: "Analyze satellite data" },
             { href: "/dashboard/chat", icon: "💬", label: "Ask AI", desc: "Get AI-powered advice" },
           ].map((action) => (
             <Link
               key={action.href}
               href={action.href}
-              className="group flex flex-col items-center gap-3 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 hover:border-emerald-300 hover:bg-emerald-50/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-200"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-6 bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 hover:border-emerald-300 hover:bg-emerald-50/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-200"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center group-hover:from-emerald-100 group-hover:to-emerald-50 transition-colors">
-                <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center group-hover:from-emerald-100 group-hover:to-emerald-50 transition-colors">
+                <span className="text-lg sm:text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
               </div>
               <div className="text-center">
-                <span className="block font-semibold text-slate-900 group-hover:text-emerald-700">{action.label}</span>
-                <span className="text-xs text-slate-500">{action.desc}</span>
+                <span className="block text-sm sm:text-base font-semibold text-slate-900 group-hover:text-emerald-700">{action.label}</span>
+                <span className="hidden sm:block text-xs text-slate-500">{action.desc}</span>
               </div>
             </Link>
           ))}
@@ -130,7 +130,7 @@ export default function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {fields.slice(0, 4).map((field) => (
               <Link
                 key={field.id}

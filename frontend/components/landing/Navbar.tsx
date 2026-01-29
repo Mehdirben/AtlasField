@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui";
 import { ArrowRightIcon, MenuIcon, CloseIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ const navLinks = [
 ];
 
 export function Navbar() {
+  const { data: session } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -62,16 +64,25 @@ export function Navbar() {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
-          >
-            Log In
-          </Link>
-          <Button href="/register" size="sm">
-            Get Started
-            <ArrowRightIcon className="w-4 h-4" />
-          </Button>
+          {session ? (
+            <Button href="/dashboard" size="sm">
+              Dashboard
+              <ArrowRightIcon className="w-4 h-4" />
+            </Button>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
+              >
+                Log In
+              </Link>
+              <Button href="/register" size="sm">
+                Get Started
+                <ArrowRightIcon className="w-4 h-4" />
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -103,20 +114,32 @@ export function Navbar() {
             </a>
           ))}
           <hr className="my-2 border-slate-100" />
-          <Link
-            href="/login"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 rounded-xl transition-all"
-          >
-            Log In
-          </Link>
-          <Link
-            href="/register"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-4 py-3 text-center font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-xl"
-          >
-            Get Started
-          </Link>
+          {session ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 text-center font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-xl"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 rounded-xl transition-all"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 text-center font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-xl"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>

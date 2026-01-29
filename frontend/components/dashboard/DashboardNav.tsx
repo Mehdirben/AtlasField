@@ -18,7 +18,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
         <button className="md:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors">
           <MenuIcon className="w-5 h-5 text-slate-600" />
         </button>
-        <Link href="/dashboard" className="flex items-center gap-2.5 font-bold text-lg group">
+        <Link href="/" className="flex items-center gap-2.5 font-bold text-lg group">
           <span className="text-2xl group-hover:scale-110 transition-transform">🛰️</span>
           <span className="hidden sm:inline bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
             AtlasField

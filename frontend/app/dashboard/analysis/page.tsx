@@ -112,34 +112,36 @@ function DetailedReportPanel({
   
   if (!report) {
     return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-slate-900">Analysis Report</h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">✕</button>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="p-6 border-b border-slate-100">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-900">Analysis Report</h2>
+              <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div className="text-center py-8 text-slate-500">
-            <p>Detailed report not available for this analysis.</p>
-            <p className="text-sm mt-2">Run a new analysis to get detailed reports.</p>
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-slate-600">Detailed report not available for this analysis.</p>
+            <p className="text-sm text-slate-400 mt-1">Run a new analysis to get detailed reports.</p>
           </div>
-          <div className="mt-4 p-4 bg-slate-50 rounded-xl">
-            <h3 className="font-medium text-slate-900 mb-2">Basic Information</h3>
+          <div className="p-6 bg-slate-50 rounded-b-3xl">
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-slate-500">Type:</span>{" "}
-                <span className="font-medium">{analysis.analysis_type === "COMPLETE" ? "Complete Analysis" : analysis.analysis_type}</span>
+              <div className="bg-white p-3 rounded-xl">
+                <span className="text-slate-400 text-xs">Type</span>
+                <p className="font-medium text-slate-900">{analysis.analysis_type === "COMPLETE" ? "Complete Analysis" : analysis.analysis_type}</p>
               </div>
-              <div>
-                <span className="text-slate-500">Mean Value:</span>{" "}
-                <span className="font-medium">{analysis.mean_value?.toFixed(3) || "—"}</span>
-              </div>
-              <div>
-                <span className="text-slate-500">Date:</span>{" "}
-                <span className="font-medium">{new Date(analysis.created_at).toLocaleString()}</span>
-              </div>
-              <div>
-                <span className="text-slate-500">Interpretation:</span>{" "}
-                <span className="font-medium">{analysis.interpretation || "—"}</span>
+              <div className="bg-white p-3 rounded-xl">
+                <span className="text-slate-400 text-xs">Date</span>
+                <p className="font-medium text-slate-900">{new Date(analysis.created_at).toLocaleDateString()}</p>
               </div>
             </div>
           </div>
@@ -148,463 +150,440 @@ function DetailedReportPanel({
     );
   }
 
+  const healthScore = report.summary?.overall_health_score ?? 0;
+  const healthColor = healthScore >= 70 ? 'emerald' : healthScore >= 40 ? 'amber' : 'red';
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-slate-50 rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+        
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-2xl">
+        <div className="bg-white px-8 py-6 border-b border-slate-200/80">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-bold text-slate-900">
-                {report.summary?.index_name || `${analysis.analysis_type.toUpperCase()} Analysis Report`}
+                {report.summary?.index_name || "Complete Field Analysis"}
               </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                {report.metadata?.field_name} • {new Date(analysis.created_at).toLocaleString()}
-              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-sm text-slate-500">{report.metadata?.field_name}</span>
+                <span className="w-1 h-1 bg-slate-300 rounded-full" />
+                <span className="text-sm text-slate-500">{report.metadata?.crop_type}</span>
+                <span className="w-1 h-1 bg-slate-300 rounded-full" />
+                <span className="text-sm text-slate-500">{new Date(analysis.created_at).toLocaleDateString()}</span>
+              </div>
             </div>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl">✕</button>
+            <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Summary Section */}
-          <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-xl p-5 border border-slate-200/60">
-            <h3 className="font-semibold text-slate-900 mb-3">📊 Summary</h3>
-            <p className="text-sm text-slate-600 mb-4">{report.summary?.description}</p>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-8">
+          <div className="max-w-4xl mx-auto space-y-8">
             
-            {report.summary?.overall_health_score !== undefined ? (
-              // Complete analysis summary
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                  <p className="text-xs text-slate-500">Overall Health Score</p>
-                  <p className={`text-4xl font-bold ${
-                    report.summary.overall_health_score >= 60 ? 'text-green-600' :
-                    report.summary.overall_health_score >= 40 ? 'text-amber-600' : 'text-red-600'
-                  }`}>{report.summary.overall_health_score}%</p>
-                  <Badge variant={
-                    report.summary.health_status === "Excellent" || report.summary.health_status === "Good" ? "success" :
-                    report.summary.health_status === "Moderate" ? "warning" : "error"
-                  }>
-                    {report.summary.health_status}
-                  </Badge>
-                </div>
-              </div>
-            ) : (
-              // Standard analysis summary
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <p className="text-xs text-slate-500">Mean Value</p>
-                  <p className="text-xl font-bold text-slate-900">{report.summary?.mean_value?.toFixed(3)}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <p className="text-xs text-slate-500">Min Value</p>
-                  <p className="text-xl font-bold text-slate-900">{report.summary?.min_value?.toFixed(3)}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <p className="text-xs text-slate-500">Max Value</p>
-                  <p className="text-xl font-bold text-slate-900">{report.summary?.max_value?.toFixed(3)}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <p className="text-xs text-slate-500">Variability</p>
-                  <p className="text-xl font-bold text-slate-900">{report.summary?.variability?.toFixed(3)}</p>
-                </div>
-              </div>
-            )}
-
-            {report.summary?.health_status && !report.summary?.overall_health_score && (
-              <div className="mt-4 flex items-center gap-3">
-                <span className="text-sm text-slate-500">Health Status:</span>
-                <Badge variant={
-                  report.summary.health_status === "Excellent" || report.summary.health_status === "Good" ? "success" :
-                  report.summary.health_status === "Moderate" ? "warning" : "error"
-                }>
-                  {report.summary.health_status}
-                </Badge>
-                {report.summary.health_score && (
-                  <span className="text-sm font-medium text-slate-700">({report.summary.health_score}%)</span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Vegetation Health - Complete Analysis */}
-          {report.vegetation_health && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🌿 Vegetation Health</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-slate-500">NDVI Mean</p>
-                  <p className="text-xl font-bold text-green-700">{report.vegetation_health.ndvi_mean?.toFixed(3)}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Vegetation Density</p>
-                  <p className="font-medium text-slate-900">{report.vegetation_health.vegetation_density}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Chlorophyll Activity</p>
-                  <p className="font-medium text-slate-900">{report.vegetation_health.chlorophyll_activity}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Growth Stage</p>
-                  <p className="font-medium text-slate-900">{report.vegetation_health.growth_stage}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Health Status</p>
-                  <Badge variant={
-                    report.vegetation_health.health_status === "Excellent" || report.vegetation_health.health_status === "Good" ? "success" :
-                    report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
-                  }>
-                    {report.vegetation_health.health_status}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Biomass Analysis - Complete Analysis */}
-          {report.biomass_analysis && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🌱 Biomass Analysis</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200/60">
-                  <p className="text-xs text-slate-500">Estimated Biomass</p>
-                  <p className="text-2xl font-bold text-green-700">{report.biomass_analysis.estimated_biomass_t_ha}</p>
-                  <p className="text-sm text-green-600">tonnes/hectare</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Biomass Level</p>
-                  <p className="font-medium text-slate-900">{report.biomass_analysis.biomass_level}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Canopy Structure</p>
-                  <p className="font-medium text-slate-900">{report.biomass_analysis.canopy_structure}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg col-span-2 md:col-span-3">
-                  <p className="text-xs text-slate-500">Carbon Content</p>
-                  <p className="font-medium text-slate-900">{report.biomass_analysis.carbon_content_t_ha} tonnes CO₂/ha</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Moisture Assessment - Complete Analysis */}
-          {report.moisture_assessment && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">💧 Moisture Assessment</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Moisture Status</p>
-                  <Badge variant={
-                    report.moisture_assessment.moisture_status === "Optimal" || report.moisture_assessment.moisture_status === "Good" ? "success" :
-                    report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
-                  }>
-                    {report.moisture_assessment.moisture_status}
-                  </Badge>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Irrigation Need</p>
-                  <p className="font-medium text-slate-900">{report.moisture_assessment.irrigation_need}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Water Stress Risk</p>
-                  <Badge variant={
-                    report.moisture_assessment.water_stress_risk === "Low" ? "success" :
-                    report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
-                  }>
-                    {report.moisture_assessment.water_stress_risk}
-                  </Badge>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Estimated Moisture</p>
-                  <p className="font-medium text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Yield Prediction - Complete Analysis */}
-          {report.yield_prediction && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🌾 Yield Prediction</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200/60 text-center">
-                  <p className="text-xs text-slate-500">Predicted Total Yield</p>
-                  <p className="text-3xl font-bold text-amber-700">{report.yield_prediction.total_predicted_yield_tonnes}</p>
-                  <p className="text-sm text-amber-600">tonnes</p>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Per Hectare</span>
-                    <span className="font-medium text-slate-900">{report.yield_prediction.predicted_yield_per_ha} t/ha</span>
+            {/* Key Metrics Overview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {report.summary?.overall_health_score !== undefined && (
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <span className="text-emerald-600 text-sm">❤️</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Health</span>
                   </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Crop Type</span>
-                    <span className="font-medium text-slate-900">{report.yield_prediction.crop_type}</span>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Yield Potential</span>
-                    <Badge variant={
-                      report.yield_prediction.yield_potential === "High" ? "success" :
-                      report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
-                    }>
-                      {report.yield_prediction.yield_potential}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Confidence</span>
-                    <span className="font-medium text-slate-900">{report.yield_prediction.confidence_level}</span>
-                  </div>
+                  <p className={`text-3xl font-bold text-${healthColor}-600`}>{healthScore}%</p>
+                  <p className="text-sm text-slate-500 mt-1">{report.summary.health_status}</p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Environmental Factors - Complete Analysis */}
-          {report.environmental_factors && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🌤️ Environmental Factors</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Data Quality</p>
-                  <p className="font-medium text-slate-900">{report.environmental_factors.data_quality}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Cloud Coverage</p>
-                  <p className="font-medium text-slate-900">{report.environmental_factors.cloud_coverage_percent}%</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Satellite Data</p>
-                  <p className="font-medium text-slate-900">{report.environmental_factors.satellite_data_age}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-500">Season</p>
-                  <p className="font-medium text-slate-900 text-sm">{report.environmental_factors.seasonal_context}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Health Assessment */}
-          {report.health_assessment && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🌱 Health Assessment</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {report.health_assessment.overall_health && (
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Overall Health</span>
-                    <span className="font-medium text-slate-900">{report.health_assessment.overall_health}</span>
+              )}
+              
+              {report.vegetation_health?.ndvi_mean !== undefined && (
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                      <span className="text-green-600 text-sm">🌿</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">NDVI</span>
                   </div>
-                )}
-                {report.health_assessment.vegetation_density && (
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Vegetation Density</span>
-                    <span className="font-medium text-slate-900">{report.health_assessment.vegetation_density}</span>
+                  <p className="text-3xl font-bold text-slate-900">{report.vegetation_health.ndvi_mean.toFixed(2)}</p>
+                  <p className="text-sm text-slate-500 mt-1">{report.vegetation_health.vegetation_density}</p>
+                </div>
+              )}
+              
+              {report.moisture_assessment?.estimated_moisture !== undefined && (
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 text-sm">💧</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Moisture</span>
                   </div>
-                )}
-                {report.health_assessment.chlorophyll_activity && (
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Chlorophyll Activity</span>
-                    <span className="font-medium text-slate-900">{report.health_assessment.chlorophyll_activity}</span>
+                  <p className="text-3xl font-bold text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</p>
+                  <p className="text-sm text-slate-500 mt-1">{report.moisture_assessment.moisture_status}</p>
+                </div>
+              )}
+              
+              {report.yield_prediction?.predicted_yield_per_ha !== undefined && (
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                      <span className="text-amber-600 text-sm">🌾</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Yield</span>
                   </div>
-                )}
-                {report.health_assessment.growth_stage_estimate && (
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-lg">
-                    <span className="text-slate-600">Growth Stage</span>
-                    <span className="font-medium text-slate-900">{report.health_assessment.growth_stage_estimate}</span>
-                  </div>
-                )}
-              </div>
-
-              {report.health_assessment.stress_indicators && report.health_assessment.stress_indicators.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-slate-600 mb-2">Stress Indicators:</p>
-                  <ul className="space-y-1">
-                    {report.health_assessment.stress_indicators.map((indicator: string, i: number) => (
-                      <li key={i} className="text-sm text-slate-700 flex items-center gap-2">
-                        <span className={indicator.includes("No significant") ? "text-green-500" : "text-amber-500"}>
-                          {indicator.includes("No significant") ? "✓" : "⚡"}
-                        </span>
-                        {indicator}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-3xl font-bold text-slate-900">{report.yield_prediction.predicted_yield_per_ha}</p>
+                  <p className="text-sm text-slate-500 mt-1">tonnes/ha</p>
                 </div>
               )}
             </div>
-          )}
 
-          {/* Spatial Analysis */}
-          {report.spatial_analysis && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3">🗺️ Spatial Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {report.spatial_analysis.uniformity_score !== undefined && (
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200/60">
-                    <p className="text-sm text-slate-600">Field Uniformity</p>
-                    <p className="text-2xl font-bold text-slate-900">{report.spatial_analysis.uniformity_score}%</p>
-                    <p className="text-sm text-blue-600">{report.spatial_analysis.uniformity_status}</p>
+            {/* Summary Description */}
+            {report.summary?.description && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/60 shadow-sm">
+                <p className="text-slate-600 leading-relaxed">{report.summary.description}</p>
+              </div>
+            )}
+
+            {/* Detailed Sections in Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Vegetation Health */}
+              {report.vegetation_health && (
+                <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      <span className="text-lg">🌿</span> Vegetation Health
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Vegetation Density</span>
+                      <span className="font-medium text-slate-900">{report.vegetation_health.vegetation_density}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Chlorophyll Activity</span>
+                      <span className="font-medium text-slate-900">{report.vegetation_health.chlorophyll_activity}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Growth Stage</span>
+                      <span className="font-medium text-slate-900">{report.vegetation_health.growth_stage}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-600">Health Status</span>
+                      <Badge variant={
+                        report.vegetation_health.health_status === "Excellent" || report.vegetation_health.health_status === "Good" ? "success" :
+                        report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
+                      }>
+                        {report.vegetation_health.health_status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Moisture Assessment */}
+              {report.moisture_assessment && (
+                <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      <span className="text-lg">💧</span> Moisture Assessment
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Moisture Status</span>
+                      <Badge variant={
+                        report.moisture_assessment.moisture_status === "Optimal" || report.moisture_assessment.moisture_status === "Good" ? "success" :
+                        report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
+                      }>
+                        {report.moisture_assessment.moisture_status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Irrigation Need</span>
+                      <span className="font-medium text-slate-900">{report.moisture_assessment.irrigation_need}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600">Water Stress Risk</span>
+                      <Badge variant={
+                        report.moisture_assessment.water_stress_risk === "Low" ? "success" :
+                        report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
+                      }>
+                        {report.moisture_assessment.water_stress_risk}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-600">Estimated Moisture</span>
+                      <span className="font-medium text-slate-900">{(report.moisture_assessment.estimated_moisture * 100).toFixed(0)}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Biomass Analysis */}
+              {report.biomass_analysis && (
+                <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      <span className="text-lg">🌱</span> Biomass Analysis
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <div className="text-center mb-4 p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl">
+                      <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Estimated Biomass</p>
+                      <p className="text-4xl font-bold text-emerald-600">{report.biomass_analysis.estimated_biomass_t_ha}</p>
+                      <p className="text-sm text-emerald-600">tonnes/hectare</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-600">Biomass Level</span>
+                        <span className="font-medium text-slate-900">{report.biomass_analysis.biomass_level}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-600">Canopy Structure</span>
+                        <span className="font-medium text-slate-900">{report.biomass_analysis.canopy_structure}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-slate-600">Carbon Content</span>
+                        <span className="font-medium text-slate-900">{report.biomass_analysis.carbon_content_t_ha} t CO₂/ha</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Yield Prediction */}
+              {report.yield_prediction && (
+                <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      <span className="text-lg">🌾</span> Yield Prediction
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <div className="text-center mb-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl">
+                      <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Predicted Yield</p>
+                      <p className="text-4xl font-bold text-amber-600">{report.yield_prediction.total_predicted_yield_tonnes}</p>
+                      <p className="text-sm text-amber-600">tonnes</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-600">Per Hectare</span>
+                        <span className="font-medium text-slate-900">{report.yield_prediction.predicted_yield_per_ha} t/ha</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-600">Yield Potential</span>
+                        <Badge variant={
+                          report.yield_prediction.yield_potential === "High" ? "success" :
+                          report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
+                        }>
+                          {report.yield_prediction.yield_potential}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-slate-600">Confidence</span>
+                        <span className="font-medium text-slate-900">{report.yield_prediction.confidence_level}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Environmental & Spatial in one row */}
+            {(report.environmental_factors || report.spatial_analysis) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Environmental Factors */}
+                {report.environmental_factors && (
+                  <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-gradient-to-r from-sky-50 to-indigo-50 border-b border-sky-100">
+                      <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <span className="text-lg">🌤️</span> Environmental Factors
+                      </h3>
+                    </div>
+                    <div className="p-6 grid grid-cols-2 gap-4">
+                      <div className="bg-slate-50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-slate-500">Data Quality</p>
+                        <p className="font-semibold text-slate-900 mt-1">{report.environmental_factors.data_quality}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-slate-500">Cloud Cover</p>
+                        <p className="font-semibold text-slate-900 mt-1">{report.environmental_factors.cloud_coverage_percent}%</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-slate-500">Data Age</p>
+                        <p className="font-semibold text-slate-900 mt-1">{report.environmental_factors.satellite_data_age}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-slate-500">Season</p>
+                        <p className="font-semibold text-slate-900 mt-1 text-xs">{report.environmental_factors.seasonal_context}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
-                {report.spatial_analysis.affected_area_estimate && (
-                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200/60">
-                    <p className="text-sm text-slate-600">Healthy Area</p>
-                    <p className="text-2xl font-bold text-green-700">
-                      {report.spatial_analysis.affected_area_estimate.healthy_area_percent}%
-                    </p>
-                    <p className="text-sm text-green-600">
-                      {report.spatial_analysis.affected_area_estimate.healthy_area_hectares} ha
-                    </p>
+
+                {/* Spatial Analysis */}
+                {report.spatial_analysis && (
+                  <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100">
+                      <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <span className="text-lg">🗺️</span> Spatial Analysis
+                      </h3>
+                    </div>
+                    <div className="p-6 grid grid-cols-2 gap-4">
+                      {report.spatial_analysis.uniformity_score !== undefined && (
+                        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 text-center">
+                          <p className="text-xs text-slate-500">Field Uniformity</p>
+                          <p className="text-2xl font-bold text-purple-600 mt-1">{report.spatial_analysis.uniformity_score}%</p>
+                          <p className="text-xs text-purple-600">{report.spatial_analysis.uniformity_status}</p>
+                        </div>
+                      )}
+                      {report.spatial_analysis.affected_area_estimate && (
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 text-center">
+                          <p className="text-xs text-slate-500">Healthy Area</p>
+                          <p className="text-2xl font-bold text-green-600 mt-1">
+                            {report.spatial_analysis.affected_area_estimate.healthy_area_percent}%
+                          </p>
+                          <p className="text-xs text-green-600">
+                            {report.spatial_analysis.affected_area_estimate.healthy_area_hectares} ha
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Problems Section */}
-          {report.problems && report.problems.length > 0 && (
-            <div className="bg-red-50 rounded-xl p-5 border border-red-200/60">
-              <h3 className="font-semibold text-red-700 mb-3 flex items-center gap-2">
-                <span>⚠️</span> Issues Detected
-              </h3>
-              <div className="space-y-4">
-                {report.problems.map((problem: any, i: number) => (
-                  <div key={i} className="bg-white rounded-lg p-4 border border-red-200/60">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="error">{problem.severity}</Badge>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-slate-900">{problem.title}</h4>
-                        <p className="text-sm text-slate-600 mt-1">{problem.description}</p>
-                        
-                        {problem.possible_causes && (
-                          <div className="mt-3">
-                            <p className="text-xs font-medium text-slate-500 uppercase mb-1">Possible Causes:</p>
-                            <ul className="text-sm text-slate-600 space-y-1">
-                              {problem.possible_causes.map((cause: string, j: number) => (
-                                <li key={j} className="flex items-center gap-2">
-                                  <span className="text-red-400">•</span> {cause}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {problem.urgent_actions && (
-                          <div className="mt-3">
-                            <p className="text-xs font-medium text-slate-500 uppercase mb-1">Urgent Actions:</p>
-                            <ul className="text-sm text-slate-600 space-y-1">
-                              {problem.urgent_actions.map((action: string, j: number) => (
-                                <li key={j} className="flex items-center gap-2">
-                                  <span className="text-red-500">→</span> {action}
+            {/* Issues & Recommendations side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Problems Section */}
+              {report.problems && report.problems.length > 0 && (
+                <div className="bg-white rounded-2xl border border-red-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100">
+                    <h3 className="font-semibold text-red-700 flex items-center gap-2">
+                      <span className="text-lg">⚠️</span> Issues Detected
+                      <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                        {report.problems.length}
+                      </span>
+                    </h3>
+                  </div>
+                  <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+                    {report.problems.map((problem: any, i: number) => (
+                      <div key={i} className="p-4 bg-red-50/50 rounded-xl border border-red-100">
+                        <div className="flex items-start gap-2 mb-2">
+                          <Badge variant="error" className="text-xs">{problem.severity}</Badge>
+                          <h4 className="font-medium text-slate-900 text-sm">{problem.title}</h4>
+                        </div>
+                        <p className="text-xs text-slate-600">{problem.description}</p>
+                        {problem.urgent_actions && problem.urgent_actions.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-red-100">
+                            <p className="text-xs font-medium text-red-600 mb-1">Actions:</p>
+                            <ul className="space-y-1">
+                              {problem.urgent_actions.slice(0, 2).map((action: string, j: number) => (
+                                <li key={j} className="text-xs text-slate-600 flex items-center gap-1">
+                                  <span className="text-red-400">→</span> {action}
                                 </li>
                               ))}
                             </ul>
                           </div>
                         )}
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* Recommendations Section */}
-          {report.recommendations && report.recommendations.length > 0 && (
-            <div className="bg-emerald-50 rounded-xl p-5 border border-emerald-200/60">
-              <h3 className="font-semibold text-emerald-700 mb-3 flex items-center gap-2">
-                <span>💡</span> Recommendations
-              </h3>
-              <div className="space-y-4">
-                {report.recommendations.map((rec: any, i: number) => (
-                  <div key={i} className="bg-white rounded-lg p-4 border border-emerald-200/60">
-                    <div className="flex items-start gap-3">
-                      <Badge variant={
-                        rec.priority === "low" ? "success" : 
-                        rec.priority === "medium" ? "warning" : "error"
-                      }>
-                        {rec.priority}
-                      </Badge>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">{rec.category}</span>
+              {/* Recommendations Section */}
+              {report.recommendations && report.recommendations.length > 0 && (
+                <div className="bg-white rounded-2xl border border-emerald-200/60 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+                    <h3 className="font-semibold text-emerald-700 flex items-center gap-2">
+                      <span className="text-lg">💡</span> Recommendations
+                      <span className="ml-auto bg-emerald-100 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                        {report.recommendations.length}
+                      </span>
+                    </h3>
+                  </div>
+                  <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+                    {report.recommendations.map((rec: any, i: number) => (
+                      <div key={i} className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <div className="flex items-start gap-2 mb-2">
+                          <Badge variant={
+                            rec.priority === "low" ? "success" : 
+                            rec.priority === "medium" ? "warning" : "error"
+                          } className="text-xs">
+                            {rec.priority}
+                          </Badge>
+                          <span className="text-xs text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">{rec.category}</span>
                         </div>
-                        <h4 className="font-medium text-slate-900 mt-1">{rec.title}</h4>
-                        <p className="text-sm text-slate-600 mt-1">{rec.description}</p>
-                        
-                        {rec.actions && (
-                          <ul className="mt-3 text-sm text-slate-600 space-y-1">
-                            {rec.actions.map((action: string, j: number) => (
-                              <li key={j} className="flex items-center gap-2">
+                        <h4 className="font-medium text-slate-900 text-sm">{rec.title}</h4>
+                        <p className="text-xs text-slate-600 mt-1">{rec.description}</p>
+                        {rec.actions && rec.actions.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {rec.actions.slice(0, 2).map((action: string, j: number) => (
+                              <li key={j} className="text-xs text-slate-600 flex items-center gap-1">
                                 <span className="text-emerald-500">✓</span> {action}
                               </li>
                             ))}
                           </ul>
                         )}
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monitoring Schedule */}
-          {report.monitoring_schedule && report.monitoring_schedule.length > 0 && (
-            <div className="bg-white rounded-xl p-5 border border-slate-200/60">
-              <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <span>📅</span> Recommended Monitoring Schedule
-              </h3>
-              <div className="overflow-hidden rounded-lg border border-slate-200/60">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">Task</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">Interval</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">Urgency</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200/60">
-                    {report.monitoring_schedule.map((item: any, i: number) => (
-                      <tr key={i} className="bg-white">
-                        <td className="px-4 py-3 text-sm text-slate-900">{item.task}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{item.recommended_interval}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant={
-                            item.urgency === "High" ? "error" : 
-                            item.urgency === "Medium" ? "warning" : "default"
-                          }>
-                            {item.urgency}
-                          </Badge>
-                        </td>
-                      </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Metadata */}
-          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
-            <h3 className="font-medium text-slate-700 mb-2 text-sm">Report Metadata</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              <div>
-                <span className="text-slate-500">Generated:</span>{" "}
-                <span className="text-slate-700">{new Date(report.metadata?.generated_at).toLocaleString()}</span>
+            {/* Monitoring Schedule */}
+            {report.monitoring_schedule && report.monitoring_schedule.length > 0 && (
+              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                    <span className="text-lg">📅</span> Monitoring Schedule
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Task</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Interval</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Urgency</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {report.monitoring_schedule.map((item: any, i: number) => (
+                        <tr key={i} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 text-sm text-slate-900">{item.task}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{item.recommended_interval}</td>
+                          <td className="px-6 py-4">
+                            <Badge variant={
+                              item.urgency === "High" ? "error" : 
+                              item.urgency === "Medium" ? "warning" : "default"
+                            }>
+                              {item.urgency}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div>
-                <span className="text-slate-500">Field:</span>{" "}
-                <span className="text-slate-700">{report.metadata?.field_name}</span>
-              </div>
-              <div>
-                <span className="text-slate-500">Crop:</span>{" "}
-                <span className="text-slate-700">{report.metadata?.crop_type}</span>
-              </div>
-              <div>
-                <span className="text-slate-500">Area:</span>{" "}
-                <span className="text-slate-700">{report.metadata?.area_hectares} ha</span>
-              </div>
-            </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-white px-8 py-4 border-t border-slate-200 flex items-center justify-center text-sm text-slate-500">
+          <div className="flex items-center gap-4">
+            <span>Generated: {new Date(report.metadata?.generated_at).toLocaleString()}</span>
+            <span className="w-1 h-1 bg-slate-300 rounded-full" />
+            <span>{report.metadata?.area_hectares} hectares</span>
           </div>
         </div>
       </div>

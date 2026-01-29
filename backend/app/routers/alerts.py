@@ -1,5 +1,5 @@
 """
-Alerts router - Field alerts and notifications
+Alerts router - Site alerts and notifications
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
 from app.database import get_db
-from app.models import User, Field, Alert
+from app.models import User, Site, Alert
 from app.schemas import AlertResponse
 from app.auth import get_current_user
 
@@ -21,18 +21,18 @@ async def list_alerts(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get all alerts for current user's fields"""
-    # Get user's field IDs
+    """Get all alerts for current user's sites"""
+    # Get user's site IDs
     result = await db.execute(
-        select(Field.id).where(Field.user_id == current_user.id)
+        select(Site.id).where(Site.user_id == current_user.id)
     )
-    field_ids = [r[0] for r in result.fetchall()]
+    site_ids = [r[0] for r in result.fetchall()]
     
-    if not field_ids:
+    if not site_ids:
         return []
     
     # Build query
-    query = select(Alert).where(Alert.field_id.in_(field_ids))
+    query = select(Alert).where(Alert.site_id.in_(site_ids))
     
     if unread_only:
         query = query.where(Alert.is_read == False)
@@ -55,8 +55,8 @@ async def mark_alert_read(
     # Get alert and verify ownership
     result = await db.execute(
         select(Alert)
-        .join(Field)
-        .where(Alert.id == alert_id, Field.user_id == current_user.id)
+        .join(Site)
+        .where(Alert.id == alert_id, Site.user_id == current_user.id)
     )
     alert = result.scalar_one_or_none()
     
@@ -79,19 +79,19 @@ async def mark_all_alerts_read(
     db: AsyncSession = Depends(get_db)
 ):
     """Mark all alerts as read"""
-    # Get user's field IDs
+    # Get user's site IDs
     result = await db.execute(
-        select(Field.id).where(Field.user_id == current_user.id)
+        select(Site.id).where(Site.user_id == current_user.id)
     )
-    field_ids = [r[0] for r in result.fetchall()]
+    site_ids = [r[0] for r in result.fetchall()]
     
-    if not field_ids:
+    if not site_ids:
         return
     
     # Update all alerts
     await db.execute(
         update(Alert)
-        .where(Alert.field_id.in_(field_ids), Alert.is_read == False)
+        .where(Alert.site_id.in_(site_ids), Alert.is_read == False)
         .values(is_read=True)
     )
     await db.commit()

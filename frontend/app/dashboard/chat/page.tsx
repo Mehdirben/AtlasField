@@ -2,19 +2,19 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { sendChatMessage, getFields, getChatHistory, Field, ChatMessage, ChatHistory } from "@/lib/api";
+import { sendChatMessage, getSites, getChatHistory, Site, ChatMessage, ChatHistory } from "@/lib/api";
 import { Badge } from "@/components/ui";
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
-  const initialFieldId = searchParams.get("field");
+  const initialSiteId = searchParams.get("site") || searchParams.get("field");
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [fields, setFields] = useState<Field[]>([]);
-  const [selectedFieldId, setSelectedFieldId] = useState<number | null>(
-    initialFieldId ? Number(initialFieldId) : null
+  const [sites, setSites] = useState<Site[]>([]);
+  const [selectedSiteId, setSelectedSiteId] = useState<number | null>(
+    initialSiteId ? Number(initialSiteId) : null
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
@@ -22,31 +22,31 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadFields();
+    loadSites();
     loadChatHistory();
   }, []);
 
-  // Load chat history when field changes
+  // Load chat history when site changes
   useEffect(() => {
     loadChatHistory();
-  }, [selectedFieldId]);
+  }, [selectedSiteId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  async function loadFields() {
+  async function loadSites() {
     try {
-      const data = await getFields();
-      setFields(data);
+      const data = await getSites();
+      setSites(data);
     } catch (error) {
-      console.error("Failed to load fields:", error);
+      console.error("Failed to load sites:", error);
     }
   }
 
   async function loadChatHistory() {
     try {
-      const histories = await getChatHistory(selectedFieldId ?? undefined);
+      const histories = await getChatHistory(selectedSiteId ?? undefined);
       setChatHistories(histories);
       
       // Load the most recent conversation if available
@@ -91,7 +91,7 @@ export default function ChatPage() {
     try {
       const response = await sendChatMessage(
         userMessage.content,
-        selectedFieldId || undefined
+        selectedSiteId || undefined
       );
 
       const assistantMessage: ChatMessage = {
@@ -116,9 +116,14 @@ export default function ChatPage() {
     }
   };
 
-  const selectedField = fields.find((f) => f.id === selectedFieldId);
+  const selectedSite = sites.find((s: Site) => s.id === selectedSiteId);
 
-  const suggestedQuestions = [
+  const suggestedQuestions = selectedSite?.site_type === "forest" ? [
+    "What is the fire risk level for my forest?",
+    "How healthy is my forest?",
+    "What type of forest do I have?",
+    "Are there signs of deforestation?",
+  ] : [
     "What is the health status of my crops?",
     "When should I irrigate?",
     "How do I interpret the NDVI index?",
@@ -138,70 +143,95 @@ export default function ChatPage() {
               </div>
               <div>
                 <h2 className="font-semibold text-slate-900">Context</h2>
-                <p className="text-xs text-slate-500">Select a field for personalized advice</p>
+                <p className="text-xs text-slate-500">Select a site for personalized advice</p>
               </div>
             </div>
           </div>
 
-          {/* Field Selection */}
+          {/* Site Selection */}
           <div className="space-y-2 mb-4">
             <button
               className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${
-                selectedFieldId === null
+                selectedSiteId === null
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                   : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
               }`}
-              onClick={() => { setSelectedFieldId(null); startNewChat(); }}
+              onClick={() => { setSelectedSiteId(null); startNewChat(); }}
             >
               <span className="text-xl group-hover:scale-110 transition-transform">🌍</span>
               <div>
                 <span className="font-medium block">General Advice</span>
-                <span className={`text-xs ${selectedFieldId === null ? 'text-emerald-100' : 'text-slate-500'}`}>
-                  No specific field
+                <span className={`text-xs ${selectedSiteId === null ? 'text-emerald-100' : 'text-slate-500'}`}>
+                  No specific site
                 </span>
               </div>
             </button>
 
-            {fields.length > 0 && (
+            {sites.length > 0 && (
               <div className="pt-3 pb-1">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">
-                  Your Fields
+                  Your Sites
                 </p>
               </div>
             )}
 
-            {fields.map((field) => (
+            {sites.map((site: Site) => (
               <button
-                key={field.id}
+                key={site.id}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${
-                  selectedFieldId === field.id
+                  selectedSiteId === site.id
                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                     : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                 }`}
-                onClick={() => { setSelectedFieldId(field.id); startNewChat(); }}
+                onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
               >
-                <span className="text-xl group-hover:scale-110 transition-transform">🗺️</span>
+                <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium truncate block">{field.name}</span>
-                  {field.crop_type && (
-                    <span className={`text-xs ${selectedFieldId === field.id ? 'text-emerald-100' : 'text-slate-500'}`}>
-                      {field.crop_type}
-                    </span>
+                  <span className="font-medium truncate block">{site.name}</span>
+                  {site.site_type === "forest" ? (
+                    site.forest_type && (
+                      <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
+                        {site.forest_type}
+                      </span>
+                    )
+                  ) : (
+                    site.crop_type && (
+                      <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
+                        {site.crop_type}
+                      </span>
+                    )
                   )}
                 </div>
-                {field.latest_ndvi && (
-                  <Badge
-                    variant={
-                      field.latest_ndvi >= 0.6
-                        ? "success"
-                        : field.latest_ndvi >= 0.4
-                        ? "warning"
-                        : "error"
-                    }
-                    className={selectedFieldId === field.id ? "bg-white/20 text-white border-white/30" : ""}
-                  >
-                    {field.latest_ndvi.toFixed(2)}
-                  </Badge>
+                {site.site_type === "forest" ? (
+                  site.fire_risk_level && (
+                    <Badge
+                      variant={
+                        site.fire_risk_level === "low"
+                          ? "success"
+                          : site.fire_risk_level === "moderate"
+                          ? "warning"
+                          : "error"
+                      }
+                      className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
+                    >
+                      {site.fire_risk_level === "low" ? "🔥 Low" : site.fire_risk_level === "moderate" ? "🔥 Med" : "🔥 High"}
+                    </Badge>
+                  )
+                ) : (
+                  site.latest_ndvi && (
+                    <Badge
+                      variant={
+                        site.latest_ndvi >= 0.6
+                          ? "success"
+                          : site.latest_ndvi >= 0.4
+                          ? "warning"
+                          : "error"
+                      }
+                      className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
+                    >
+                      {site.latest_ndvi.toFixed(2)}
+                    </Badge>
+                  )
                 )}
               </button>
             ))}
@@ -231,7 +261,7 @@ export default function ChatPage() {
                 chatHistories.map((history) => {
                   const firstMessage = history.messages[0]?.content || "New conversation";
                   const preview = firstMessage.length > 40 ? firstMessage.substring(0, 40) + "..." : firstMessage;
-                  const fieldName = fields.find(f => f.id === history.field_id)?.name || "General";
+                  const siteName = sites.find((s: Site) => s.id === history.field_id)?.name || "General";
                   
                   return (
                     <button
@@ -253,7 +283,7 @@ export default function ChatPage() {
                           {new Date(history.updated_at).toLocaleDateString()}
                         </span>
                         <span className="text-xs px-1.5 py-0.5 bg-slate-200/60 rounded text-slate-500">
-                          {fieldName}
+                          {siteName}
                         </span>
                       </div>
                     </button>
@@ -283,25 +313,25 @@ export default function ChatPage() {
                 <span className="text-xl sm:text-2xl">🤖</span> <span className="hidden sm:inline">AI</span> Assistant
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 truncate hidden sm:block">
-                Ask questions about your crops
+                Ask questions about your sites
               </p>
             </div>
           </div>
-          {/* Mobile field selector */}
+          {/* Mobile site selector */}
           <select
-            value={selectedFieldId || ""}
-            onChange={(e) => { setSelectedFieldId(e.target.value ? Number(e.target.value) : null); startNewChat(); }}
+            value={selectedSiteId || ""}
+            onChange={(e) => { setSelectedSiteId(e.target.value ? Number(e.target.value) : null); startNewChat(); }}
             className="lg:hidden px-2 py-1.5 text-sm bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 max-w-[120px] truncate"
           >
             <option value="">General</option>
-            {fields.map((field) => (
-              <option key={field.id} value={field.id}>{field.name}</option>
+            {sites.map((site: Site) => (
+              <option key={site.id} value={site.id}>{site.site_type === "forest" ? "🌲" : "🌾"} {site.name}</option>
             ))}
           </select>
-          {selectedField && (
+          {selectedSite && (
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-100">
-              <span className="text-sm">🎯</span>
-              <span className="text-sm font-medium text-emerald-700">{selectedField.name}</span>
+              <span className="text-sm">{selectedSite.site_type === "forest" ? "🌲" : "🎯"}</span>
+              <span className="text-sm font-medium text-emerald-700">{selectedSite.name}</span>
             </div>
           )}
         </div>
@@ -317,8 +347,8 @@ export default function ChatPage() {
                 How can I help you today?
               </h2>
               <p className="text-slate-500 mb-8 max-w-md">
-                I'm your agricultural assistant. Ask me questions about your crops, 
-                irrigation, or get personalized farming advice.
+                I'm your agricultural and forestry assistant. Ask me questions about your sites,
+                irrigation, forest health, or get personalized advice.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
                 {suggestedQuestions.map((question, i) => (

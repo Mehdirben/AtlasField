@@ -3,11 +3,11 @@
 import { useRef, useEffect, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Field } from "@/lib/api";
+import { Site } from "@/lib/api";
 
 interface FieldMapProps {
-  fields?: Field[];
-  onFieldClick?: (fieldId: number) => void;
+  fields?: Site[];  // Accept sites (backwards compatible prop name)
+  onFieldClick?: (siteId: number) => void;  // Backwards compatible
   zoom?: number;
   center?: [number, number];
   editable?: boolean;
@@ -84,26 +84,40 @@ export default function FieldMap({
         }
       });
 
-      // Add fields
-      fields.forEach((field, i) => {
-        if (!field.geometry?.coordinates) return;
+      // Add fields/sites
+      fields.forEach((site, i) => {
+        if (!site.geometry?.coordinates) return;
 
         map.current?.addSource(`field-${i}`, {
           type: "geojson",
           data: {
             type: "Feature",
-            properties: { id: field.id, name: field.name },
-            geometry: field.geometry,
+            properties: { id: site.id, name: site.name },
+            geometry: site.geometry,
           },
         });
 
-        const color = field.latest_ndvi
-          ? field.latest_ndvi >= 0.6
-            ? "#10b981"
-            : field.latest_ndvi >= 0.4
-            ? "#f59e0b"
-            : "#ef4444"
-          : "#6b7280";
+        // Color based on site type and health
+        let color = "#6b7280"; // default gray
+        if (site.site_type === "forest") {
+          // Forest coloring based on fire risk
+          color = site.fire_risk_level === "low"
+            ? "#059669"  // emerald/green for low risk
+            : site.fire_risk_level === "moderate"
+            ? "#d97706"  // amber for moderate
+            : site.fire_risk_level === "high" || site.fire_risk_level === "extreme"
+            ? "#dc2626"  // red for high/extreme
+            : "#15803d"; // default green for forests
+        } else {
+          // Field coloring based on NDVI
+          color = site.latest_ndvi
+            ? site.latest_ndvi >= 0.6
+              ? "#10b981"
+              : site.latest_ndvi >= 0.4
+              ? "#f59e0b"
+              : "#ef4444"
+            : "#6b7280";
+        }
 
         map.current?.addLayer({
           id: `field-fill-${i}`,
@@ -127,7 +141,7 @@ export default function FieldMap({
 
         if (onFieldClick) {
           map.current?.on("click", `field-fill-${i}`, () => {
-            onFieldClick(field.id);
+            onFieldClick(site.id);
           });
           map.current?.on("mouseenter", `field-fill-${i}`, () => {
             if (map.current) map.current.getCanvas().style.cursor = "pointer";
@@ -138,11 +152,11 @@ export default function FieldMap({
         }
       });
 
-      // Fit bounds to all fields
+      // Fit bounds to all sites
       if (fields.length > 0 && fields[0].geometry?.coordinates) {
         const bounds = new maplibregl.LngLatBounds();
-        fields.forEach((field) => {
-          field.geometry?.coordinates?.[0]?.forEach((coord: number[]) => {
+        fields.forEach((site) => {
+          site.geometry?.coordinates?.[0]?.forEach((coord: number[]) => {
             bounds.extend([coord[0], coord[1]]);
           });
         });

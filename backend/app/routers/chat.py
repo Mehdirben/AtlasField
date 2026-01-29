@@ -1,5 +1,5 @@
 """
-Chat router - AI-powered agricultural assistant using Gemini
+Chat router - AI-powered assistant using Gemini for agriculture and forestry
 """
 from typing import List, Optional
 from datetime import datetime
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import User, Field, ChatHistory, Analysis
+from app.models import User, Site, ChatHistory, Analysis, SiteType
 from app.schemas import ChatRequest, ChatResponse, ChatHistoryResponse
 from app.auth import get_current_user
 from app.services.gemini_service import GeminiService
@@ -24,37 +24,45 @@ async def chat(
     db: AsyncSession = Depends(get_db)
 ):
     """Send a message to the AI assistant"""
-    field_context = None
+    site_context = None
     
-    # Get field context if provided
-    if request.field_id:
+    # Get site context if provided
+    if request.site_id:
         result = await db.execute(
-            select(Field)
-            .where(Field.id == request.field_id, Field.user_id == current_user.id)
+            select(Site)
+            .where(Site.id == request.site_id, Site.user_id == current_user.id)
         )
-        field = result.scalar_one_or_none()
+        site = result.scalar_one_or_none()
         
-        if field:
+        if site:
             # Get latest analyses for context
             result = await db.execute(
                 select(Analysis)
-                .where(Analysis.field_id == field.id)
+                .where(Analysis.site_id == site.id)
                 .order_by(Analysis.created_at.desc())
                 .limit(5)
             )
             analyses = result.scalars().all()
             
-            field_context = {
-                "field_name": field.name,
-                "crop_type": field.crop_type,
-                "area_hectares": field.area_hectares,
-                "planting_date": field.planting_date.isoformat() if field.planting_date else None,
+            site_context = {
+                "site_name": site.name,
+                "site_type": site.site_type.value,
+                "area_hectares": site.area_hectares,
+                # Field-specific
+                "crop_type": site.crop_type if site.site_type == SiteType.FIELD else None,
+                "planting_date": site.planting_date.isoformat() if site.planting_date else None,
+                # Forest-specific
+                "forest_type": site.forest_type if site.site_type == SiteType.FOREST else None,
+                "tree_species": site.tree_species if site.site_type == SiteType.FOREST else None,
+                "protected_status": site.protected_status if site.site_type == SiteType.FOREST else None,
                 "analyses": [
                     {
                         "type": a.analysis_type.value,
                         "mean_value": a.mean_value,
                         "interpretation": a.interpretation,
-                        "date": a.created_at.isoformat()
+                        "date": a.created_at.isoformat(),
+                        # Include forest data if available
+                        "forest_data": a.data.get("forest_data") if a.data else None
                     }
                     for a in analyses
                 ]
@@ -65,7 +73,7 @@ async def chat(
         select(ChatHistory)
         .where(
             ChatHistory.user_id == current_user.id,
-            ChatHistory.field_id == request.field_id
+            ChatHistory.site_id == request.site_id
         )
         .order_by(ChatHistory.updated_at.desc())
     )
@@ -74,7 +82,7 @@ async def chat(
     if not chat_history:
         chat_history = ChatHistory(
             user_id=current_user.id,
-            field_id=request.field_id,
+            site_id=request.site_id,
             messages=[]
         )
         db.add(chat_history)
@@ -85,7 +93,7 @@ async def chat(
     try:
         response = await gemini.chat(
             message=request.message,
-            field_context=field_context,
+            field_context=site_context,  # Keep param name for compatibility
             history=chat_history.messages[-10:]  # Last 10 messages
         )
     except Exception as e:
@@ -101,20 +109,20 @@ async def chat(
     
     await db.commit()
     
-    return ChatResponse(response=response, field_context=field_context)
+    return ChatResponse(response=response, site_context=site_context)
 
 
 @router.get("/history", response_model=List[ChatHistoryResponse])
 async def get_chat_history(
-    field_id: Optional[int] = None,
+    site_id: Optional[int] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get chat history for current user"""
     query = select(ChatHistory).where(ChatHistory.user_id == current_user.id)
     
-    if field_id is not None:
-        query = query.where(ChatHistory.field_id == field_id)
+    if site_id is not None:
+        query = query.where(ChatHistory.site_id == site_id)
     
     query = query.order_by(ChatHistory.updated_at.desc())
     

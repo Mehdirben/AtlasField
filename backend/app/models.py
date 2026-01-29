@@ -17,6 +17,12 @@ class SubscriptionTier(str, enum.Enum):
     ENTERPRISE = "enterprise"
 
 
+class SiteType(str, enum.Enum):
+    """Type of monitored site"""
+    FIELD = "field"
+    FOREST = "forest"
+
+
 class AnalysisType(str, enum.Enum):
     NDVI = "NDVI"
     RVI = "RVI"
@@ -25,6 +31,7 @@ class AnalysisType(str, enum.Enum):
     YIELD = "YIELD"
     BIOMASS = "BIOMASS"
     COMPLETE = "COMPLETE"  # Comprehensive analysis combining all metrics
+    FOREST = "FOREST"  # Forest-specific analysis (NBR, NDMI, canopy)
 
 
 class AlertSeverity(str, enum.Enum):
@@ -32,6 +39,16 @@ class AlertSeverity(str, enum.Enum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
+
+class AlertType(str, enum.Enum):
+    """Type of alert for different monitoring scenarios"""
+    VEGETATION_HEALTH = "vegetation_health"
+    MOISTURE = "moisture"
+    FIRE_RISK = "fire_risk"
+    DEFORESTATION = "deforestation"
+    DROUGHT_STRESS = "drought_stress"
+    PEST_DISEASE = "pest_disease"
 
 
 class User(Base):
@@ -50,12 +67,15 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    fields: Mapped[list["Field"]] = relationship("Field", back_populates="owner", cascade="all, delete-orphan")
+    sites: Mapped[list["Site"]] = relationship("Site", back_populates="owner", cascade="all, delete-orphan")
     chat_histories: Mapped[list["ChatHistory"]] = relationship("ChatHistory", back_populates="user", cascade="all, delete-orphan")
 
 
-class Field(Base):
-    __tablename__ = "fields"
+class Site(Base):
+    """
+    A monitored site - can be an agricultural field or a forest
+    """
+    __tablename__ = "sites"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
@@ -63,22 +83,33 @@ class Field(Base):
     description: Mapped[Optional[str]] = mapped_column(Text)
     geometry: Mapped[dict] = mapped_column(JSONB, nullable=False)  # GeoJSON polygon
     area_hectares: Mapped[Optional[float]] = mapped_column(Float)
+    
+    # Site type discriminator
+    site_type: Mapped[SiteType] = mapped_column(SQLEnum(SiteType), default=SiteType.FIELD, nullable=False)
+    
+    # Field-specific columns (nullable, used when site_type='field')
     crop_type: Mapped[Optional[str]] = mapped_column(String(100))
     planting_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    
+    # Forest-specific columns (nullable, used when site_type='forest')
+    forest_type: Mapped[Optional[str]] = mapped_column(String(50))  # coniferous, deciduous, mixed
+    tree_species: Mapped[Optional[str]] = mapped_column(String(100))  # e.g., oak, pine, eucalyptus
+    protected_status: Mapped[Optional[str]] = mapped_column(String(100))  # e.g., none, national_park, reserve
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    owner: Mapped["User"] = relationship("User", back_populates="fields")
-    analyses: Mapped[list["Analysis"]] = relationship("Analysis", back_populates="field", cascade="all, delete-orphan")
-    alerts: Mapped[list["Alert"]] = relationship("Alert", back_populates="field", cascade="all, delete-orphan")
+    owner: Mapped["User"] = relationship("User", back_populates="sites")
+    analyses: Mapped[list["Analysis"]] = relationship("Analysis", back_populates="site", cascade="all, delete-orphan")
+    alerts: Mapped[list["Alert"]] = relationship("Alert", back_populates="site", cascade="all, delete-orphan")
 
 
 class Analysis(Base):
     __tablename__ = "analyses"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    field_id: Mapped[int] = mapped_column(ForeignKey("fields.id"), nullable=False)
+    site_id: Mapped[int] = mapped_column(ForeignKey("sites.id"), nullable=False)
     analysis_type: Mapped[AnalysisType] = mapped_column(SQLEnum(AnalysisType), nullable=False)
     satellite_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
     data: Mapped[dict] = mapped_column(JSONB, nullable=False)  # Analysis results
@@ -90,14 +121,15 @@ class Analysis(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    field: Mapped["Field"] = relationship("Field", back_populates="analyses")
+    site: Mapped["Site"] = relationship("Site", back_populates="analyses")
 
 
 class Alert(Base):
     __tablename__ = "alerts"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    field_id: Mapped[int] = mapped_column(ForeignKey("fields.id"), nullable=False)
+    site_id: Mapped[int] = mapped_column(ForeignKey("sites.id"), nullable=False)
+    alert_type: Mapped[Optional[AlertType]] = mapped_column(SQLEnum(AlertType))
     severity: Mapped[AlertSeverity] = mapped_column(SQLEnum(AlertSeverity), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
@@ -105,7 +137,7 @@ class Alert(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    field: Mapped["Field"] = relationship("Field", back_populates="alerts")
+    site: Mapped["Site"] = relationship("Site", back_populates="alerts")
 
 
 class ChatHistory(Base):
@@ -113,10 +145,14 @@ class ChatHistory(Base):
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    field_id: Mapped[Optional[int]] = mapped_column(ForeignKey("fields.id"))
+    site_id: Mapped[Optional[int]] = mapped_column(ForeignKey("sites.id"))
     messages: Mapped[list] = mapped_column(JSONB, default=list)  # List of {role, content, timestamp}
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="chat_histories")
+
+
+# Backwards compatibility aliases
+Field = Site

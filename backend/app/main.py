@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_db
-from app.routers import auth, fields, analysis, chat, alerts
+from app.routers import auth, sites, analysis, chat, alerts
 
 
 @asynccontextmanager
@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="AI-powered satellite crop monitoring for agriculture and forestry",
+    description="AI-powered satellite monitoring for agriculture and forestry",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -35,7 +35,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
-app.include_router(fields.router, prefix=settings.API_V1_PREFIX)
+app.include_router(sites.router, prefix=settings.API_V1_PREFIX)
 app.include_router(analysis.router, prefix=settings.API_V1_PREFIX)
 app.include_router(chat.router, prefix=settings.API_V1_PREFIX)
 app.include_router(alerts.router, prefix=settings.API_V1_PREFIX)

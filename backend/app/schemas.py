@@ -3,8 +3,8 @@ Pydantic schemas for request/response validation
 """
 from datetime import datetime
 from typing import Optional, Any
-from pydantic import BaseModel, EmailStr, Field
-from app.models import SubscriptionTier, AnalysisType, AlertSeverity
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from app.models import SubscriptionTier, AnalysisType, AlertSeverity, AlertType, SiteType
 
 
 # ============== Auth Schemas ==============
@@ -42,31 +42,58 @@ class TokenData(BaseModel):
     user_id: Optional[int] = None
 
 
-# ============== Field Schemas ==============
+# ============== Site Schemas (formerly Field) ==============
 
-class FieldCreate(BaseModel):
+class SiteCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     geometry: dict  # GeoJSON polygon
+    site_type: SiteType = SiteType.FIELD
+    # Field-specific
     crop_type: Optional[str] = None
     planting_date: Optional[datetime] = None
+    # Forest-specific
+    forest_type: Optional[str] = None  # coniferous, deciduous, mixed (auto-detected if not provided)
+    tree_species: Optional[str] = None
+    protected_status: Optional[str] = None
+    
+    @field_validator('forest_type')
+    @classmethod
+    def validate_forest_type(cls, v):
+        if v is not None:
+            valid_types = ['coniferous', 'deciduous', 'mixed', 'tropical', 'mangrove']
+            if v.lower() not in valid_types:
+                raise ValueError(f'forest_type must be one of: {", ".join(valid_types)}')
+            return v.lower()
+        return v
 
 
-class FieldUpdate(BaseModel):
+class SiteUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
+    # Field-specific
     crop_type: Optional[str] = None
     planting_date: Optional[datetime] = None
+    # Forest-specific
+    forest_type: Optional[str] = None
+    tree_species: Optional[str] = None
+    protected_status: Optional[str] = None
 
 
-class FieldResponse(BaseModel):
+class SiteResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
     geometry: dict
     area_hectares: Optional[float]
+    site_type: SiteType
+    # Field-specific
     crop_type: Optional[str]
     planting_date: Optional[datetime]
+    # Forest-specific
+    forest_type: Optional[str]
+    tree_species: Optional[str]
+    protected_status: Optional[str]
     created_at: datetime
     updated_at: datetime
 
@@ -74,10 +101,20 @@ class FieldResponse(BaseModel):
         from_attributes = True
 
 
-class FieldWithAnalysis(FieldResponse):
+class SiteWithAnalysis(SiteResponse):
     latest_ndvi: Optional[float] = None
     latest_analysis_date: Optional[datetime] = None
     alert_count: int = 0
+    # Forest-specific analysis data
+    latest_nbr: Optional[float] = None  # Normalized Burn Ratio
+    fire_risk_level: Optional[str] = None
+
+
+# Backwards compatibility aliases
+FieldCreate = SiteCreate
+FieldUpdate = SiteUpdate
+FieldResponse = SiteResponse
+FieldWithAnalysis = SiteWithAnalysis
 
 
 # ============== Analysis Schemas ==============
@@ -90,7 +127,7 @@ class AnalysisRequest(BaseModel):
 
 class AnalysisResponse(BaseModel):
     id: int
-    field_id: int
+    site_id: int
     analysis_type: AnalysisType
     satellite_date: Optional[datetime]
     data: dict
@@ -126,7 +163,8 @@ class BiomassEstimate(BaseModel):
 
 class AlertResponse(BaseModel):
     id: int
-    field_id: int
+    site_id: int
+    alert_type: Optional[AlertType]
     severity: AlertSeverity
     title: str
     message: str
@@ -147,17 +185,17 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    field_id: Optional[int] = None  # Optional field context
+    site_id: Optional[int] = None  # Optional site context
 
 
 class ChatResponse(BaseModel):
     response: str
-    field_context: Optional[dict] = None
+    site_context: Optional[dict] = None
 
 
 class ChatHistoryResponse(BaseModel):
     id: int
-    field_id: Optional[int]
+    site_id: Optional[int]
     messages: list[ChatMessage]
     created_at: datetime
     updated_at: datetime
@@ -169,9 +207,32 @@ class ChatHistoryResponse(BaseModel):
 # ============== Dashboard Schemas ==============
 
 class DashboardStats(BaseModel):
+    total_sites: int
     total_fields: int
+    total_forests: int
     total_area_hectares: float
-    healthy_fields: int
-    fields_needing_attention: int
+    healthy_sites: int
+    sites_needing_attention: int
     unread_alerts: int
     recent_analyses: list[AnalysisResponse]
+
+
+# ============== Forest-specific Schemas ==============
+
+class ForestClassification(BaseModel):
+    """Auto-detected forest classification from satellite data"""
+    detected_type: str  # coniferous, deciduous, mixed
+    confidence: float  # 0-1
+    canopy_cover_percent: float
+    spectral_signature: dict
+
+
+class ForestAnalysis(BaseModel):
+    """Forest-specific analysis results"""
+    nbr: float  # Normalized Burn Ratio
+    ndmi: float  # Normalized Difference Moisture Index
+    canopy_health: str
+    fire_risk_level: str  # low, medium, high, critical
+    deforestation_detected: bool
+    carbon_estimate_tonnes_ha: float
+    interpretation: str

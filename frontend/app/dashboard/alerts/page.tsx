@@ -50,7 +50,12 @@ export default function AlertsPage() {
 
   const unreadCount = alerts.filter((a) => !a.is_read).length;
 
-  const getSeverityIcon = (severity: string) => {
+  const getSeverityIcon = (severity: string, alertType?: string) => {
+    // Forest-specific icons
+    if (alertType === "fire_risk") return "🔥";
+    if (alertType === "deforestation") return "🪓";
+    if (alertType === "drought_stress") return "🏜️";
+    
     switch (severity) {
       case "critical":
         return "🚨";
@@ -63,7 +68,18 @@ export default function AlertsPage() {
     }
   };
 
-  const getSeverityColor = (severity: string) => {
+  const getSeverityColor = (severity: string, alertType?: string) => {
+    // Forest fire risk gets special treatment
+    if (alertType === "fire_risk") {
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    }
+    if (alertType === "deforestation") {
+      return "bg-red-100 text-red-700 border-red-200";
+    }
+    if (alertType === "drought_stress") {
+      return "bg-amber-100 text-amber-700 border-amber-200";
+    }
+    
     switch (severity) {
       case "critical":
         return "bg-red-100 text-red-700 border-red-200";
@@ -171,7 +187,7 @@ export default function AlertsPage() {
           <p className="text-slate-500 max-w-md mx-auto">
             {filter === "unread"
               ? "You've read all your alerts. Great job!"
-              : "Your crops are doing well. Keep it up!"}
+              : "Your sites are doing well. Keep it up!"}
           </p>
         </div>
       ) : (
@@ -192,10 +208,10 @@ export default function AlertsPage() {
                     <div className="flex items-start gap-4 p-5">
                       <div
                         className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl border shrink-0 ${getSeverityColor(
-                          alert.severity
+                          alert.severity, alert.alert_type
                         )}`}
                       >
-                        {getSeverityIcon(alert.severity)}
+                        {getSeverityIcon(alert.severity, alert.alert_type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4">
@@ -229,12 +245,12 @@ export default function AlertsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100">
-                          {alert.field_name && (
+                          {(alert.field_name || alert.site_name) && (
                             <Link
-                              href={`/dashboard/analysis?field=${alert.field_id}`}
+                              href={`/dashboard/sites/${alert.site_id || alert.field_id}`}
                               className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                             >
-                              <span>📍</span> {alert.field_name}
+                              <span>📍</span> {alert.site_name || alert.field_name}
                             </Link>
                           )}
                           <span className="text-sm text-slate-400">

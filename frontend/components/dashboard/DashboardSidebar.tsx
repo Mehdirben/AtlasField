@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const menuItems = [
   { href: "/dashboard", icon: DashboardIcon, label: "Dashboard", exact: true, mobileLabel: "Home" },
-  { href: "/dashboard/fields", icon: MapIcon, label: "My Fields", mobileLabel: "Fields" },
+  { href: "/dashboard/sites", icon: MapIcon, label: "My Sites", mobileLabel: "Sites" },
   { href: "/dashboard/analysis", icon: SatelliteIcon, label: "Analysis", mobileLabel: "Analysis" },
   { href: "/dashboard/chat", icon: ChatIcon, label: "AI Assistant", mobileLabel: "Chat" },
   { href: "/dashboard/alerts", icon: BellIcon, label: "Alerts", mobileLabel: "Alerts" },
@@ -79,7 +79,7 @@ export function DashboardSidebar() {
               <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-md">
                 Current
               </span>
-              <span className="text-white/80 text-xs">1/3 fields</span>
+              <span className="text-white/80 text-xs">1/3 sites</span>
             </div>
             <p className="text-white font-bold text-base lg:text-lg mb-1">Free Plan</p>
             <p className="text-emerald-100 text-xs lg:text-sm mb-4">Upgrade for unlimited access</p>

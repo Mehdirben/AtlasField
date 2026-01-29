@@ -33,54 +33,106 @@ export const registerUser = async (data: {
   return response.data;
 };
 
-// Fields
-export interface Field {
+// Site types
+export type SiteType = "field" | "forest";
+
+// Sites (formerly Fields)
+export interface Site {
   id: number;
   name: string;
   description?: string;
   geometry: GeoJSON.Polygon;
   area_hectares?: number;
+  site_type: SiteType;
+  // Field-specific
   crop_type?: string;
   planting_date?: string;
+  // Forest-specific
+  forest_type?: string;  // coniferous, deciduous, mixed
+  tree_species?: string;
+  protected_status?: string;
+  // Timestamps
   created_at: string;
   updated_at: string;
+  // Analysis data
   latest_ndvi?: number;
   latest_analysis_date?: string;
   alert_count?: number;
+  // Forest-specific analysis
+  latest_nbr?: number;
+  fire_risk_level?: string;
 }
 
-export const getFields = async (): Promise<Field[]> => {
-  const response = await api.get("/fields");
+// Backwards compatibility
+export type Field = Site;
+
+export const getSites = async (siteType?: SiteType): Promise<Site[]> => {
+  const params = siteType ? { site_type: siteType } : {};
+  const response = await api.get("/sites", { params });
   return response.data;
 };
 
+// Backwards compatibility alias
+export const getFields = getSites;
+
+export const getSite = async (id: number): Promise<Site> => {
+  const response = await api.get(`/sites/${id}`);
+  return response.data;
+};
+
+// Backwards compatibility alias
+export const getField = getSite;
+
+export const createSite = async (data: {
+  name: string;
+  description?: string;
+  geometry: GeoJSON.Polygon;
+  site_type: SiteType;
+  // Field-specific
+  crop_type?: string;
+  planting_date?: string;
+  // Forest-specific
+  forest_type?: string;
+  tree_species?: string;
+  protected_status?: string;
+}): Promise<Site> => {
+  const response = await api.post("/sites", data);
+  return response.data;
+};
+
+// Backwards compatibility alias
 export const createField = async (data: {
   name: string;
   description?: string;
   geometry: GeoJSON.Polygon;
   crop_type?: string;
-}): Promise<Field> => {
-  const response = await api.post("/fields", data);
-  return response.data;
+}): Promise<Site> => {
+  return createSite({ ...data, site_type: "field" });
 };
 
-export const updateField = async (
+export const updateSite = async (
   id: number,
-  data: Partial<Field>
-): Promise<Field> => {
-  const response = await api.put(`/fields/${id}`, data);
+  data: Partial<Site>
+): Promise<Site> => {
+  const response = await api.put(`/sites/${id}`, data);
   return response.data;
 };
 
-export const deleteField = async (id: number): Promise<void> => {
-  await api.delete(`/fields/${id}`);
+// Backwards compatibility alias
+export const updateField = updateSite;
+
+export const deleteSite = async (id: number): Promise<void> => {
+  await api.delete(`/sites/${id}`);
 };
+
+// Backwards compatibility alias
+export const deleteField = deleteSite;
 
 // Analysis
 export interface Analysis {
   id: number;
-  field_id: number;
-  analysis_type: "NDVI" | "RVI" | "MOISTURE" | "FUSION" | "YIELD" | "BIOMASS" | "COMPLETE";
+  site_id: number;
+  analysis_type: "NDVI" | "RVI" | "MOISTURE" | "FUSION" | "YIELD" | "BIOMASS" | "COMPLETE" | "FOREST";
   satellite_date?: string;
   data: Record<string, unknown>;
   mean_value?: number;
@@ -92,31 +144,31 @@ export interface Analysis {
 }
 
 export const runAnalysis = async (
-  fieldId: number,
+  siteId: number,
   analysisType: string = "NDVI"
 ): Promise<Analysis> => {
-  const response = await api.post(`/analysis/${fieldId}`, {
+  const response = await api.post(`/analysis/${siteId}`, {
     analysis_type: analysisType,
   });
   return response.data;
 };
 
 export const getAnalysisHistory = async (
-  fieldId: number,
+  siteId: number,
   analysisType?: string
 ): Promise<Analysis[]> => {
   const params = analysisType ? { analysis_type: analysisType } : {};
-  const response = await api.get(`/analysis/${fieldId}/history`, { params });
+  const response = await api.get(`/analysis/${siteId}/history`, { params });
   return response.data;
 };
 
-export const getYieldPrediction = async (fieldId: number) => {
-  const response = await api.get(`/analysis/${fieldId}/yield`);
+export const getYieldPrediction = async (siteId: number) => {
+  const response = await api.get(`/analysis/${siteId}/yield`);
   return response.data;
 };
 
-export const getBiomassEstimate = async (fieldId: number) => {
-  const response = await api.get(`/analysis/${fieldId}/biomass`);
+export const getBiomassEstimate = async (siteId: number) => {
+  const response = await api.get(`/analysis/${siteId}/biomass`);
   return response.data;
 };
 
@@ -159,8 +211,12 @@ export const deleteChatHistory = async (historyId: number): Promise<void> => {
 // Alerts
 export interface Alert {
   id: number;
-  field_id: number;
+  site_id: number;
+  site_name?: string;
+  // Backwards compatibility
+  field_id?: number;
   field_name?: string;
+  alert_type?: "vegetation_health" | "moisture" | "fire_risk" | "deforestation" | "drought_stress" | "pest_disease";
   severity: "low" | "medium" | "high" | "critical";
   title: string;
   message: string;

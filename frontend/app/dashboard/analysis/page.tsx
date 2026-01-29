@@ -5,15 +5,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  getFields,
+  getSites,
   runAnalysis,
   getAnalysisHistory,
   getYieldPrediction,
   getBiomassEstimate,
-  Field,
+  Site,
   Analysis,
 } from "@/lib/api";
 import { Badge } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
   ssr: false,
@@ -593,10 +594,10 @@ function DetailedReportPanel({
 
 export default function AnalysisPage() {
   const searchParams = useSearchParams();
-  const initialFieldId = searchParams.get("field");
+  const initialSiteId = searchParams.get("site") || searchParams.get("field");
   
-  const [fields, setFields] = useState<Field[]>([]);
-  const [selectedField, setSelectedField] = useState<Field | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [yieldData, setYieldData] = useState<any>(null);
   const [biomassData, setBiomassData] = useState<any>(null);
@@ -606,63 +607,63 @@ export default function AnalysisPage() {
   const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(null);
 
   useEffect(() => {
-    loadFields();
+    loadSites();
   }, []);
 
   useEffect(() => {
-    if (selectedField) {
-      loadFieldData(selectedField.id);
+    if (selectedSite) {
+      loadSiteData(selectedSite.id);
     }
-  }, [selectedField?.id]);
+  }, [selectedSite?.id]);
 
-  async function loadFields() {
+  async function loadSites() {
     try {
-      const data = await getFields();
-      setFields(data);
+      const data = await getSites();
+      setSites(data);
       
-      // If field ID is provided in URL, select that field
-      if (initialFieldId) {
-        const fieldFromUrl = data.find((f: Field) => f.id === Number(initialFieldId));
-        if (fieldFromUrl) {
-          setSelectedField(fieldFromUrl);
+      // If site ID is provided in URL, select that site
+      if (initialSiteId) {
+        const siteFromUrl = data.find((s: Site) => s.id === Number(initialSiteId));
+        if (siteFromUrl) {
+          setSelectedSite(siteFromUrl);
         } else if (data.length > 0) {
-          setSelectedField(data[0]);
+          setSelectedSite(data[0]);
         }
       } else if (data.length > 0) {
-        setSelectedField(data[0]);
+        setSelectedSite(data[0]);
       }
     } catch (error) {
-      console.error("Failed to load fields:", error);
+      console.error("Failed to load sites:", error);
     } finally {
       setLoading(false);
     }
   }
 
-  async function loadFieldData(fieldId: number) {
+  async function loadSiteData(siteId: number) {
     try {
       const [analysisData, yieldRes, biomassRes] = await Promise.all([
-        getAnalysisHistory(fieldId),
-        getYieldPrediction(fieldId).catch(() => null),
-        getBiomassEstimate(fieldId).catch(() => null),
+        getAnalysisHistory(siteId),
+        getYieldPrediction(siteId).catch(() => null),
+        getBiomassEstimate(siteId).catch(() => null),
       ]);
       setAnalyses(analysisData);
       setYieldData(yieldRes);
       setBiomassData(biomassRes);
     } catch (error) {
-      console.error("Failed to load field data:", error);
+      console.error("Failed to load site data:", error);
     }
   }
 
   const handleRunAnalysis = async (type: string) => {
-    if (!selectedField) return;
+    if (!selectedSite) return;
     setAnalyzing(type);
     try {
-      const analysis = await runAnalysis(selectedField.id, type);
+      const analysis = await runAnalysis(selectedSite.id, type);
       setAnalyses((prev) => [analysis, ...prev]);
       setSelectedAnalysis(analysis);
       const [yieldRes, biomassRes] = await Promise.all([
-        getYieldPrediction(selectedField.id).catch(() => null),
-        getBiomassEstimate(selectedField.id).catch(() => null),
+        getYieldPrediction(selectedSite.id).catch(() => null),
+        getBiomassEstimate(selectedSite.id).catch(() => null),
       ]);
       setYieldData(yieldRes);
       setBiomassData(biomassRes);
@@ -727,21 +728,21 @@ export default function AnalysisPage() {
     );
   }
 
-  if (fields.length === 0) {
+  if (sites.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-100 to-cyan-100 flex items-center justify-center mb-2">
           <span className="text-4xl">🗺️</span>
         </div>
-        <h2 className="text-xl font-semibold text-slate-900">No Fields Yet</h2>
+        <h2 className="text-xl font-semibold text-slate-900">No Sites Yet</h2>
         <p className="text-slate-500 text-center max-w-md">
-          Create your first field to start running satellite analyses.
+          Create your first site to start running satellite analyses.
         </p>
         <Link
-          href="/dashboard/fields/new"
+          href="/dashboard/sites/new"
           className="mt-4 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-emerald-500/25 transition-all"
         >
-          Create Field
+          Create Site
         </Link>
       </div>
     );
@@ -749,6 +750,7 @@ export default function AnalysisPage() {
 
   const getAnalysisTypeStyle = (type: string) => {
     if (type === "COMPLETE") return "bg-gradient-to-br from-emerald-100 to-teal-100";
+    if (type === "FOREST") return "bg-gradient-to-br from-green-100 to-teal-100";
     if (type === "NDVI") return "bg-green-100";
     if (type === "RVI") return "bg-blue-100";
     return "bg-purple-100";
@@ -756,6 +758,7 @@ export default function AnalysisPage() {
 
   const getAnalysisTypeIcon = (type: string) => {
     if (type === "COMPLETE") return "🛰️";
+    if (type === "FOREST") return "🌲";
     if (type === "NDVI") return "🌿";
     if (type === "RVI") return "📡";
     return "🔄";
@@ -763,8 +766,11 @@ export default function AnalysisPage() {
 
   const getAnalysisTypeName = (type: string) => {
     if (type === "COMPLETE") return "Complete Analysis";
+    if (type === "FOREST") return "Forest Analysis";
     return type;
   };
+
+  const isForest = selectedSite?.site_type === "forest";
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -779,35 +785,40 @@ export default function AnalysisPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Satellite Analysis</h1>
           <p className="text-sm sm:text-base text-slate-500 mt-1">
-            Monitor crop health with real-time satellite data
+            Monitor {isForest ? "forest health" : "crop health"} with real-time satellite data
           </p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
-            value={selectedField?.id || ""}
+            value={selectedSite?.id || ""}
             onChange={(e) => {
-              const field = fields.find((f) => f.id === Number(e.target.value));
-              setSelectedField(field || null);
+              const site = sites.find((s: Site) => s.id === Number(e.target.value));
+              setSelectedSite(site || null);
             }}
             className="flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all sm:min-w-[200px] text-sm sm:text-base"
           >
-            {fields.map((field) => (
-              <option key={field.id} value={field.id}>
-                {field.name} {field.crop_type ? `(${field.crop_type})` : ""}
+            {sites.map((site: Site) => (
+              <option key={site.id} value={site.id}>
+                {site.site_type === "forest" ? "🌲" : "🌾"} {site.name} {site.crop_type ? `(${site.crop_type})` : site.forest_type ? `(${site.forest_type})` : ""}
               </option>
             ))}
           </select>
           <Link
-            href={`/dashboard/chat${selectedField ? `?field=${selectedField.id}` : ""}`}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-emerald-500/25 transition-all text-sm sm:text-base"
+            href={`/dashboard/chat${selectedSite ? `?site=${selectedSite.id}` : ""}`}
+            className={cn(
+              "flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-xl font-medium hover:shadow-lg transition-all text-sm sm:text-base",
+              isForest 
+                ? "bg-gradient-to-r from-green-500 to-green-600 hover:shadow-green-500/25"
+                : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:shadow-emerald-500/25"
+            )}
           >
             <span>🤖</span> <span className="hidden sm:inline">Ask</span> AI
           </Link>
         </div>
       </div>
 
-      {selectedField && (
+      {selectedSite && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
@@ -869,8 +880,8 @@ export default function AnalysisPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="h-[250px] sm:h-[350px]">
                   <FieldMap
-                    fields={[selectedField]}
-                    center={getCenterFromGeometry(selectedField.geometry)}
+                    fields={[selectedSite]}
+                    center={getCenterFromGeometry(selectedSite.geometry)}
                     zoom={14}
                   />
                 </div>
@@ -939,11 +950,13 @@ export default function AnalysisPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                         <div className="p-2.5 sm:p-3 bg-slate-50/80 rounded-lg sm:rounded-xl">
                           <p className="text-[10px] sm:text-xs text-slate-500">Area</p>
-                          <p className="font-semibold text-slate-900 text-sm sm:text-base">{selectedField.area_hectares?.toFixed(2) || "—"} ha</p>
+                          <p className="font-semibold text-slate-900 text-sm sm:text-base">{selectedSite.area_hectares?.toFixed(2) || "—"} ha</p>
                         </div>
                         <div className="p-2.5 sm:p-3 bg-slate-50/80 rounded-lg sm:rounded-xl">
-                          <p className="text-[10px] sm:text-xs text-slate-500">Crop</p>
-                          <p className="font-semibold text-slate-900 text-sm sm:text-base truncate">{selectedField.crop_type || "Not set"}</p>
+                          <p className="text-[10px] sm:text-xs text-slate-500">{isForest ? "Forest Type" : "Crop"}</p>
+                          <p className="font-semibold text-slate-900 text-sm sm:text-base truncate capitalize">
+                            {isForest ? (selectedSite.forest_type || "Pending analysis") : (selectedSite.crop_type || "Not set")}
+                          </p>
                         </div>
                         <div className="p-2.5 sm:p-3 bg-slate-50/80 rounded-lg sm:rounded-xl">
                           <p className="text-[10px] sm:text-xs text-slate-500">Analyses</p>
@@ -1144,7 +1157,7 @@ export default function AnalysisPage() {
                     <span>🔔</span> Check Alerts
                   </Link>
                   <Link
-                    href={`/dashboard/chat?field=${selectedField.id}`}
+                    href={`/dashboard/chat?site=${selectedSite.id}`}
                     className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl hover:bg-slate-50 transition-colors text-slate-600 hover:text-slate-900 text-xs sm:text-base"
                   >
                     <span>💬</span> Get AI Advice

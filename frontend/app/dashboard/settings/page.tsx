@@ -300,7 +300,7 @@ export default function SettingsPage() {
                 {subscriptionTiers.map((tier) => (
                   <div
                     key={tier.name}
-                    className={`relative bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${
+                    className={`relative bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md flex flex-col ${
                       tier.popular ? "ring-2 ring-emerald-500 border-emerald-200" : "border-slate-200/60"
                     }`}
                   >
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                         </div>
                       </div>
                     )}
-                    <div className={`p-6 ${tier.popular ? "pt-12" : ""}`}>
+                    <div className={`p-6 flex flex-col flex-1 ${tier.popular ? "pt-12" : ""}`}>
                       <h3 className="text-lg font-semibold text-slate-900">
                         {tier.name}
                       </h3>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                         </span>
                         <span className="text-slate-500">{tier.period}</span>
                       </div>
-                      <ul className="mt-6 space-y-3">
+                      <ul className="mt-6 space-y-3 flex-1">
                         {tier.features.map((feature, i) => (
                           <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
                             <svg

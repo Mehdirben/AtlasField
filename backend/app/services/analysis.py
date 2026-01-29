@@ -114,13 +114,13 @@ class AnalysisService:
     def _interpret_biomass(biomass: float) -> str:
         """Interpret biomass value"""
         if biomass < 2:
-            return "Biomasse faible - début de saison ou végétation en stress"
+            return "Low biomass - early season or stressed vegetation"
         elif biomass < 5:
-            return "Biomasse modérée - croissance normale"
+            return "Moderate biomass - normal growth"
         elif biomass < 10:
-            return "Biomasse élevée - végétation bien développée"
+            return "High biomass - well-developed vegetation"
         else:
-            return "Biomasse très élevée - végétation dense et mature"
+            return "Very high biomass - dense and mature vegetation"
     
     @classmethod
     def get_mock_analysis(cls, analysis_type: AnalysisType, bbox: tuple) -> dict:
@@ -186,7 +186,7 @@ class AnalysisService:
                 "min": round(max(0, mean - 0.2), 3),
                 "max": round(min(1, mean + 0.2), 3),
                 "cloud_coverage": round(np.random.uniform(0, 20), 1),
-                "interpretation": "Analyse effectuée",
+                "interpretation": "Analysis completed",
                 "raw_data": {"source": "mock"}
             }
     
@@ -194,26 +194,26 @@ class AnalysisService:
     def _interpret_ndvi(value: float) -> str:
         """Interpret NDVI/vegetation index value"""
         if value < 0.2:
-            return "Végétation très faible ou sol nu - attention requise"
+            return "Very low vegetation or bare soil - attention required"
         elif value < 0.4:
-            return "Végétation en stress - surveillance et action recommandées"
+            return "Stressed vegetation - monitoring and action recommended"
         elif value < 0.6:
-            return "Végétation modérée - développement normal"
+            return "Moderate vegetation - normal development"
         elif value < 0.8:
-            return "Végétation saine - bonne croissance"
+            return "Healthy vegetation - good growth"
         else:
-            return "Végétation très dense et vigoureuse"
+            return "Very dense and vigorous vegetation"
     
     @staticmethod
     def _interpret_moisture(value: float) -> str:
         """Interpret moisture index value"""
         if value < 0.1:
-            return "Sol très sec - irrigation urgente recommandée"
+            return "Very dry soil - urgent irrigation recommended"
         elif value < 0.25:
-            return "Humidité faible - prévoir irrigation prochainement"
+            return "Low moisture - plan irrigation soon"
         elif value < 0.4:
-            return "Humidité modérée - conditions acceptables"
+            return "Moderate moisture - acceptable conditions"
         elif value < 0.6:
-            return "Bonne humidité - conditions optimales"
+            return "Good moisture - optimal conditions"
         else:
-            return "Sol très humide - réduire irrigation si nécessaire"
+            return "Very wet soil - reduce irrigation if necessary"

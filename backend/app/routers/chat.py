@@ -90,7 +90,7 @@ async def chat(
         )
     except Exception as e:
         # Fallback response if API fails
-        response = f"Je suis désolé, je ne peux pas répondre pour le moment. Erreur: {str(e)}"
+        response = f"Sorry, I cannot respond at the moment. Error: {str(e)}"
     
     # Update chat history
     now = datetime.utcnow().isoformat()

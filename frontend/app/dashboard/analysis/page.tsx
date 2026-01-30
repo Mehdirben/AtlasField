@@ -826,9 +826,10 @@ export default function AnalysisPage() {
     if (selectedSite) {
       loadSiteData(selectedSite.id);
 
-      // Update URL to persist selection on refresh
+      // Update URL and localStorage to persist selection
       const params = new URLSearchParams(searchParams.toString());
       params.set("site", selectedSite.id.toString());
+      localStorage.setItem("lastSelectedSiteId", selectedSite.id.toString());
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
   }, [selectedSite?.id]);
@@ -838,11 +839,20 @@ export default function AnalysisPage() {
       const data = await getSites();
       setSites(data);
 
+      const savedSiteId = typeof window !== 'undefined' ? localStorage.getItem("lastSelectedSiteId") : null;
+
       // If site ID is provided in URL, select that site
       if (initialSiteId) {
         const siteFromUrl = data.find((s: Site) => s.id === Number(initialSiteId));
         if (siteFromUrl) {
           setSelectedSite(siteFromUrl);
+        } else if (data.length > 0) {
+          setSelectedSite(data[0]);
+        }
+      } else if (savedSiteId) {
+        const siteFromStorage = data.find((s: Site) => s.id === Number(savedSiteId));
+        if (siteFromStorage) {
+          setSelectedSite(siteFromStorage);
         } else if (data.length > 0) {
           setSelectedSite(data[0]);
         }

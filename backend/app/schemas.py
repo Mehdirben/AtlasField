@@ -189,17 +189,23 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    site_id: Optional[int] = None  # Optional site context
+    site_id: Optional[int] = Field(None, alias="field_id")
+    
+    class Config:
+        populate_by_name = True
 
 
 class ChatResponse(BaseModel):
     response: str
-    site_context: Optional[dict] = None
+    site_context: Optional[dict] = Field(None, alias="field_context")
+    
+    class Config:
+        populate_by_name = True
 
 
 class ChatHistoryResponse(BaseModel):
     id: int
-    site_id: Optional[int]
+    site_id: Optional[int] = Field(None, alias="field_id")
     messages: list[ChatMessage]
     created_at: datetime
     updated_at: datetime

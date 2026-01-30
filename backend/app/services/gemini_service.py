@@ -29,7 +29,7 @@ Rules:
 4. Mention limitations if data is insufficient
 5. Suggest concrete actions when possible
 
-If field data is provided, use it to contextualize your responses."""
+If site data is provided, use it to contextualize your responses."""
 
     def __init__(self):
         if settings.GEMINI_API_KEY:
@@ -42,6 +42,7 @@ If field data is provided, use it to contextualize your responses."""
         self,
         message: str,
         field_context: Optional[dict] = None,
+        global_context: Optional[list] = None,
         history: Optional[list] = None
     ) -> str:
         """
@@ -61,21 +62,53 @@ If field data is provided, use it to contextualize your responses."""
             context_parts = [self.SYSTEM_PROMPT]
             
             if field_context:
-                context_parts.append(f"\n\nSelected field context:")
-                context_parts.append(f"- Name: {field_context.get('field_name', 'Not specified')}")
-                context_parts.append(f"- Crop: {field_context.get('crop_type', 'Not specified')}")
+                context_parts.append(f"\n\nSELECTED SITE CONTEXT:")
+                context_parts.append(f"- Name: {field_context.get('site_name', 'Not specified')}")
+                context_parts.append(f"- Type: {field_context.get('site_type', 'Not specified')}")
+                if field_context.get('description'):
+                    context_parts.append(f"- Description: {field_context['description']}")
                 context_parts.append(f"- Area: {field_context.get('area_hectares', 'N/A')} hectares")
                 
-                if field_context.get('planting_date'):
-                    context_parts.append(f"- Planting date: {field_context['planting_date']}")
+                if field_context.get('site_type') == 'field':
+                    context_parts.append(f"- Crop: {field_context.get('crop_type', 'Not specified')}")
+                    if field_context.get('planting_date'):
+                        context_parts.append(f"- Planting date: {field_context['planting_date']}")
+                else:
+                    context_parts.append(f"- Forest Type: {field_context.get('forest_type', 'Not specified')}")
+                    context_parts.append(f"- Tree Species: {field_context.get('tree_species', 'Not specified')}")
+                    context_parts.append(f"- Protected Status: {field_context.get('protected_status', 'Not specified')}")
+                    if field_context.get('baseline_carbon'):
+                        context_parts.append(f"- Baseline Carbon: {field_context['baseline_carbon']} t/ha")
+                    if field_context.get('baseline_canopy'):
+                        context_parts.append(f"- Baseline Canopy Cover: {field_context['baseline_canopy']}%")
                 
                 if field_context.get('analyses'):
-                    context_parts.append("\nLatest satellite analyses:")
-                    for analysis in field_context['analyses'][:3]:
+                    context_parts.append("\nRecent satellite analyses (most recent first):")
+                    for analysis in field_context['analyses'][:10]:
+                        val_str = f"Mean: {analysis.get('mean_value', 'N/A')}"
+                        if analysis.get('min_value') is not None and analysis.get('max_value') is not None:
+                            val_str += f" (Min: {analysis['min_value']}, Max: {analysis['max_value']})"
+                        
                         context_parts.append(
-                            f"  - {analysis['type'].upper()}: {analysis.get('mean_value', 'N/A')} "
-                            f"({analysis.get('interpretation', '')})"
+                            f"  - {analysis['date'][:10]} | {analysis['type'].upper()}: {val_str} "
+                            f"-> {analysis.get('interpretation', '')}"
                         )
+                        if analysis.get('forest_data'):
+                            fd = analysis['forest_data']
+                            context_parts.append(f"    [Forest Data] NBR: {fd.get('nbr')}, Fire Risk: {fd.get('fire_risk')}, Deforestation Risk: {fd.get('deforestation_risk')}")
+
+                if field_context.get('alerts'):
+                    context_parts.append("\nRecent Alerts:")
+                    for alert in field_context['alerts'][:5]:
+                        context_parts.append(
+                            f"  - [{alert['date'][:10]}] {alert['severity'].upper()}: {alert['title']} - {alert['message']}"
+                        )
+            
+            if global_context:
+                context_parts.append(f"\n\nUSER'S SITES SUMMARY:")
+                for s in global_context:
+                    status = f" | Latest: {s['latest_analysis']['type']}={s['latest_analysis']['mean_value']}" if s.get('latest_analysis') else ""
+                    context_parts.append(f"- {s['name']} ({s['type']}, {s['crop_or_forest']}){status}")
             
             # Build conversation
             full_prompt = "\n".join(context_parts)
@@ -120,7 +153,7 @@ If field data is provided, use it to contextualize your responses."""
                 ndvi_analysis = next((a for a in analyses if a['type'] == 'ndvi'), None)
                 if ndvi_analysis:
                     return (
-                        f"According to the latest NDVI analysis of your field '{field_context.get('field_name', '')}', "
+                        f"According to the latest NDVI analysis of your site '{field_context.get('site_name', '')}', "
                         f"the vegetation index is {ndvi_analysis.get('mean_value', 'N/A')}. "
                         f"{ndvi_analysis.get('interpretation', '')}\n\n"
                         "An NDVI between 0.6 and 0.8 indicates healthy vegetation. "

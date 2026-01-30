@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import User, Site, ChatHistory, Analysis, SiteType
+from app.models import User, Site, ChatHistory, Analysis, SiteType, Alert
 from app.schemas import ChatRequest, ChatResponse, ChatHistoryResponse
 from app.auth import get_current_user
 from app.services.gemini_service import GeminiService
@@ -24,7 +24,7 @@ async def chat(
     db: AsyncSession = Depends(get_db)
 ):
     """Send a message to the AI assistant"""
-    site_context = None
+    global_context = []
     
     # Get site context if provided
     if request.site_id:
@@ -40,12 +40,23 @@ async def chat(
                 select(Analysis)
                 .where(Analysis.site_id == site.id)
                 .order_by(Analysis.created_at.desc())
-                .limit(5)
+                .limit(20)  # Increased limit
             )
             analyses = result.scalars().all()
             
+            # Get latest alerts for context
+            result = await db.execute(
+                select(Alert)
+                .where(Alert.site_id == site.id)
+                .order_by(Alert.created_at.desc())
+                .limit(10)
+            )
+            alerts = result.scalars().all()
+            
             site_context = {
+                "site_id": site.id,
                 "site_name": site.name,
+                "description": site.description,
                 "site_type": site.site_type.value,
                 "area_hectares": site.area_hectares,
                 # Field-specific
@@ -55,18 +66,61 @@ async def chat(
                 "forest_type": site.forest_type if site.site_type == SiteType.FOREST else None,
                 "tree_species": site.tree_species if site.site_type == SiteType.FOREST else None,
                 "protected_status": site.protected_status if site.site_type == SiteType.FOREST else None,
+                "baseline_carbon": site.baseline_carbon_t_ha if site.site_type == SiteType.FOREST else None,
+                "baseline_canopy": site.baseline_canopy_cover if site.site_type == SiteType.FOREST else None,
                 "analyses": [
                     {
                         "type": a.analysis_type.value,
                         "mean_value": a.mean_value,
+                        "min_value": a.min_value,
+                        "max_value": a.max_value,
                         "interpretation": a.interpretation,
                         "date": a.created_at.isoformat(),
-                        # Include forest data if available
                         "forest_data": a.data.get("forest_data") if a.data else None
                     }
                     for a in analyses
+                ],
+                "alerts": [
+                    {
+                        "type": a.alert_type.value if a.alert_type else "general",
+                        "severity": a.severity.value,
+                        "title": a.title,
+                        "message": a.message,
+                        "date": a.created_at.isoformat()
+                    }
+                    for a in alerts
                 ]
             }
+    else:
+        # Get global context (all user sites)
+        result = await db.execute(
+            select(Site)
+            .where(Site.user_id == current_user.id)
+            .order_by(Site.name)
+        )
+        all_sites = result.scalars().all()
+        
+        for s in all_sites:
+            # For each site, get its latest analysis if it exists
+            result = await db.execute(
+                select(Analysis)
+                .where(Analysis.site_id == s.id)
+                .order_by(Analysis.created_at.desc())
+                .limit(1)
+            )
+            latest_analysis = result.scalar_one_or_none()
+            
+            global_context.append({
+                "id": s.id,
+                "name": s.name,
+                "type": s.site_type.value,
+                "crop_or_forest": s.crop_type if s.site_type == SiteType.FIELD else s.forest_type,
+                "latest_analysis": {
+                    "type": latest_analysis.analysis_type.value,
+                    "mean_value": latest_analysis.mean_value,
+                    "date": latest_analysis.created_at.isoformat()
+                } if latest_analysis else None
+            })
     
     # Get or create chat history
     result = await db.execute(
@@ -93,8 +147,9 @@ async def chat(
     try:
         response = await gemini.chat(
             message=request.message,
-            field_context=site_context,  # Keep param name for compatibility
-            history=chat_history.messages[-10:]  # Last 10 messages
+            field_context=site_context,
+            global_context=global_context,
+            history=chat_history.messages[-10:]
         )
     except Exception as e:
         # Fallback response if API fails

@@ -211,7 +211,11 @@ Set the following environment variables in Coolify:
 | `NEXTAUTH_SECRET`     | Secret for NextAuth               | (secure random string)                       |
 | `NEXT_PUBLIC_MAPTILER_KEY`| MapTiler API Key (Optional) | (your API key)                               |
 
-> **Important**: `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_MAPTILER_KEY` are build arguments. You must **Rebuild** the frontend after changing them.
+> **Important**: `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_MAPTILER_KEY` are **build arguments**.
+>
+> 1. In Coolify, go to your Frontend resource → **Environment Variables**.
+> 2. For these variables, ensure the **"Build Variable"** (or "Build-time") checkbox is checked.
+> 3. You must **Rebuild** the frontend after changing them.
 
 ---
 

@@ -238,7 +238,7 @@ function DetailedReportPanel({
                     </div>
                   )}
 
-                  {report.carbon_sequestration?.current_carbon_stock_t_ha !== undefined && (
+                  {report.carbon_sequestration?.total_carbon_t_ha !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-green-100 flex items-center justify-center">
@@ -246,10 +246,11 @@ function DetailedReportPanel({
                         </div>
                         <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Carbon</span>
                       </div>
-                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.carbon_sequestration.current_carbon_stock_t_ha}</p>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.carbon_sequestration.total_carbon_t_ha}</p>
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">t CO₂/ha</p>
                     </div>
                   )}
+
                 </>
               ) : (
                 <>
@@ -280,7 +281,7 @@ function DetailedReportPanel({
                     </div>
                   )}
 
-                  {report.yield_prediction?.predicted_yield_per_ha !== undefined && (
+                  {report.yield_prediction?.yield_per_ha !== undefined && (
                     <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/60 shadow-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-100 flex items-center justify-center">
@@ -288,10 +289,11 @@ function DetailedReportPanel({
                         </div>
                         <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">Yield</span>
                       </div>
-                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.yield_prediction.predicted_yield_per_ha}</p>
+                      <p className="text-xl sm:text-3xl font-bold text-slate-900">{report.yield_prediction.yield_per_ha}</p>
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">tonnes/ha</p>
                     </div>
                   )}
+
                 </>
               )}
             </div>
@@ -427,14 +429,16 @@ function DetailedReportPanel({
                   <div className="p-4 sm:p-6">
                     <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg sm:rounded-xl">
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Total Carbon Stock</p>
-                      <p className="text-2xl sm:text-4xl font-bold text-teal-600">{report.carbon_sequestration.total_carbon_stock_tonnes}</p>
+                      <p className="text-2xl sm:text-4xl font-bold text-teal-600">{report.carbon_sequestration.total_carbon_tonnes}</p>
                       <p className="text-xs sm:text-sm text-teal-600">tonnes CO₂</p>
                     </div>
+
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Per Hectare</span>
-                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.current_carbon_stock_t_ha} t/ha</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.total_carbon_t_ha} t/ha</span>
                       </div>
+
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Carbon Status</span>
                         <span className="font-medium text-xs sm:text-base text-slate-900">{report.carbon_sequestration.carbon_status}</span>
@@ -542,9 +546,10 @@ function DetailedReportPanel({
                   <div className="p-4 sm:p-6">
                     <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg sm:rounded-xl">
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Estimated Biomass</p>
-                      <p className="text-2xl sm:text-4xl font-bold text-emerald-600">{report.biomass_analysis.estimated_biomass_t_ha}</p>
+                      <p className="text-2xl sm:text-4xl font-bold text-emerald-600">{report.biomass_analysis.mean_biomass_t_ha}</p>
                       <p className="text-xs sm:text-sm text-emerald-600">tonnes/hectare</p>
                     </div>
+
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Biomass Level</span>
@@ -556,8 +561,9 @@ function DetailedReportPanel({
                       </div>
                       <div className="flex justify-between items-center py-1.5 sm:py-2">
                         <span className="text-xs sm:text-base text-slate-600">Carbon Content</span>
-                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.biomass_analysis.carbon_content_t_ha} t CO₂/ha</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.biomass_analysis.total_carbon_t_ha} t CO₂/ha</span>
                       </div>
+
                     </div>
                   </div>
                 </div>
@@ -574,14 +580,16 @@ function DetailedReportPanel({
                   <div className="p-4 sm:p-6">
                     <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg sm:rounded-xl">
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Total Predicted Yield</p>
-                      <p className="text-2xl sm:text-4xl font-bold text-amber-600">{report.yield_prediction.total_predicted_yield_tonnes}</p>
+                      <p className="text-2xl sm:text-4xl font-bold text-amber-600">{report.yield_prediction.total_yield_tonnes}</p>
                       <p className="text-xs sm:text-sm text-amber-600">tonnes</p>
                     </div>
+
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Per Hectare</span>
-                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.yield_prediction.predicted_yield_per_ha} t/ha</span>
+                        <span className="font-medium text-xs sm:text-base text-slate-900">{report.yield_prediction.yield_per_ha} t/ha</span>
                       </div>
+
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Yield Potential</span>
                         <Badge variant={
@@ -1111,8 +1119,9 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">Carbon</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                        {((latestComplete?.data?.detailed_report as any)?.carbon_sequestration?.current_carbon_stock_t_ha ??
+                        {((latestComplete?.data?.detailed_report as any)?.carbon_sequestration?.total_carbon_t_ha ??
                           (latestComplete?.data as any)?.forest_data?.carbon_estimate_tonnes_ha)?.toFixed(0) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+
                       </p>
                     </div>
                   </div>
@@ -1155,7 +1164,8 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">Yield</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                        {yieldFromComplete?.predicted_yield_per_ha?.toFixed(1) || yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                        {yieldFromComplete?.yield_per_ha?.toFixed(1) || yieldData?.yield_per_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+
                       </p>
                     </div>
                   </div>
@@ -1168,7 +1178,8 @@ export default function AnalysisPage() {
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-slate-500 truncate">Biomass</p>
                       <p className="text-lg sm:text-2xl font-bold text-slate-900">
-                        {biomassFromComplete?.estimated_biomass_t_ha?.toFixed(1) || biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+                        {biomassFromComplete?.mean_biomass_t_ha?.toFixed(1) || biomassData?.mean_biomass_t_ha?.toFixed(1) || "—"} <span className="text-[10px] sm:text-sm font-normal text-slate-400">t/ha</span>
+
                       </p>
                     </div>
                   </div>

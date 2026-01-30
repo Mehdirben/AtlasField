@@ -184,10 +184,11 @@ class AnalysisService:
             report["biomass_analysis"] = {
                 "biomass_level": cls._get_biomass_indicator(mean_value),
                 "canopy_structure": "Dense" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Sparse",
-                "estimated_biomass_t_ha": biomass_estimate["mean_biomass_t_ha"],
-                "carbon_content_t_ha": biomass_estimate["total_carbon_t_ha"],
+                "mean_biomass_t_ha": biomass_estimate["mean_biomass_t_ha"],
+                "total_carbon_t_ha": biomass_estimate["total_carbon_t_ha"],
                 "interpretation": biomass_estimate["interpretation"]
             }
+
             
             # Soil Moisture Assessment
             moisture_value = mean_value * 0.8 + 0.1  # Derived estimate
@@ -208,11 +209,12 @@ class AnalysisService:
             
             report["yield_prediction"] = {
                 "crop_type": crop_type or "Unknown",
-                "predicted_yield_per_ha": round(yield_per_ha, 2),
-                "total_predicted_yield_tonnes": round(total_yield, 2),
+                "yield_per_ha": round(yield_per_ha, 2),
+                "total_yield_tonnes": round(total_yield, 2),
                 "yield_potential": "High" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Below Average",
                 "confidence_level": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
             }
+
             
             # Spatial Analysis
             report["spatial_analysis"] = {
@@ -360,14 +362,15 @@ class AnalysisService:
                 "change_detection_confidence": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
             },
             "carbon_sequestration": {
-                "current_carbon_stock_t_ha": round(carbon_estimate, 2),
-                "total_carbon_stock_tonnes": round(carbon_estimate * (area_hectares or 1), 2),
+                "total_carbon_t_ha": round(carbon_estimate, 2),
+                "total_carbon_tonnes": round(carbon_estimate * (area_hectares or 1), 2),
                 "carbon_status": cls._get_carbon_status(carbon_estimate),
                 "sequestration_potential": cls._get_sequestration_potential(mean_value, canopy_cover),
                 "baseline_carbon_t_ha": round(baseline_carbon, 2) if baseline_carbon else None,
                 "carbon_change_percent": round(((carbon_estimate - baseline_carbon) / baseline_carbon) * 100, 1) if baseline_carbon and baseline_carbon > 0 else None,
                 "carbon_trend": cls._get_carbon_trend(carbon_estimate, baseline_carbon) if baseline_carbon else "Baseline not set"
             },
+
             "forest_classification": {
                 "detected_type": forest_classification.get("detected_type", forest_type or "mixed"),
                 "classification_confidence": forest_classification.get("confidence", 0.7),

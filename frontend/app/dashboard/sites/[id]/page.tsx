@@ -528,9 +528,10 @@ export default function SiteDetailPage() {
               <div className="p-4 sm:p-6">
                 <div className="text-center py-3 sm:py-4">
                   <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
-                    {yieldData.predicted_yield?.toFixed(1) || "—"}
+                    {yieldData.yield_per_ha?.toFixed(1) || "—"}
                   </p>
                   <p className="text-slate-500 mt-0.5 sm:mt-1 text-xs sm:text-base">tonnes/hectare</p>
+
                 </div>
                 <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-slate-50/80 rounded-lg sm:rounded-xl border border-slate-200/60">
                   <p className="text-[10px] sm:text-sm text-slate-500 mb-1.5 sm:mb-2">Confidence</p>
@@ -538,12 +539,13 @@ export default function SiteDetailPage() {
                     <div className="flex-1 h-2 sm:h-2.5 bg-slate-200 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
-                        style={{ width: `${(yieldData.confidence || 0.7) * 100}%` }}
+                        style={{ width: `${(yieldData.confidence_percent || 70)}%` }}
                       />
                     </div>
                     <span className="text-xs sm:text-sm font-semibold text-slate-700">
-                      {((yieldData.confidence || 0.7) * 100).toFixed(0)}%
+                      {(yieldData.confidence_percent || 70).toFixed(0)}%
                     </span>
+
                   </div>
                 </div>
               </div>
@@ -561,9 +563,10 @@ export default function SiteDetailPage() {
               <div className="p-4 sm:p-6">
                 <div className="text-center py-3 sm:py-4">
                   <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    {biomassData.estimated_biomass?.toFixed(1) || "—"}
+                    {biomassData.mean_biomass_t_ha?.toFixed(1) || "—"}
                   </p>
                   <p className="text-slate-500 mt-0.5 sm:mt-1 text-xs sm:text-base">tonnes/hectare</p>
+
                 </div>
                 {biomassData.growth_stage && (
                   <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg sm:rounded-xl text-center border border-green-200/60">

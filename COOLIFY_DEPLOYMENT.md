@@ -9,7 +9,7 @@ Before deploying, be aware of these common issues:
 | Issue                        | Solution                                                                      |
 | ---------------------------- | ----------------------------------------------------------------------------- |
 | **Bad Gateway (502)**        | **Most common**: Set correct **Ports Exposes** (Backend = `8000`). Also ensures `NEXT_PUBLIC_API_URL` includes `/api/v1` suffix. |
-| **CORS Header Missing**      | Often a "fake" error caused by a **502**. Fix the 502 first. Also check `CORS_ORIGINS_STR` matches Frontend URL. |
+| **CORS Header Missing**      | Often a "fake" error caused by a **502/500**. Fix the backend error first. Also check `CORS_ORIGINS_STR` matches Frontend URL. **Note**: If using `*`, `allow_credentials` is disabled. |
 | **Frontend can't reach API** | Set `NEXT_PUBLIC_API_URL` to backend URL (e.g., `https://api.yourdomain.com/api/v1`) |
 | **Database Connection Error**| Ensure `DATABASE_URL` uses the internal Coolify hostname for PostgreSQL       |
 | **Changes not taking effect**| Use **Rebuild** not just Redeploy (Coolify caches images)                     |

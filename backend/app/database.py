@@ -51,6 +51,8 @@ def run_migrations():
     alembic_ini = os.path.join(backend_dir, 'alembic.ini')
     
     if os.path.exists(alembic_ini):
+        print(f"INFO: Found alembic.ini at {alembic_ini}. Starting migrations...")
+        
         # Convert async URL to sync for Alembic
         sync_url = settings.DATABASE_URL.replace('postgresql+asyncpg://', 'postgresql://')
         
@@ -60,20 +62,36 @@ def run_migrations():
         
         try:
             command.upgrade(alembic_cfg, 'head')
-            print("✅ Database migrations completed")
+            print("✅ Database migrations completed successfully")
+            return True
         except Exception as e:
-            print(f"⚠️ Migration error: {e}")
+            print(f"❌ Migration error: {e}")
+            return False
     else:
-        print("⚠️ alembic.ini not found, skipping migrations")
+        print("⚠️ alembic.ini not found, skipping migration step")
+        return False
 
 
 async def init_db():
     """Initialize database tables"""
+    print("INFO: Initializing database...")
+    
     # Run migrations first (handles schema changes properly)
+    migration_success = False
     try:
-        run_migrations()
+        migration_success = run_migrations()
     except Exception as e:
-        print(f"⚠️ Migration failed, falling back to create_all: {e}")
-        # Fallback to create_all if migrations fail (e.g., fresh install without migration history)
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        print(f"⚠️ Migration call failed: {e}")
+    
+    if not migration_success:
+        print("INFO: Falling back to Base.metadata.create_all (schema sync)...")
+        # Fallback to create_all if migrations fail or are missing
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            print("✅ Database tables initialized (metadata.create_all)")
+        except Exception as e:
+            print(f"❌ Database initialization failed: {e}")
+            raise e
+    
+    print("INFO: Database initialization sequence finished")

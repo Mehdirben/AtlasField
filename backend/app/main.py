@@ -25,10 +25,18 @@ app = FastAPI(
 )
 
 # Configure CORS
+origins = settings.CORS_ORIGINS
+allow_all = "*" in origins
+
+# Log CORS configuration
+print(f"INFO: CORS allowed origins: {origins}")
+if allow_all:
+    print("WARNING: CORS allowed for all origins (*). Credentials (cookies) will be disabled.")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=origins,
+    allow_credentials=not allow_all,  # Starlette requirement: cannot use allow_credentials=True with '*'
     allow_methods=["*"],
     allow_headers=["*"],
 )

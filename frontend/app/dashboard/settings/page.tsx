@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Badge, Button } from "@/components/ui";
+import { SITE_LIMITS } from "@/lib/constants";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -39,7 +40,7 @@ export default function SettingsPage() {
       price: "$0",
       period: "/month",
       features: [
-        "1 field",
+        `${SITE_LIMITS.free} field${SITE_LIMITS.free > 1 ? "s" : ""}`,
         "5 analyses/month",
         "Basic NDVI data",
         "7 days history",
@@ -51,7 +52,7 @@ export default function SettingsPage() {
       price: "$29",
       period: "/month",
       features: [
-        "10 fields",
+        `${SITE_LIMITS.pro} fields`,
         "100 analyses/month",
         "NDVI + RVI + Fusion",
         "1 year history",
@@ -98,11 +99,10 @@ export default function SettingsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-left transition-all whitespace-nowrap text-sm sm:text-base ${
-                activeTab === tab.id
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium shadow-lg shadow-emerald-500/25"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+              className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-left transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === tab.id
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium shadow-lg shadow-emerald-500/25"
+                : "text-slate-600 hover:bg-slate-100"
+                }`}
             >
               <span className="text-lg sm:text-xl">{tab.icon}</span>
               <span className="hidden sm:inline">{tab.label}</span>
@@ -258,14 +258,12 @@ export default function SettingsPage() {
                       </div>
                       <button
                         onClick={() => handleNotificationChange(item.key)}
-                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                          notifications[item.key] ? "bg-emerald-500" : "bg-slate-300"
-                        }`}
+                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${notifications[item.key] ? "bg-emerald-500" : "bg-slate-300"
+                          }`}
                       >
                         <span
-                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                            notifications[item.key] ? "translate-x-6" : "translate-x-0"
-                          }`}
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${notifications[item.key] ? "translate-x-6" : "translate-x-0"
+                            }`}
                         />
                       </button>
                     </div>
@@ -300,9 +298,8 @@ export default function SettingsPage() {
                 {subscriptionTiers.map((tier) => (
                   <div
                     key={tier.name}
-                    className={`relative bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md flex flex-col ${
-                      tier.popular ? "ring-2 ring-emerald-500 border-emerald-200" : "border-slate-200/60"
-                    }`}
+                    className={`relative bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md flex flex-col ${tier.popular ? "ring-2 ring-emerald-500 border-emerald-200" : "border-slate-200/60"
+                      }`}
                   >
                     {tier.popular && (
                       <div className="absolute -top-0 left-0 right-0">
@@ -342,13 +339,12 @@ export default function SettingsPage() {
                         ))}
                       </ul>
                       <button
-                        className={`w-full mt-6 px-4 py-3 rounded-xl font-medium transition-all ${
-                          tier.current
-                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                            : tier.popular
+                        className={`w-full mt-6 px-4 py-3 rounded-xl font-medium transition-all ${tier.current
+                          ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          : tier.popular
                             ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-emerald-500/25"
                             : "border border-slate-200 text-slate-700 hover:bg-slate-50"
-                        }`}
+                          }`}
                         disabled={tier.current}
                       >
                         {tier.current ? "Current Plan" : "Choose Plan"}

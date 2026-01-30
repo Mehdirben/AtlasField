@@ -33,6 +33,21 @@ export const registerUser = async (data: {
   return response.data;
 };
 
+export interface UserProfile {
+  id: number;
+  email: string;
+  full_name?: string;
+  subscription_tier: "free" | "pro" | "enterprise";
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export const getCurrentUser = async (): Promise<UserProfile> => {
+  const response = await api.get("/auth/me");
+  return response.data;
+};
+
 // Site types
 export type SiteType = "field" | "forest";
 

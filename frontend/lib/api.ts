@@ -71,6 +71,7 @@ export interface Site {
   updated_at: string;
   // Analysis data
   latest_ndvi?: number;
+  health_score?: number;
   latest_analysis_date?: string;
   alert_count?: number;
   // Forest-specific analysis

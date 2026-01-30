@@ -104,6 +104,7 @@ class SiteResponse(BaseModel):
 class SiteWithAnalysis(SiteResponse):
     latest_ndvi: Optional[float] = None
     latest_analysis_date: Optional[datetime] = None
+    health_score: Optional[float] = None
     alert_count: int = 0
     # Forest-specific analysis data
     latest_nbr: Optional[float] = None  # Normalized Burn Ratio

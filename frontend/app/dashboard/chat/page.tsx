@@ -152,8 +152,8 @@ export default function ChatPage() {
           <div className="space-y-2 mb-4">
             <button
               className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === null
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                  : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                 }`}
               onClick={() => { setSelectedSiteId(null); startNewChat(); }}
             >
@@ -178,8 +178,8 @@ export default function ChatPage() {
               <button
                 key={site.id}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === site.id
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                    : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                  : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                   }`}
                 onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
               >
@@ -200,36 +200,19 @@ export default function ChatPage() {
                     )
                   )}
                 </div>
-                {site.site_type === "forest" ? (
-                  site.fire_risk_level && (
-                    <Badge
-                      variant={
-                        site.fire_risk_level === "low"
-                          ? "success"
-                          : site.fire_risk_level === "moderate"
-                            ? "warning"
-                            : "error"
-                      }
-                      className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
-                    >
-                      {site.fire_risk_level === "low" ? "🔥 Low" : site.fire_risk_level === "moderate" ? "🔥 Med" : "🔥 High"}
-                    </Badge>
-                  )
-                ) : (
-                  site.latest_ndvi && (
-                    <Badge
-                      variant={
-                        site.latest_ndvi >= 0.6
-                          ? "success"
-                          : site.latest_ndvi >= 0.4
-                            ? "warning"
-                            : "error"
-                      }
-                      className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
-                    >
-                      {site.latest_ndvi.toFixed(2)}
-                    </Badge>
-                  )
+                {site.health_score !== undefined && site.health_score !== null && (
+                  <Badge
+                    variant={
+                      site.health_score >= 60
+                        ? "success"
+                        : site.health_score >= 40
+                          ? "warning"
+                          : "error"
+                    }
+                    className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
+                  >
+                    {Math.round(site.health_score)}%
+                  </Badge>
                 )}
               </button>
             ))}
@@ -266,8 +249,8 @@ export default function ChatPage() {
                       key={history.id}
                       onClick={() => selectChatHistory(history)}
                       className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${activeHistoryId === history.id
-                          ? "bg-emerald-50 border border-emerald-200"
-                          : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
+                        ? "bg-emerald-50 border border-emerald-200"
+                        : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                         }`}
                     >
                       <p className={`text-sm font-medium truncate ${activeHistoryId === history.id ? "text-emerald-700" : "text-slate-700"
@@ -367,8 +350,8 @@ export default function ChatPage() {
                 >
                   <div
                     className={`max-w-[80%] p-4 ${message.role === "user"
-                        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl rounded-br-md shadow-lg shadow-emerald-500/20"
-                        : "bg-white/80 backdrop-blur border border-slate-200/60 rounded-2xl rounded-bl-md shadow-sm"
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl rounded-br-md shadow-lg shadow-emerald-500/20"
+                      : "bg-white/80 backdrop-blur border border-slate-200/60 rounded-2xl rounded-bl-md shadow-sm"
                       }`}
                   >
                     {message.role === "assistant" && (

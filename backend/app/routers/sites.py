@@ -77,6 +77,7 @@ async def list_sites(
         latest_date = None
         latest_nbr = None
         fire_risk_level = None
+        health_score = None
         
         if site.analyses:
             # Look for relevant analyses based on site type
@@ -87,13 +88,14 @@ async def list_sites(
                     latest = max(forest_analyses, key=lambda x: x.created_at)
                     latest_ndvi = latest.mean_value
                     latest_date = latest.created_at
-                    # Extract forest-specific data
+                    # Extract health score from forest report
                     if latest.data:
                         latest_nbr = latest.data.get("nbr")
                         fire_risk_level = latest.data.get("fire_risk_level")
+                        health_score = latest.data.get("detailed_report", {}).get("summary", {}).get("overall_health_score")
             
-            # Fall back to NDVI or COMPLETE analyses
-            if latest_ndvi is None:
+            # Fall back to NDVI or COMPLETE analyses if no health_score yet
+            if health_score is None:
                 relevant_analyses = [
                     a for a in site.analyses 
                     if a.analysis_type in (AnalysisType.NDVI, AnalysisType.COMPLETE)
@@ -102,6 +104,9 @@ async def list_sites(
                     latest = max(relevant_analyses, key=lambda x: x.created_at)
                     latest_ndvi = latest.mean_value
                     latest_date = latest.created_at
+                    # For fields/general NDVI, health score is just NDVI * 100
+                    if latest_ndvi is not None:
+                        health_score = max(0, min(100, latest_ndvi * 100))
         
         # Count unread alerts
         alert_count = len([a for a in site.alerts if not a.is_read])
@@ -122,6 +127,7 @@ async def list_sites(
             updated_at=site.updated_at,
             latest_ndvi=latest_ndvi,
             latest_analysis_date=latest_date,
+            health_score=health_score,
             alert_count=alert_count,
             latest_nbr=latest_nbr,
             fire_risk_level=fire_risk_level

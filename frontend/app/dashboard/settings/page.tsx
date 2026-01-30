@@ -40,7 +40,7 @@ export default function SettingsPage() {
       price: "$0",
       period: "/month",
       features: [
-        `${SITE_LIMITS.free} field${SITE_LIMITS.free > 1 ? "s" : ""}`,
+        `${SITE_LIMITS.free} site${SITE_LIMITS.free > 1 ? "s" : ""}`,
         "5 analyses/month",
         "Basic NDVI data",
         "7 days history",
@@ -52,7 +52,7 @@ export default function SettingsPage() {
       price: "$29",
       period: "/month",
       features: [
-        `${SITE_LIMITS.pro} fields`,
+        `${SITE_LIMITS.pro} sites`,
         "100 analyses/month",
         "NDVI + RVI + Fusion",
         "1 year history",
@@ -67,7 +67,7 @@ export default function SettingsPage() {
       price: "Custom",
       period: "",
       features: [
-        "Unlimited fields",
+        "Unlimited sites",
         "Unlimited analyses",
         "Dedicated API",
         "Unlimited history",
@@ -286,7 +286,7 @@ export default function SettingsPage() {
                     <div>
                       <h3 className="font-semibold text-slate-900">Free Plan</h3>
                       <p className="text-sm text-slate-600">
-                        1 field • 5 analyses/month
+                        1 site • 5 analyses/month
                       </p>
                     </div>
                     <Badge variant="primary">Active</Badge>

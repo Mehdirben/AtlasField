@@ -5,7 +5,7 @@ import { Button, Badge } from "@/components/ui";
 import { ArrowRightIcon, PlayIcon, CheckIcon } from "@/components/icons";
 
 const trustItems = [
-  { text: "500+ Farmers" },
+  { text: "500+ Land Managers" },
   { text: "10,000+ Hectares" },
   { text: "98% Accuracy" },
 ];
@@ -34,16 +34,16 @@ export function Hero() {
             </Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
-              Monitor Your Fields{" "}
+              Monitor Your Fields &{" "}
               <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
-                From Space
+                Forests from Space
               </span>
             </h1>
 
             <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0">
-              Get real-time insights on crop health, yield predictions, and pest
-              alerts using Sentinel satellite data and AI. Make smarter farming
-              decisions with data from space.
+              Get real-time insights on crop health, forest density, and
+              environmental risks using Sentinel satellite data and AI. Build a
+              sustainable future for your land with data from space.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
@@ -114,7 +114,7 @@ export function Hero() {
                 <div className="mt-4 space-y-3">
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-600">Crop Health</span>
+                      <span className="text-slate-600">Site Health (NDVI)</span>
                       <span className="font-medium text-slate-900">85%</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -123,16 +123,18 @@ export function Hero() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-600">Soil Moisture</span>
-                      <span className="font-medium text-slate-900">62%</span>
+                      <span className="text-slate-600">Forest Carbon Stock</span>
+                      <span className="font-medium text-slate-900">124 t/ha</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full w-[62%] bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full" />
+                      <div className="h-full w-[72%] bg-gradient-to-r from-green-500 to-emerald-400 rounded-full" />
                     </div>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Yield Forecast</span>
-                    <span className="font-medium text-emerald-600">+12% vs last year</span>
+                    <span className="text-slate-600">Environmental Risk</span>
+                    <span className="font-medium text-emerald-600 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Low
+                    </span>
                   </div>
                 </div>
               </div>

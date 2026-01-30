@@ -11,11 +11,11 @@ export function CTA() {
 
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-          Ready to Transform Your Farming?
+          Ready to Transform Your Land Management?
         </h2>
         <p className="text-lg text-emerald-100 mb-8 max-w-xl mx-auto">
-          Join thousands of farmers using satellite data to boost yields and
-          reduce costs. Start your free trial today.
+          Join thousands of land managers using satellite data to monitor
+          their forests and fields efficiently. Start your free trial today.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">

@@ -10,7 +10,7 @@ const plans = [
     period: "/month",
     description: "Perfect for small farmers getting started",
     features: [
-      "1 field monitoring",
+      "1 site monitoring",
       "10 analyses per month",
       "Basic NDVI reports",
       "Weekly email updates",
@@ -26,7 +26,7 @@ const plans = [
     period: "/month",
     description: "For growing farms that need more insights",
     features: [
-      "10 fields monitoring",
+      "10 sites monitoring",
       "Unlimited analyses",
       "AI-powered chat assistant",
       "Real-time alerts",
@@ -43,7 +43,7 @@ const plans = [
     period: "",
     description: "For cooperatives and large operations",
     features: [
-      "Unlimited fields",
+      "Unlimited sites",
       "API access",
       "Custom AI models",
       "Dedicated account manager",
@@ -81,7 +81,7 @@ export function Pricing() {
               className={cn(
                 "relative p-6 flex flex-col",
                 plan.highlighted &&
-                  "border-2 border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105"
+                "border-2 border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105"
               )}
             >
               {plan.highlighted && (

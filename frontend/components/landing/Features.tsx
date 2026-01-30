@@ -2,34 +2,34 @@ import { Section, Container, SectionHeader, Card } from "@/components/ui";
 
 const features = [
   {
-    icon: "🛰️",
+    icon: "📡",
     title: "Multi-Sensor Fusion",
-    description: "Combines Sentinel-1 radar and Sentinel-2 optical imagery for comprehensive field analysis, even through clouds.",
+    description: "Combines Sentinel radar and optical imagery for comprehensive analysis of your sites, even through persistent clouds.",
   },
   {
-    icon: "☁️",
-    title: "Cloud-Free Monitoring",
-    description: "SAR radar technology sees through clouds and works in any weather. Your monitoring never stops.",
+    icon: "🔥",
+    title: "Fire & Risk Detection",
+    description: "Advanced algorithms detect early fire signs and moisture stress in forests and fields to prevent environmental damage.",
   },
   {
-    icon: "🧠",
-    title: "AI-Powered Analysis",
-    description: "Deep learning models detect diseases early, identify pests, and provide actionable recommendations.",
+    icon: "🌳",
+    title: "Forest Health & Carbon",
+    description: "Monitor canopy cover, species health, and estimate carbon stock changes over time with high-resolution data.",
   },
   {
     icon: "📊",
-    title: "Yield Prediction",
-    description: "Get accurate harvest forecasts 2-3 months ahead using historical data and current field conditions.",
+    title: "State-of-the-art Indices",
+    description: "Access NDVI, NBR, and NDMI reports to track vegetation health and moisture levels accurately.",
   },
   {
     icon: "🔔",
     title: "Real-Time Alerts",
-    description: "Instant notifications for pest threats, irrigation needs, and anomalies detected in your fields.",
+    description: "Instant notifications for forest fire risks, pest threats, and soil anomalies detected at your sites.",
   },
   {
     icon: "💬",
-    title: "AI Chat Assistant",
-    description: "Chat with our AI assistant about your fields. Ask questions and get instant, data-driven answers.",
+    title: "AI Site Assistant",
+    description: "Chat with our AI about your land. Ask questions about forest density, crop health, or historical trends.",
   },
 ];
 
@@ -42,11 +42,11 @@ export function Features() {
             <>
               Everything You Need for{" "}
               <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
-                Precision Farming
+                Modern Monitoring
               </span>
             </>
           }
-          subtitle="Leverage satellite data and AI to make smarter decisions for your fields. From real-time monitoring to predictive analytics."
+          subtitle="Leverage satellite data and AI to make smarter decisions for your land. From real-time monitoring to advanced environmental insights."
         />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

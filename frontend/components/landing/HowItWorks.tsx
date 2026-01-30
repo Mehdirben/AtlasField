@@ -4,8 +4,8 @@ const steps = [
   {
     number: "01",
     icon: "✏️",
-    title: "Draw Your Field",
-    description: "Simply draw your field boundaries on our interactive map. It takes less than a minute.",
+    title: "Draw Your Site",
+    description: "Simply draw your site boundaries—fields or forests—on our map. It takes less than a minute.",
   },
   {
     number: "02",

@@ -49,8 +49,8 @@ export function Footer() {
               <span>AtlasField</span>
             </Link>
             <p className="text-sm mb-6 max-w-xs">
-              AI-powered satellite monitoring for precision farming. Make data-driven
-              decisions with insights from space.
+              AI-powered satellite monitoring for fields and forests. Make
+              data-driven decisions with insights from space.
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (

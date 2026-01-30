@@ -29,18 +29,18 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
-  const fields = sites.filter((s) => s.site_type === "field");
-  const forests = sites.filter((s) => s.site_type === "forest");
+  const fields = sites.filter((s) => s.site_type === "FIELD");
+  const forests = sites.filter((s) => s.site_type === "FOREST");
   const totalArea = sites.reduce((sum, s) => sum + (s.area_hectares || 0), 0);
   const healthySites = sites.filter((s) => {
-    if (s.site_type === "forest") {
-      return s.fire_risk_level === "low";
+    if (s.site_type === "FOREST") {
+      return s.fire_risk_level === "LOW";
     }
     return s.latest_ndvi && s.latest_ndvi >= 0.4;
   }).length;
   const sitesNeedingAttention = sites.filter((s) => {
-    if (s.site_type === "forest") {
-      return s.fire_risk_level && s.fire_risk_level !== "low";
+    if (s.site_type === "FOREST") {
+      return s.fire_risk_level && s.fire_risk_level !== "LOW";
     }
     return s.latest_ndvi && s.latest_ndvi < 0.4;
   }).length;
@@ -153,7 +153,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
+                    <span className="text-lg">{site.site_type === "FOREST" ? "🌲" : "🌾"}</span>
                     <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">{site.name}</h3>
                   </div>
                   {site.health_score !== undefined && site.health_score !== null ? (
@@ -168,14 +168,14 @@ export default function DashboardPage() {
                     >
                       {Math.round(site.health_score)}%
                     </Badge>
-                  ) : site.site_type === "forest" ? (
+                  ) : site.site_type === "FOREST" ? (
                     site.fire_risk_level && (
                       <span
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-lg",
-                          site.fire_risk_level === "low"
+                          site.fire_risk_level === "LOW"
                             ? "bg-emerald-100 text-emerald-700"
-                            : site.fire_risk_level === "moderate"
+                            : site.fire_risk_level === "MEDIUM"
                               ? "bg-amber-100 text-amber-700"
                               : "bg-red-100 text-red-700"
                         )}
@@ -201,7 +201,7 @@ export default function DashboardPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-500">
-                  {site.site_type === "forest" ? (
+                  {site.site_type === "FOREST" ? (
                     site.forest_type && (
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md">{site.forest_type}</span>
                     )
@@ -233,22 +233,22 @@ export default function DashboardPage() {
                 key={alert.id}
                 className={cn(
                   "flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm transition-all hover:shadow-md",
-                  alert.severity === "critical"
+                  alert.severity === "CRITICAL"
                     ? "bg-red-50/80 border-red-200"
-                    : alert.severity === "high"
+                    : alert.severity === "HIGH"
                       ? "bg-amber-50/80 border-amber-200"
                       : "bg-blue-50/80 border-blue-200"
                 )}
               >
                 <div className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-                  alert.severity === "critical"
+                  alert.severity === "CRITICAL"
                     ? "bg-red-100"
-                    : alert.severity === "high"
+                    : alert.severity === "HIGH"
                       ? "bg-amber-100"
                       : "bg-blue-100"
                 )}>
-                  {alert.severity === "critical" ? "🚨" : alert.severity === "high" ? "⚠️" : "ℹ️"}
+                  {alert.severity === "CRITICAL" ? "🚨" : alert.severity === "HIGH" ? "⚠️" : "ℹ️"}
                 </div>
                 <div className="flex-1">
                   <span className="block font-semibold text-slate-900">{alert.title}</span>

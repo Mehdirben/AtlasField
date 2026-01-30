@@ -37,7 +37,7 @@ export interface UserProfile {
   id: number;
   email: string;
   full_name?: string;
-  subscription_tier: "free" | "pro" | "enterprise";
+  subscription_tier: "FREE" | "PRO" | "ENTERPRISE";
   is_active: boolean;
   is_verified: boolean;
   created_at: string;
@@ -49,7 +49,7 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
 };
 
 // Site types
-export type SiteType = "field" | "forest";
+export type SiteType = "FIELD" | "FOREST";
 
 // Sites (formerly Fields)
 export interface Site {
@@ -123,7 +123,7 @@ export const createField = async (data: {
   geometry: GeoJSON.Polygon;
   crop_type?: string;
 }): Promise<Site> => {
-  return createSite({ ...data, site_type: "field" });
+  return createSite({ ...data, site_type: "FIELD" });
 };
 
 export const updateSite = async (
@@ -290,8 +290,8 @@ export interface Alert {
   // Backwards compatibility
   field_id?: number;
   field_name?: string;
-  alert_type?: "vegetation_health" | "moisture" | "fire_risk" | "deforestation" | "drought_stress" | "pest_disease";
-  severity: "low" | "medium" | "high" | "critical";
+  alert_type?: "VEGETATION_HEALTH" | "MOISTURE" | "FIRE_RISK" | "DEFORESTATION" | "DROUGHT_STRESS" | "PEST_DISEASE";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   title: string;
   message: string;
   is_read: boolean;

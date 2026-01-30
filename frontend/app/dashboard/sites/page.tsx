@@ -22,12 +22,12 @@ const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
 
 // Helper to get site icon based on type
 const getSiteIcon = (siteType: SiteType) => {
-  return siteType === "forest" ? "🌲" : "🌾";
+  return siteType === "FOREST" ? "🌲" : "🌾";
 };
 
 // Helper to get site color classes
 const getSiteColorClasses = (siteType: SiteType, isSelected: boolean) => {
-  if (siteType === "forest") {
+  if (siteType === "FOREST") {
     return isSelected
       ? "border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
       : "border-slate-200/60 hover:border-green-300 hover:bg-green-50/80";
@@ -80,8 +80,8 @@ export default function SitesPage() {
     ? sites
     : sites.filter(s => s.site_type === filterType);
 
-  const fieldCount = sites.filter(s => s.site_type === "field").length;
-  const forestCount = sites.filter(s => s.site_type === "forest").length;
+  const fieldCount = sites.filter(s => s.site_type === "FIELD").length;
+  const forestCount = sites.filter(s => s.site_type === "FOREST").length;
 
   if (loading) {
     return (
@@ -122,10 +122,10 @@ export default function SitesPage() {
           All ({sites.length})
         </button>
         <button
-          onClick={() => setFilterType("field")}
+          onClick={() => setFilterType("FIELD")}
           className={cn(
             "px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2",
-            filterType === "field"
+            filterType === "FIELD"
               ? "bg-emerald-500 text-white"
               : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
           )}
@@ -133,10 +133,10 @@ export default function SitesPage() {
           🌾 Fields ({fieldCount})
         </button>
         <button
-          onClick={() => setFilterType("forest")}
+          onClick={() => setFilterType("FOREST")}
           className={cn(
             "px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2",
-            filterType === "forest"
+            filterType === "FOREST"
               ? "bg-green-600 text-white"
               : "bg-green-50 text-green-700 hover:bg-green-100"
           )}
@@ -198,7 +198,7 @@ export default function SitesPage() {
                       <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors",
                         selectedSite === site.id
-                          ? (site.site_type === "forest" ? "bg-green-100" : "bg-emerald-100")
+                          ? (site.site_type === "FOREST" ? "bg-green-100" : "bg-emerald-100")
                           : "bg-slate-100 group-hover:bg-emerald-50"
                       )}>
                         {getSiteIcon(site.site_type)}
@@ -206,12 +206,12 @@ export default function SitesPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">{site.name}</h3>
                         <p className="text-sm text-slate-500">
-                          {site.site_type === "forest"
+                          {site.site_type === "FOREST"
                             ? `${site.forest_type || "Forest"} • ${site.area_hectares?.toFixed(1) || "?"} ha`
                             : `${site.crop_type || "Not specified"} • ${site.area_hectares?.toFixed(1) || "?"} ha`
                           }
                         </p>
-                        {site.site_type === "forest" && site.protected_status && (
+                        {site.site_type === "FOREST" && site.protected_status && (
                           <span className="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
                             🛡️ Protected
                           </span>
@@ -231,7 +231,7 @@ export default function SitesPage() {
                       >
                         {Math.round(site.health_score)}%
                       </Badge>
-                    ) : site.site_type === "field" && site.latest_ndvi ? (
+                    ) : site.site_type === "FIELD" && site.latest_ndvi ? (
                       <span className={cn(
                         "px-2.5 py-1 text-xs font-semibold rounded-lg",
                         site.latest_ndvi >= 0.6 ? "bg-emerald-100 text-emerald-700" :
@@ -240,12 +240,12 @@ export default function SitesPage() {
                       )}>
                         {site.latest_ndvi.toFixed(2)}
                       </span>
-                    ) : site.site_type === "forest" && site.fire_risk_level ? (
+                    ) : site.site_type === "FOREST" && site.fire_risk_level ? (
                       <span className={cn(
                         "px-2.5 py-1 text-xs font-semibold rounded-lg",
-                        site.fire_risk_level === "low" ? "bg-green-100 text-green-700" :
-                          site.fire_risk_level === "moderate" ? "bg-amber-100 text-amber-700" :
-                            site.fire_risk_level === "high" ? "bg-orange-100 text-orange-700" :
+                        site.fire_risk_level === "LOW" ? "bg-green-100 text-green-700" :
+                          site.fire_risk_level === "MEDIUM" ? "bg-amber-100 text-amber-700" :
+                            site.fire_risk_level === "HIGH" ? "bg-orange-100 text-orange-700" :
                               "bg-red-100 text-red-700"
                       )}>
                         🔥 {site.fire_risk_level}

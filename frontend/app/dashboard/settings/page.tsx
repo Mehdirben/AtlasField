@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Badge, Button } from "@/components/ui";
-import { SITE_LIMITS } from "@/lib/constants";
+import { SITE_LIMITS, SubscriptionTier } from "@/lib/constants";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -40,7 +40,7 @@ export default function SettingsPage() {
       price: "$0",
       period: "/month",
       features: [
-        `${SITE_LIMITS.free} site${SITE_LIMITS.free > 1 ? "s" : ""}`,
+        `${SITE_LIMITS.FREE} site${SITE_LIMITS.FREE > 1 ? "s" : ""}`,
         "5 analyses/month",
         "Basic NDVI data",
         "7 days history",
@@ -52,7 +52,7 @@ export default function SettingsPage() {
       price: "$29",
       period: "/month",
       features: [
-        `${SITE_LIMITS.pro} sites`,
+        `${SITE_LIMITS.PRO} sites`,
         "100 analyses/month",
         "NDVI + RVI + Fusion",
         "1 year history",
@@ -284,9 +284,11 @@ export default function SettingsPage() {
                 <div className="p-6">
                   <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl border border-emerald-200/60">
                     <div>
-                      <h3 className="font-semibold text-slate-900">Free Plan</h3>
+                      <h3 className="font-semibold text-slate-900">
+                        {session?.user?.subscriptionTier === "PRO" ? "Pro Plan" : session?.user?.subscriptionTier === "ENTERPRISE" ? "Enterprise Plan" : "Free Plan"}
+                      </h3>
                       <p className="text-sm text-slate-600">
-                        1 site • 5 analyses/month
+                        {SITE_LIMITS[(session?.user?.subscriptionTier as SubscriptionTier) || "FREE"]} sites • Unlimited analyses
                       </p>
                     </div>
                     <Badge variant="primary">Active</Badge>

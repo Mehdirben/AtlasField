@@ -352,8 +352,8 @@ function DetailedReportPanel({
                     <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl">
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Fire Risk Level</p>
                       <Badge variant={
-                        report.fire_risk_assessment.fire_risk_level === "low" ? "success" :
-                          report.fire_risk_assessment.fire_risk_level === "medium" ? "warning" : "error"
+                        report.fire_risk_assessment.fire_risk_level === "LOW" ? "success" :
+                          report.fire_risk_assessment.fire_risk_level === "MEDIUM" ? "warning" : "error"
                       } className="text-sm sm:text-lg px-3 py-1">
                         {report.fire_risk_assessment.fire_risk_level?.toUpperCase()}
                       </Badge>
@@ -394,8 +394,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Deforestation Risk</span>
                       <Badge variant={
-                        report.deforestation_monitoring.deforestation_risk === "low" ? "success" :
-                          report.deforestation_monitoring.deforestation_risk === "medium" ? "warning" : "error"
+                        report.deforestation_monitoring.deforestation_risk === "LOW" ? "success" :
+                          report.deforestation_monitoring.deforestation_risk === "MEDIUM" ? "warning" : "error"
                       }>
                         {report.deforestation_monitoring.deforestation_risk}
                       </Badge>
@@ -869,7 +869,7 @@ export default function AnalysisPage() {
   async function loadSiteData(siteId: number) {
     try {
       const site = sites.find(s => s.id === siteId) || selectedSite;
-      const isForestSite = site?.site_type === "forest";
+      const isForestSite = site?.site_type === "FOREST";
 
       const [analysisData, yieldRes, biomassRes, trendsRes] = await Promise.all([
         getAnalysisHistory(siteId),
@@ -1008,7 +1008,7 @@ export default function AnalysisPage() {
     return type;
   };
 
-  const isForest = selectedSite?.site_type === "forest";
+  const isForest = selectedSite?.site_type === "FOREST";
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -1038,7 +1038,7 @@ export default function AnalysisPage() {
           >
             {sites.map((site: Site) => (
               <option key={site.id} value={site.id}>
-                {site.site_type === "forest" ? "🌲" : "🌾"} {site.name} {site.crop_type ? `(${site.crop_type})` : site.forest_type ? `(${site.forest_type})` : ""}
+                {site.site_type === "FOREST" ? "🌲" : "🌾"} {site.name} {site.crop_type ? `(${site.crop_type})` : site.forest_type ? `(${site.forest_type})` : ""}
               </option>
             ))}
           </select>
@@ -1120,7 +1120,7 @@ export default function AnalysisPage() {
               </>
             ) : (
               <>
-                {/* Field/Agriculture metric cards */}
+                {/* FIELD/Agriculture metric cards */}
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 p-3 sm:p-5 shadow-sm">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center text-lg sm:text-2xl shrink-0">
@@ -1226,7 +1226,7 @@ export default function AnalysisPage() {
                           {analysisHistory.length > 0 ? (
                             <BarChart
                               data={analysisHistory}
-                              label={isForest ? "Forest Health Trend" : "Health Score Trend (Last Analyses)"}
+                              label={isForest ? "FOREST Health Trend" : "Health Score Trend (Last Analyses)"}
                               color={isForest ? "bg-teal-500" : "bg-emerald-500"}
                             />
                           ) : (
@@ -1244,16 +1244,26 @@ export default function AnalysisPage() {
                           : "bg-gradient-to-r from-emerald-50 to-cyan-50 border-emerald-200/60"
                           }`}>
                           <h4 className="font-medium text-slate-900 mb-1.5 sm:mb-2 text-sm sm:text-base">
-                            {isForest ? "Latest Forest Analysis" : "Latest Analysis Interpretation"}
+                            {isForest ? "Latest FOREST Analysis" : "Latest Analysis Interpretation"}
                           </h4>
                           <p className="text-slate-600 text-xs sm:text-base">{String(latestNDVI.interpretation)}</p>
-                          {(latestNDVI.data as any)?.detailed_report && (
+                          {selectedSite.site_type === "FOREST" ? (
                             <button
-                              onClick={() => setSelectedAnalysis(latestNDVI)}
-                              className="mt-2 sm:mt-3 text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                              onClick={() => handleRunAnalysis("FOREST")}
+                              disabled={analyzing !== null}
+                              className="mt-2 sm:mt-3 flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                             >
-                              View Full Report →
+                              {analyzing === "FOREST" ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "🌲"} Run Forest Analysis
                             </button>
+                          ) : (
+                            (latestNDVI.data as any)?.detailed_report && (
+                              <button
+                                onClick={() => setSelectedAnalysis(latestNDVI)}
+                                className="mt-2 sm:mt-3 text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                              >
+                                View Full Report →
+                              </button>
+                            )
                           )}
                         </div>
                       )}
@@ -1264,7 +1274,7 @@ export default function AnalysisPage() {
                           <p className="font-semibold text-slate-900 text-sm sm:text-base">{selectedSite.area_hectares?.toFixed(2) || "—"} ha</p>
                         </div>
                         <div className="p-2.5 sm:p-3 bg-slate-50/80 rounded-lg sm:rounded-xl">
-                          <p className="text-[10px] sm:text-xs text-slate-500">{isForest ? "Forest Type" : "Crop"}</p>
+                          <p className="text-[10px] sm:text-xs text-slate-500">{isForest ? "FOREST Type" : "Crop"}</p>
                           <p className="font-semibold text-slate-900 text-sm sm:text-base truncate capitalize">
                             {isForest ? (selectedSite.forest_type || "Pending analysis") : (selectedSite.crop_type || "Not set")}
                           </p>
@@ -1402,7 +1412,7 @@ export default function AnalysisPage() {
                     </div>
                   )}
 
-                  {activeTab === "trends" && selectedSite?.site_type === "field" && (
+                  {activeTab === "trends" && selectedSite?.site_type === "FIELD" && (
                     <div className="space-y-4 sm:space-y-6">
                       {!fieldTrends?.has_sufficient_data ? (
                         <div className="text-center py-8 sm:py-12">
@@ -1411,7 +1421,7 @@ export default function AnalysisPage() {
                           </div>
                           <h3 className="font-semibold text-slate-900 mb-2">Trends Coming Soon</h3>
                           <p className="text-slate-500 text-sm max-w-md mx-auto">
-                            {fieldTrends?.message || "Run more field analyses to see trends in vegetation health, crop yield, and biomass."}
+                            {fieldTrends?.message || "Run more FIELD analyses to see trends in vegetation health, crop yield, and biomass."}
                           </p>
                         </div>
                       ) : (
@@ -1430,7 +1440,7 @@ export default function AnalysisPage() {
                               </span>
                               <div>
                                 <h4 className="font-semibold text-slate-900 capitalize">
-                                  Field Health: {fieldTrends.overall_trend}
+                                  FIELD Health: {fieldTrends.overall_trend}
                                 </h4>
                                 <p className="text-sm text-slate-600">
                                   Based on {fieldTrends.analyses.length} analyses
@@ -1548,7 +1558,7 @@ export default function AnalysisPage() {
                           </div>
                           <h3 className="font-semibold text-slate-900 mb-2">Trends Coming Soon</h3>
                           <p className="text-slate-500 text-sm max-w-md mx-auto">
-                            {forestTrends?.message || "Run more forest analyses to see trends in carbon sequestration, canopy coverage, and forest health."}
+                            {forestTrends?.message || "Run more FOREST analyses to see trends in carbon sequestration, canopy coverage, and FOREST health."}
                           </p>
                         </div>
                       ) : (
@@ -1567,7 +1577,7 @@ export default function AnalysisPage() {
                               </span>
                               <div>
                                 <h4 className="font-semibold text-slate-900 capitalize">
-                                  Forest Health: {forestTrends.overall_trend}
+                                  FOREST Health: {forestTrends.overall_trend}
                                 </h4>
                                 <p className="text-sm text-slate-600">
                                   Based on {forestTrends.analyses.length} analyses
@@ -1696,7 +1706,7 @@ export default function AnalysisPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                 <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
                   <h2 className="font-semibold text-slate-900 text-sm sm:text-base">
-                    {isForest ? "Forest Analysis" : "Field Analysis"}
+                    {isForest ? "FOREST Analysis" : "FIELD Analysis"}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">Comprehensive satellite analysis</p>
                 </div>

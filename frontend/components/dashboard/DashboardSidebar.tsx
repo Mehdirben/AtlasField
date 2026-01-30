@@ -50,9 +50,10 @@ export function DashboardSidebar() {
     return pathname.startsWith(item.href);
   };
 
-  const tier = user?.subscription_tier || "free";
-  const limit = SITE_LIMITS[tier as SubscriptionTier];
-  const planName = tier === "free" ? "Free Plan" : tier === "pro" ? "Pro Plan" : "Enterprise Plan";
+  const rawTier = user?.subscription_tier || "FREE";
+  const tier = rawTier.toUpperCase() as SubscriptionTier;
+  const limit = SITE_LIMITS[tier] || SITE_LIMITS.FREE;
+  const planName = tier === "FREE" ? "Free Plan" : tier === "PRO" ? "Pro Plan" : "Enterprise Plan";
 
   return (
     <>
@@ -110,7 +111,7 @@ export function DashboardSidebar() {
               </div>
               <p className="text-white font-bold text-base lg:text-lg mb-1">{planName}</p>
               <p className="text-emerald-100 text-xs lg:text-sm mb-4">
-                {tier === "free" ? "Upgrade for unlimited access" : "Enjoy your premium features"}
+                {tier === "FREE" ? "Upgrade for unlimited access" : "Enjoy your premium features"}
               </p>
               <Link
                 href="/dashboard/settings?tab=subscription"

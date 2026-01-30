@@ -699,13 +699,13 @@ class SentinelHubService:
             confidence = 0.7
             
             if mean_msi > 1.2 and mean_ndfi < -0.1:
-                forest_type = "coniferous"
+                forest_type = "CONIFEROUS"
                 confidence = min(0.9, 0.6 + abs(mean_ndfi) * 0.5)
             elif mean_msi < 0.9 and mean_ndfi > 0:
-                forest_type = "deciduous"
+                forest_type = "DECIDUOUS"
                 confidence = min(0.9, 0.6 + mean_ndfi * 0.5)
             else:
-                forest_type = "mixed"
+                forest_type = "MIXED"
                 confidence = 0.65
             
             # Estimate canopy cover from NDVI
@@ -732,9 +732,9 @@ class SentinelHubService:
         density = "dense" if canopy_cover > 70 else "moderate" if canopy_cover > 40 else "sparse"
         
         interpretations = {
-            "coniferous": f"Coniferous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: pine, spruce, fir.",
-            "deciduous": f"Deciduous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: oak, beech, maple.",
-            "mixed": f"Mixed forest with {density} canopy ({canopy_cover:.0f}% cover). Contains both coniferous and deciduous species.",
+            "CONIFEROUS": f"Coniferous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: pine, spruce, fir.",
+            "DECIDUOUS": f"Deciduous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: oak, beech, maple.",
+            "MIXED": f"Mixed forest with {density} canopy ({canopy_cover:.0f}% cover). Contains both coniferous and deciduous species.",
             "UNKNOWN": "Unable to classify forest type. Area may have insufficient vegetation cover."
         }
         return interpretations.get(forest_type, interpretations["UNKNOWN"])
@@ -776,7 +776,7 @@ class SentinelHubService:
         
         # Estimate carbon content (simplified model)
         # Forests typically store 50-200 tonnes C/ha depending on type and age
-        biomass_factor = 150 if classification.get("detected_type") == "coniferous" else 120
+        biomass_factor = 150 if classification.get("detected_type") == "CONIFEROUS" else 120
         carbon_estimate = biomass_factor * ndvi_mean * (classification.get("canopy_cover_percent", 50) / 100)
         
         return {
@@ -1007,39 +1007,27 @@ class SentinelHubService:
                 confidence = min(0.85, 0.6 + mean_ndwi * 0.5)
             
             # Corn/Maize - high NDVI, strong red edge
-            elif mean_ndvi > 0.65 and mean_ndre > 0.4:
-                crop_type = "corn"
-                confidence = min(0.85, 0.55 + mean_ndvi * 0.3)
-            
-            # Soybeans - moderate-high NDVI, distinctive SWIR
-            elif mean_ndvi > 0.5 and mean_ndvi < 0.75 and mean_swir > 1.1:
-                crop_type = "soybeans"
-                confidence = 0.7
-            
-            # Wheat/Cereals - moderate NDVI (varies by growth stage)
-            elif 0.3 < mean_ndvi < 0.65 and mean_ndre < 0.35:
-                crop_type = "wheat"
-                confidence = 0.7
-            
-            # Pasture/Grassland - consistent moderate NDVI, low SWIR ratio
-            elif 0.25 < mean_ndvi < 0.5 and mean_swir < 1.0:
-                crop_type = "pasture"
-                confidence = 0.65
-            
-            # Vegetables - variable, typically higher variability
-            elif 0.3 < mean_ndvi < 0.6 and np.std(ndvi_values) > 0.1:
-                crop_type = "vegetables"
-                confidence = 0.55
-            
-            # Bare soil / fallow
-            elif mean_ndvi < 0.2:
-                crop_type = "fallow"
+                crop_type = "RICE"
+                confidence = 0.85
+            # Wheat detection - moderate NDVI and specific SWIR ratio
+            elif 0.35 < mean_ndvi < 0.6 and mean_swir > 1.5:
+                crop_type = "WHEAT"
                 confidence = 0.75
-            
-            # Default to general crop if no clear match
+            # Maize detection - high NDVI and strong Red Edge
+            elif mean_ndvi > 0.6 and mean_rendvi > 0.5:
+                crop_type = "MAIZE"
+                confidence = 0.8
+            # Soybean detection - moderate NDVI and specific Red Edge/SWIR
+            elif 0.4 < mean_ndvi < 0.7 and mean_rendvi < 0.4:
+                crop_type = "SOYBEANS"
+                confidence = 0.7
+            # Fallow/Bare soil detection - very low NDVI
+            elif mean_ndvi < 0.2:
+                crop_type = "FALLOW"
+                confidence = 0.9
             else:
-                crop_type = "mixed_crop"
-                confidence = 0.5
+                crop_type = "MIXED_CROP"
+                confidence = 0.6
             
             # Estimate vegetation cover
             veg_cover = min(100, max(0, (mean_ndvi - 0.1) / 0.7 * 100))
@@ -1082,17 +1070,15 @@ class SentinelHubService:
         health = "excellent" if ndvi > 0.6 else "good" if ndvi > 0.45 else "moderate" if ndvi > 0.3 else "poor"
         
         crop_names = {
-            "wheat": "Wheat/Cereals",
-            "corn": "Corn/Maize",
-            "soybeans": "Soybeans",
-            "rice": "Rice (paddy)",
-            "pasture": "Pasture/Grassland",
-            "vegetables": "Vegetables/Horticulture",
-            "fallow": "Fallow/Bare soil",
-            "mixed_crop": "Mixed crops",
+            "RICE": "Paddy Rice",
+            "WHEAT": "Wheat/Small grains",
+            "MAIZE": "Corn/Maize",
+            "SOYBEANS": "Soybeans",
+            "VEGETABLES": "Vegetables/Horticulture",
+            "FALLOW": "Fallow/Bare soil",
+            "MIXED_CROP": "Mixed crops",
             "UNKNOWN": "Unknown crop"
         }
         
         name = crop_names.get(crop_type, crop_type.title())
         return f"Detected {name} with {health} health. Vegetation cover: {cover:.0f}%. NDVI: {ndvi:.2f}"
-

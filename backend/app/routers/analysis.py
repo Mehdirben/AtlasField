@@ -205,7 +205,7 @@ async def run_analysis(
                 try:
                     crop_classification = await sentinel_service.get_crop_classification(bbox)
                     detected_crop = crop_classification.get("detected_type")
-                    if detected_crop and detected_crop not in ("UNKNOWN", "fallow"):
+                    if detected_crop and detected_crop not in ("UNKNOWN", "FALLOW"):
                         site.crop_type = detected_crop
                         await db.commit()
                     # Store crop classification data in analysis
@@ -221,7 +221,7 @@ async def run_analysis(
                 try:
                     crop_classification = await sentinel_service.get_crop_classification(bbox)
                     detected_crop = crop_classification.get("detected_type")
-                    if detected_crop and detected_crop not in ("UNKNOWN", "fallow"):
+                    if detected_crop and detected_crop not in ("UNKNOWN", "FALLOW"):
                         site.crop_type = detected_crop
                         await db.commit()
                     analysis_data["crop_classification"] = crop_classification
@@ -409,7 +409,7 @@ async def predict_yield(
     # Calculate yield prediction
     prediction = AnalysisService.predict_yield(
         ndvi_history=ndvi_history,
-        crop_type=site.crop_type or "wheat",
+        crop_type=site.crop_type or "WHEAT",
         area_ha=site.area_hectares or 1.0
     )
     

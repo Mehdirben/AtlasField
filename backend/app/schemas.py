@@ -61,10 +61,10 @@ class SiteCreate(BaseModel):
     @classmethod
     def validate_forest_type(cls, v):
         if v is not None:
-            valid_types = ['coniferous', 'deciduous', 'mixed', 'tropical', 'mangrove']
-            if v.lower() not in valid_types:
+            valid_types = ['CONIFEROUS', 'DECIDUOUS', 'MIXED', 'TROPICAL', 'MANGROVE']
+            if v.upper() not in valid_types:
                 raise ValueError(f'forest_type must be one of: {", ".join(valid_types)}')
-            return v.lower()
+            return v.upper()
         return v
 
 
@@ -244,7 +244,7 @@ class ForestAnalysis(BaseModel):
     nbr: float  # Normalized Burn Ratio
     ndmi: float  # Normalized Difference Moisture Index
     canopy_health: str
-    fire_risk_level: str  # low, medium, high, critical
+    fire_risk_level: str  # LOW, MEDIUM, HIGH, CRITICAL
     deforestation_detected: bool
     carbon_estimate_tonnes_ha: float
     interpretation: str
@@ -273,7 +273,7 @@ class ForestAnalysisData(BaseModel):
 class ForestTrends(BaseModel):
     """Analysis-by-analysis forest trends with baseline comparison"""
     analyses: list[ForestAnalysisData]
-    overall_trend: str  # improving, stable, declining, unknown
+    overall_trend: str  # IMPROVING, STABLE, DECLINING, UNKNOWN
     avg_ndvi_change: Optional[float] = None  # Average change across all analyses
     avg_carbon_change: Optional[float] = None
     baseline_comparison: Optional[dict] = None  # comparison to first recorded baseline
@@ -298,7 +298,7 @@ class FieldAnalysisData(BaseModel):
 class FieldTrends(BaseModel):
     """Analysis-by-analysis field trends"""
     analyses: list[FieldAnalysisData]
-    overall_trend: str  # improving, stable, declining, unknown
+    overall_trend: str  # IMPROVING, STABLE, DECLINING, UNKNOWN
     avg_ndvi_change: Optional[float] = None
     avg_yield_change: Optional[float] = None
     baseline_comparison: Optional[dict] = None

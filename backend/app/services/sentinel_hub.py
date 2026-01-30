@@ -756,23 +756,23 @@ class SentinelHubService:
         
         # Determine fire risk based on NBR and NDMI
         if nbr_mean < 0.1:
-            fire_risk = "critical"
+            fire_risk = "CRITICAL"
         elif nbr_mean < 0.2 and ndmi_mean < 0.2:
-            fire_risk = "high"
+            fire_risk = "HIGH"
         elif nbr_mean < 0.3 or ndmi_mean < 0.25:
-            fire_risk = "medium"
+            fire_risk = "MEDIUM"
         else:
-            fire_risk = "low"
+            fire_risk = "LOW"
         
         # Determine canopy health
         if ndvi_mean >= 0.6:
-            canopy_health = "excellent"
+            canopy_health = "EXCELLENT"
         elif ndvi_mean >= 0.45:
-            canopy_health = "good"
+            canopy_health = "GOOD"
         elif ndvi_mean >= 0.3:
-            canopy_health = "moderate"
+            canopy_health = "MODERATE"
         else:
-            canopy_health = "poor"
+            canopy_health = "POOR"
         
         # Estimate carbon content (simplified model)
         # Forests typically store 50-200 tonnes C/ha depending on type and age
@@ -790,7 +790,7 @@ class SentinelHubService:
             "canopy_health": canopy_health,
             "forest_classification": classification,
             "carbon_estimate_tonnes_ha": round(carbon_estimate, 1),
-            "deforestation_risk": "low" if ndvi_mean > 0.4 else "medium" if ndvi_mean > 0.25 else "high",
+            "deforestation_risk": "LOW" if ndvi_mean > 0.4 else "MEDIUM" if ndvi_mean > 0.25 else "HIGH",
             "interpretation": self._interpret_forest_health(ndvi_mean, nbr_mean, ndmi_mean, fire_risk, classification)
         }
     
@@ -811,9 +811,9 @@ class SentinelHubService:
             parts.append(f"This {forest_type} forest shows signs of stress with reduced vegetation vigor.")
         
         # Fire risk
-        if fire_risk in ["high", "critical"]:
-            parts.append(f"⚠️ Fire risk is {fire_risk.upper()} - immediate monitoring recommended.")
-        elif fire_risk == "medium":
+        if fire_risk in ["HIGH", "CRITICAL"]:
+            parts.append(f"⚠️ Fire risk is {fire_risk} - immediate monitoring recommended.")
+        elif fire_risk == "MEDIUM":
             parts.append("Moderate fire risk - regular monitoring advised.")
         
         # Moisture stress

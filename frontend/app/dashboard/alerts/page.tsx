@@ -55,7 +55,7 @@ export default function AlertsPage() {
     if (alertType === "fire_risk") return "🔥";
     if (alertType === "deforestation") return "🪓";
     if (alertType === "drought_stress") return "🏜️";
-    
+
     switch (severity) {
       case "critical":
         return "🚨";
@@ -79,13 +79,13 @@ export default function AlertsPage() {
     if (alertType === "drought_stress") {
       return "bg-amber-100 text-amber-700 border-amber-200";
     }
-    
+
     switch (severity) {
-      case "critical":
+      case "CRITICAL":
         return "bg-red-100 text-red-700 border-red-200";
-      case "high":
+      case "HIGH":
         return "bg-orange-100 text-orange-700 border-orange-200";
-      case "medium":
+      case "MEDIUM":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
       default:
         return "bg-blue-100 text-blue-700 border-blue-200";
@@ -141,21 +141,19 @@ export default function AlertsPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="inline-flex bg-white/80 backdrop-blur-sm rounded-xl p-1 sm:p-1.5 border border-slate-200/60 shadow-sm">
             <button
-              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === "all"
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              }`}
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === "all"
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
               onClick={() => setFilter("all")}
             >
               All
             </button>
             <button
-              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === "unread"
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              }`}
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === "unread"
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
               onClick={() => setFilter("unread")}
             >
               Unread
@@ -201,9 +199,8 @@ export default function AlertsPage() {
                 {dateAlerts.map((alert) => (
                   <div
                     key={alert.id}
-                    className={`bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm transition-all hover:shadow-md ${
-                      !alert.is_read ? "ring-2 ring-emerald-500/20 border-emerald-200" : "border-slate-200/60"
-                    }`}
+                    className={`bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm transition-all hover:shadow-md ${!alert.is_read ? "ring-2 ring-emerald-500/20 border-emerald-200" : "border-slate-200/60"
+                      }`}
                   >
                     <div className="flex items-start gap-4 p-5">
                       <div
@@ -224,20 +221,20 @@ export default function AlertsPage() {
                           <div className="flex items-center gap-2 shrink-0">
                             <Badge
                               variant={
-                                alert.severity === "critical"
+                                alert.severity === "CRITICAL"
                                   ? "error"
-                                  : alert.severity === "high"
-                                  ? "warning"
-                                  : "default"
+                                  : alert.severity === "HIGH"
+                                    ? "warning"
+                                    : "default"
                               }
                             >
-                              {alert.severity === "critical"
+                              {alert.severity === "CRITICAL"
                                 ? "Critical"
-                                : alert.severity === "high"
-                                ? "High"
-                                : alert.severity === "medium"
-                                ? "Medium"
-                                : "Info"}
+                                : alert.severity === "HIGH"
+                                  ? "High"
+                                  : alert.severity === "MEDIUM"
+                                    ? "Medium"
+                                    : "Info"}
                             </Badge>
                             {!alert.is_read && (
                               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />

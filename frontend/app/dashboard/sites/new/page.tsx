@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Check, Loader2, MapPin, Maximize2, PlusCircle, Trees } from "lucide-react";
 import { createSite, SiteType } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +49,7 @@ const TREE_SPECIES = [
 
 export default function NewSitePage() {
   const router = useRouter();
-  const [siteType, setSiteType] = useState<SiteType>("field");
+  const [siteType, setSiteType] = useState<SiteType>("FIELD");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -100,15 +101,15 @@ export default function NewSitePage() {
         geometry: geometry,
         site_type: siteType,
         // Field-specific
-        crop_type: siteType === "field" ? formData.crop_type || undefined : undefined,
+        crop_type: siteType === "FIELD" ? formData.crop_type || undefined : undefined,
         // Forest-specific (forest_type will be auto-detected by satellite)
-        tree_species: siteType === "forest" ? formData.tree_species || undefined : undefined,
-        protected_status: siteType === "forest" ? formData.protected_status : undefined,
+        tree_species: siteType === "FOREST" ? formData.tree_species || undefined : undefined,
+        protected_status: siteType === "FOREST" ? formData.protected_status : undefined,
       });
 
       router.push("/dashboard/sites");
     } catch (err: any) {
-      setError(err.response?.data?.detail || `Error creating ${siteType}`);
+      setError(err.response?.data?.detail || `Error creating ${siteType.toLowerCase()}`);
     } finally {
       setLoading(false);
     }
@@ -135,10 +136,10 @@ export default function NewSitePage() {
         <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
-            onClick={() => setSiteType("field")}
+            onClick={() => setSiteType("FIELD")}
             className={cn(
               "p-6 rounded-xl border-2 transition-all duration-200 text-left",
-              siteType === "field"
+              siteType === "FIELD"
                 ? "border-emerald-500 bg-gradient-to-br from-emerald-50 to-cyan-50 shadow-lg shadow-emerald-500/10"
                 : "border-slate-200 hover:border-emerald-300 hover:bg-slate-50"
             )}
@@ -146,7 +147,7 @@ export default function NewSitePage() {
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-14 h-14 rounded-xl flex items-center justify-center text-3xl transition-colors",
-                siteType === "field" ? "bg-emerald-100" : "bg-slate-100"
+                siteType === "FIELD" ? "bg-emerald-100" : "bg-slate-100"
               )}>
                 🌾
               </div>
@@ -155,7 +156,7 @@ export default function NewSitePage() {
                 <p className="text-sm text-slate-500 mt-1">Track crops, NDVI, yields and more</p>
               </div>
             </div>
-            {siteType === "field" && (
+            {siteType === "FIELD" && (
               <div className="mt-4 flex items-center gap-2 text-emerald-600 text-sm font-medium">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -167,10 +168,10 @@ export default function NewSitePage() {
 
           <button
             type="button"
-            onClick={() => setSiteType("forest")}
+            onClick={() => setSiteType("FOREST")}
             className={cn(
               "p-6 rounded-xl border-2 transition-all duration-200 text-left",
-              siteType === "forest"
+              siteType === "FOREST"
                 ? "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-500/10"
                 : "border-slate-200 hover:border-green-300 hover:bg-slate-50"
             )}
@@ -178,7 +179,7 @@ export default function NewSitePage() {
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-14 h-14 rounded-xl flex items-center justify-center text-3xl transition-colors",
-                siteType === "forest" ? "bg-green-100" : "bg-slate-100"
+                siteType === "FOREST" ? "bg-green-100" : "bg-slate-100"
               )}>
                 🌲
               </div>
@@ -187,7 +188,7 @@ export default function NewSitePage() {
                 <p className="text-sm text-slate-500 mt-1">Monitor fire risk, health, deforestation</p>
               </div>
             </div>
-            {siteType === "forest" && (
+            {siteType === "FOREST" && (
               <div className="mt-4 flex items-center gap-2 text-green-600 text-sm font-medium">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -198,7 +199,7 @@ export default function NewSitePage() {
           </button>
         </div>
 
-        {siteType === "forest" && (
+        {siteType === "FOREST" && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="flex items-start gap-3">
               <span className="text-xl">🛰️</span>
@@ -213,7 +214,7 @@ export default function NewSitePage() {
           </div>
         )}
 
-        {siteType === "field" && (
+        {siteType === "FIELD" && (
           <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div className="flex items-start gap-3">
               <span className="text-xl">🛰️</span>
@@ -237,13 +238,13 @@ export default function NewSitePage() {
               <h2 className="font-semibold text-slate-900 flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
                 <span className={cn(
                   "flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg",
-                  siteType === "forest"
+                  siteType === "FOREST"
                     ? "bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/25"
                     : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25"
                 )}>
                   1
                 </span>
-                Draw your {siteType} boundaries
+                Draw your {siteType.toLowerCase()} boundaries
               </h2>
             </div>
             <div className="p-3 sm:p-6">
@@ -257,14 +258,14 @@ export default function NewSitePage() {
               {geometry && (
                 <div className={cn(
                   "mt-4 flex items-center gap-2 px-4 py-3 rounded-xl border",
-                  siteType === "forest"
+                  siteType === "FOREST"
                     ? "text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200/60"
                     : "text-emerald-700 bg-gradient-to-r from-emerald-50 to-cyan-50 border-emerald-200/60"
                 )}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="font-medium">{siteType === "forest" ? "Forest" : "Field"} drawn! You can edit it or continue.</span>
+                  <span className="font-medium">{siteType === "FOREST" ? "Forest" : "Field"} drawn! You can edit it or continue.</span>
                 </div>
               )}
             </div>
@@ -278,13 +279,13 @@ export default function NewSitePage() {
               <h2 className="font-semibold text-slate-900 flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
                 <span className={cn(
                   "flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg",
-                  siteType === "forest"
+                  siteType === "FOREST"
                     ? "bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/25"
                     : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25"
                 )}>
                   2
                 </span>
-                {siteType === "forest" ? "Forest" : "Field"} information
+                {siteType === "FOREST" ? "Forest" : "Field"} information
               </h2>
             </div>
             <div className="p-4 sm:p-6">
@@ -297,7 +298,7 @@ export default function NewSitePage() {
 
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
-                    {siteType === "forest" ? "Forest" : "Field"} Name *
+                    {siteType === "FOREST" ? "Forest" : "Field"} Name *
                   </label>
                   <input
                     id="name"
@@ -306,13 +307,13 @@ export default function NewSitePage() {
                     value={formData.name}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                    placeholder={siteType === "forest" ? "e.g. Cedar Valley Forest" : "e.g. North Field"}
+                    placeholder={siteType === "FOREST" ? "e.g. Cedar Valley Forest" : "e.g. North Field"}
                     required
                   />
                 </div>
 
                 {/* Field-specific: Crop Type */}
-                {siteType === "field" && (
+                {siteType === "FIELD" && (
                   <div>
                     <label htmlFor="crop_type" className="block text-sm font-medium text-slate-700 mb-2">
                       Crop Type
@@ -338,7 +339,7 @@ export default function NewSitePage() {
                 )}
 
                 {/* Forest-specific: Tree Species */}
-                {siteType === "forest" && (
+                {siteType === "FOREST" && (
                   <>
                     <div>
                       <label htmlFor="tree_species" className="block text-sm font-medium text-slate-700 mb-2">
@@ -390,7 +391,7 @@ export default function NewSitePage() {
                     onChange={handleChange}
                     rows={4}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
-                    placeholder={siteType === "forest" ? "Notes about the forest..." : "Notes about the field..."}
+                    placeholder={siteType === "FOREST" ? "Notes about the forest..." : "Notes about the field..."}
                   />
                 </div>
 
@@ -407,18 +408,27 @@ export default function NewSitePage() {
                     disabled={loading || !geometry}
                     className={cn(
                       "flex-1 px-4 py-3 text-white rounded-xl hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed",
-                      siteType === "forest"
+                      siteType === "FOREST"
                         ? "bg-gradient-to-r from-green-500 to-green-600 hover:shadow-green-500/25"
                         : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:shadow-emerald-500/25"
                     )}
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Creating...
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <PlusCircle className="w-6 h-6" />
+                            {`Create ${siteType === "FOREST" ? "Forest" : "Field"}`}
+                          </>
+                        )}
                       </span>
                     ) : (
-                      `Create ${siteType === "forest" ? "Forest" : "Field"}`
+                      `Create ${siteType === "FOREST" ? "Forest" : "Field"}`
                     )}
                   </button>
                 </div>

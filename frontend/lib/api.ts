@@ -207,7 +207,7 @@ export interface ForestAnalysisData {
 
 export interface ForestTrends {
   analyses: ForestAnalysisData[];
-  overall_trend: "improving" | "stable" | "declining" | "unknown";
+  overall_trend: "IMPROVING" | "STABLE" | "DECLINING" | "UNKNOWN";
   avg_ndvi_change?: number;
   avg_carbon_change?: number;
   baseline_comparison?: any;
@@ -228,7 +228,7 @@ export interface FieldAnalysisData {
 
 export interface FieldTrends {
   analyses: FieldAnalysisData[];
-  overall_trend: "improving" | "stable" | "declining" | "unknown";
+  overall_trend: "IMPROVING" | "STABLE" | "DECLINING" | "UNKNOWN";
   avg_ndvi_change?: number;
   avg_yield_change?: number;
   baseline_comparison?: any;

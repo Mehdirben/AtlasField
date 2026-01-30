@@ -62,7 +62,7 @@ export default function SiteDetailPage() {
       setAnalyses(analysisData);
 
       // Load predictions only for fields
-      if (siteData.site_type === "field" && analysisData.length > 0) {
+      if (siteData.site_type === "FIELD" && analysisData.length > 0) {
         try {
           const [yield_, biomass] = await Promise.all([
             getYieldPrediction(siteId),
@@ -86,13 +86,13 @@ export default function SiteDetailPage() {
     try {
       const analysis = await runAnalysis(siteId, type);
       setAnalyses((prev) => [analysis, ...prev]);
-      
+
       // Reload site to get updated forest_type and other fields
       const updatedSite = await getSite(siteId);
       setSite(updatedSite);
-      
+
       // Only load predictions for fields
-      if (site?.site_type === "field") {
+      if (site?.site_type === "FIELD") {
         const [yield_, biomass] = await Promise.all([
           getYieldPrediction(siteId),
           getBiomassEstimate(siteId),
@@ -131,7 +131,7 @@ export default function SiteDetailPage() {
     );
   }
 
-  const isForest = site.site_type === "forest";
+  const isForest = site.site_type === "FOREST";
   const latestForestAnalysis = analyses.find((a) => a.analysis_type === "FOREST");
 
   return (
@@ -153,8 +153,8 @@ export default function SiteDetailPage() {
               <h1 className="text-lg sm:text-2xl font-bold text-slate-900 truncate">{site.name}</h1>
             </div>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-              <Badge 
-                variant={isForest ? "success" : "primary"} 
+              <Badge
+                variant={isForest ? "success" : "primary"}
                 className="text-[10px] sm:text-xs"
               >
                 {isForest ? "Forest" : "Field"}
@@ -189,7 +189,7 @@ export default function SiteDetailPage() {
           href={`/dashboard/chat?site=${siteId}`}
           className={cn(
             "flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-medium text-sm sm:text-base",
-            isForest 
+            isForest
               ? "bg-gradient-to-r from-green-500 to-green-600 hover:shadow-green-500/25"
               : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:shadow-emerald-500/25"
           )}
@@ -224,7 +224,7 @@ export default function SiteDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div className={cn(
                   "rounded-lg sm:rounded-xl p-3 sm:p-4 border",
-                  isForest 
+                  isForest
                     ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-100/60"
                     : "bg-gradient-to-br from-emerald-50 to-cyan-50 border-emerald-100/60"
                 )}>
@@ -235,7 +235,7 @@ export default function SiteDetailPage() {
                 </div>
                 <div className={cn(
                   "rounded-lg sm:rounded-xl p-3 sm:p-4 border",
-                  isForest 
+                  isForest
                     ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100/60"
                     : "bg-gradient-to-br from-green-50 to-emerald-50 border-green-100/60"
                 )}>
@@ -275,21 +275,21 @@ export default function SiteDetailPage() {
                   {site.fire_risk_level && (
                     <div className={cn(
                       "rounded-lg sm:rounded-xl p-3 sm:p-4 border",
-                      site.fire_risk_level === "low" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/60" :
-                      site.fire_risk_level === "moderate" ? "bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/60" :
-                      site.fire_risk_level === "high" ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/60" :
-                      "bg-gradient-to-br from-red-50 to-rose-50 border-red-200/60"
+                      site.fire_risk_level === "LOW" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/60" :
+                        site.fire_risk_level === "MEDIUM" ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60" :
+                          site.fire_risk_level === "HIGH" ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/60" :
+                            "bg-gradient-to-br from-red-50 to-rose-50 border-red-200/60"
                     )}>
                       <p className="text-[10px] sm:text-sm text-slate-500">Fire Risk</p>
-                      <p className={cn(
-                        "text-sm sm:text-lg font-semibold capitalize",
-                        site.fire_risk_level === "low" ? "text-green-700" :
-                        site.fire_risk_level === "moderate" ? "text-amber-700" :
-                        site.fire_risk_level === "high" ? "text-orange-700" :
-                        "text-red-700"
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center text-3xl",
+                        site.fire_risk_level === "LOW" ? "text-green-700" :
+                          site.fire_risk_level === "MEDIUM" ? "text-amber-700" :
+                            site.fire_risk_level === "HIGH" ? "text-orange-700" :
+                              "text-red-700"
                       )}>
                         🔥 {site.fire_risk_level}
-                      </p>
+                      </div>
                     </div>
                   )}
                   {site.latest_nbr !== undefined && site.latest_nbr !== null && (
@@ -335,13 +335,13 @@ export default function SiteDetailPage() {
                         <div className={cn(
                           "w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center text-lg sm:text-xl shrink-0 border",
                           analysis.analysis_type === "NDVI" ? "bg-gradient-to-br from-green-100 to-emerald-100 border-green-200/60" :
-                          analysis.analysis_type === "RVI" ? "bg-gradient-to-br from-blue-100 to-cyan-100 border-blue-200/60" :
-                          analysis.analysis_type === "FOREST" ? "bg-gradient-to-br from-green-100 to-teal-100 border-green-200/60" :
-                          "bg-gradient-to-br from-purple-100 to-pink-100 border-purple-200/60"
+                            analysis.analysis_type === "RVI" ? "bg-gradient-to-br from-blue-100 to-cyan-100 border-blue-200/60" :
+                              analysis.analysis_type === "FOREST" ? "bg-gradient-to-br from-green-100 to-teal-100 border-green-200/60" :
+                                "bg-gradient-to-br from-purple-100 to-pink-100 border-purple-200/60"
                         )}>
-                          {analysis.analysis_type === "NDVI" ? "🌿" : 
-                           analysis.analysis_type === "RVI" ? "📡" : 
-                           analysis.analysis_type === "FOREST" ? "🌲" : "🔄"}
+                          {analysis.analysis_type === "NDVI" ? "🌿" :
+                            analysis.analysis_type === "RVI" ? "📡" :
+                              analysis.analysis_type === "FOREST" ? "🌲" : "🔄"}
                         </div>
                         <div className="min-w-0">
                           <p className="font-medium text-slate-900 text-xs sm:text-base truncate">
@@ -363,12 +363,12 @@ export default function SiteDetailPage() {
                           <Badge
                             variant={
                               analysis.mean_value >= 0.6 ? "success" :
-                              analysis.mean_value >= 0.4 ? "warning" : "error"
+                                analysis.mean_value >= 0.4 ? "warning" : "error"
                             }
                             className="text-[10px] sm:text-xs"
                           >
                             {analysis.mean_value >= 0.6 ? "Good" :
-                             analysis.mean_value >= 0.4 ? "Fair" : "Low"}
+                              analysis.mean_value >= 0.4 ? "Fair" : "Low"}
                           </Badge>
                         </div>
                       )}
@@ -392,7 +392,7 @@ export default function SiteDetailPage() {
                 // Forest-specific analysis buttons
                 <>
                   <button
-                    onClick={() => handleRunAnalysis("forest")}
+                    onClick={() => handleRunAnalysis("FOREST")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-green-200/60"
                   >
@@ -403,7 +403,7 @@ export default function SiteDetailPage() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleRunAnalysis("ndvi")}
+                    onClick={() => handleRunAnalysis("NDVI")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-emerald-200/60"
                   >
@@ -414,7 +414,7 @@ export default function SiteDetailPage() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleRunAnalysis("rvi")}
+                    onClick={() => handleRunAnalysis("RVI")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-blue-200/60"
                   >
@@ -429,7 +429,7 @@ export default function SiteDetailPage() {
                 // Field-specific analysis buttons
                 <>
                   <button
-                    onClick={() => handleRunAnalysis("ndvi")}
+                    onClick={() => handleRunAnalysis("NDVI")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-green-200/60"
                   >
@@ -440,7 +440,7 @@ export default function SiteDetailPage() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleRunAnalysis("rvi")}
+                    onClick={() => handleRunAnalysis("RVI")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-blue-200/60"
                   >
@@ -451,7 +451,7 @@ export default function SiteDetailPage() {
                     </div>
                   </button>
                   <button
-                    onClick={() => handleRunAnalysis("fusion")}
+                    onClick={() => handleRunAnalysis("FUSION")}
                     disabled={analyzing}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-lg sm:rounded-xl transition-all disabled:opacity-50 border border-purple-200/60"
                   >
@@ -502,7 +502,7 @@ export default function SiteDetailPage() {
                           </p>
                         </div>
                       )}
-                      
+
                       {/* Health Interpretation */}
                       {latestForestAnalysis.interpretation && (
                         <div className="p-3 sm:p-4 bg-slate-50/80 rounded-xl border border-slate-200/60">

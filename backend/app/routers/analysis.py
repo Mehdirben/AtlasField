@@ -86,11 +86,11 @@ async def create_alert_from_analysis(
     
     elif analysis_type == AnalysisType.FOREST and analysis_data:
         # Forest-specific alerts
-        fire_risk = analysis_data.get("fire_risk_level", "low")
+        fire_risk = analysis_data.get("fire_risk_level", "LOW")
         nbr = analysis_data.get("nbr", 0.5)
         ndmi = analysis_data.get("ndmi", 0.3)
         
-        if fire_risk == "critical":
+        if fire_risk == "CRITICAL":
             alert = Alert(
                 site_id=site.id,
                 alert_type=AlertType.FIRE_RISK,
@@ -99,7 +99,7 @@ async def create_alert_from_analysis(
                 message=f"Forest analysis indicates CRITICAL fire risk. NBR: {nbr:.3f}, NDMI: {ndmi:.3f}. "
                         f"Extremely dry conditions detected. Take immediate precautions.",
             )
-        elif fire_risk == "high":
+        elif fire_risk == "HIGH":
             alert = Alert(
                 site_id=site.id,
                 alert_type=AlertType.FIRE_RISK,
@@ -110,8 +110,8 @@ async def create_alert_from_analysis(
             )
         
         # Check for deforestation
-        deforestation_risk = analysis_data.get("deforestation_risk", "low")
-        if deforestation_risk == "high":
+        deforestation_risk = analysis_data.get("deforestation_risk", "LOW").upper()
+        if deforestation_risk == "HIGH":
             alert = Alert(
                 site_id=site.id,
                 alert_type=AlertType.DEFORESTATION,
@@ -251,10 +251,10 @@ async def run_analysis(
             cloud_coverage=analysis_data.get("cloud_coverage", 10),
             nbr=analysis_data.get("nbr", 0.3),
             ndmi=analysis_data.get("ndmi", 0.2),
-            fire_risk_level=analysis_data.get("fire_risk_level", "low"),
-            canopy_health=analysis_data.get("canopy_health", "Good"),
+            fire_risk_level=analysis_data.get("fire_risk_level", "LOW"),
+            canopy_health=analysis_data.get("canopy_health", "GOOD"),
             carbon_estimate=analysis_data.get("carbon_estimate_tonnes_ha", 80),
-            deforestation_risk=analysis_data.get("deforestation_risk", "low"),
+            deforestation_risk=analysis_data.get("deforestation_risk", "LOW"),
             forest_classification=analysis_data.get("forest_classification", {}),
             area_hectares=site.area_hectares,
             forest_name=site.name,
@@ -501,7 +501,7 @@ async def get_forest_trends(
     if len(analyses) < 2:
         return ForestTrends(
             analyses=[],
-            overall_trend="unknown",
+            overall_trend="UNKNOWN",
             has_sufficient_data=False,
             message="Insufficient data: At least 2 forest analyses are required for trend comparison."
         )
@@ -522,8 +522,8 @@ async def get_forest_trends(
         ndmi = forest_data.get("ndmi", detailed_report.get("fire_risk_assessment", {}).get("ndmi_value", 0.2))
         carbon = forest_data.get("carbon_estimate_tonnes_ha", detailed_report.get("carbon_sequestration", {}).get("current_carbon_stock_t_ha", 80))
         canopy = forest_data.get("canopy_cover_percent", detailed_report.get("canopy_health", {}).get("canopy_cover_percent", (ndvi * 100)))
-        fire_risk = forest_data.get("fire_risk_level", detailed_report.get("fire_risk_assessment", {}).get("risk_level", "low"))
-        deforestation = forest_data.get("deforestation_risk", detailed_report.get("deforestation_monitoring", {}).get("risk_level", "low"))
+        fire_risk = forest_data.get("fire_risk_level", detailed_report.get("fire_risk_assessment", {}).get("risk_level", "LOW"))
+        deforestation = forest_data.get("deforestation_risk", detailed_report.get("deforestation_monitoring", {}).get("risk_level", "LOW"))
         
         current_data = {
             "ndvi": ndvi,
@@ -581,13 +581,13 @@ async def get_forest_trends(
     # Determine overall trend
     if avg_ndvi_change is not None and avg_carbon_change is not None:
         if avg_ndvi_change > 2 and avg_carbon_change > 0:
-            overall_trend = "improving"
+            overall_trend = "IMPROVING"
         elif avg_ndvi_change < -2 or avg_carbon_change < -2:
-            overall_trend = "declining"
+            overall_trend = "DECLINING"
         else:
-            overall_trend = "stable"
+            overall_trend = "STABLE"
     else:
-        overall_trend = "unknown"
+        overall_trend = "UNKNOWN"
     
     # Baseline comparison if available
     baseline_comparison = None
@@ -748,13 +748,13 @@ async def get_field_trends(
     # Determine overall trend
     if avg_ndvi_change is not None:
         if avg_ndvi_change > 1:
-            overall_trend = "improving"
+            overall_trend = "IMPROVING"
         elif avg_ndvi_change < -1:
-            overall_trend = "declining"
+            overall_trend = "DECLINING"
         else:
-            overall_trend = "stable"
+            overall_trend = "STABLE"
     else:
-        overall_trend = "unknown"
+        overall_trend = "UNKNOWN"
     
     return FieldTrends(
         analyses=analysis_data_list,

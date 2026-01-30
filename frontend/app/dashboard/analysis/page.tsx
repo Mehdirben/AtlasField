@@ -721,8 +721,8 @@ function DetailedReportPanel({
                       <div key={i} className="p-3 sm:p-4 bg-emerald-50/50 rounded-lg sm:rounded-xl border border-emerald-100">
                         <div className="flex flex-wrap items-start gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                           <Badge variant={
-                            rec.priority === "low" ? "success" :
-                              rec.priority === "medium" ? "warning" : "error"
+                            rec.priority === "LOW" ? "success" :
+                              rec.priority === "MEDIUM" ? "warning" : "error"
                           } className="text-[10px] sm:text-xs">
                             {rec.priority}
                           </Badge>
@@ -869,13 +869,13 @@ export default function AnalysisPage() {
   async function loadSiteData(siteId: number) {
     try {
       const site = sites.find(s => s.id === siteId) || selectedSite;
-      const isForestSite = site?.site_type === "FOREST";
+      const isForest = site?.site_type === "FOREST";
 
       const [analysisData, yieldRes, biomassRes, trendsRes] = await Promise.all([
         getAnalysisHistory(siteId),
-        isForestSite ? Promise.resolve(null) : getYieldPrediction(siteId).catch(() => null),
+        isForest ? Promise.resolve(null) : getYieldPrediction(siteId).catch(() => null),
         getBiomassEstimate(siteId).catch(() => null),
-        isForestSite ? getForestTrends(siteId).catch(() => null) : Promise.resolve(null),
+        isForest ? getForestTrends(siteId).catch(() => null) : Promise.resolve(null),
       ]);
       setAnalyses(analysisData);
       setYieldData(yieldRes);
@@ -883,7 +883,7 @@ export default function AnalysisPage() {
       setForestTrends(trendsRes);
 
       // Fetch field trends if it's a field site
-      if (!isForestSite) {
+      if (!isForest) {
         const fieldTrendsRes = await getFieldTrends(siteId).catch(() => null);
         setFieldTrends(fieldTrendsRes);
       }
@@ -1381,16 +1381,16 @@ export default function AnalysisPage() {
                           </h4>
                           <div className="space-y-2 sm:space-y-3">
                             {recommendations.map((rec: any, i: number) => (
-                              <div key={i} className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${rec.priority === "low"
+                              <div key={i} className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${rec.priority === "LOW"
                                 ? "bg-emerald-50 border-emerald-200/60"
-                                : rec.priority === "medium"
+                                : rec.priority === "MEDIUM"
                                   ? "bg-blue-50 border-blue-200/60"
                                   : "bg-amber-50 border-amber-200/60"
                                 }`}>
                                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                                   <Badge variant={
-                                    rec.priority === "low" ? "success" :
-                                      rec.priority === "medium" ? "warning" : "error"
+                                    rec.priority === "LOW" ? "success" :
+                                      rec.priority === "MEDIUM" ? "warning" : "error"
                                   } className="text-[10px] sm:text-xs">
                                     {rec.priority}
                                   </Badge>
@@ -1427,17 +1427,21 @@ export default function AnalysisPage() {
                       ) : (
                         <>
                           {/* Overall Trend Banner */}
-                          <div className={`p-4 rounded-xl border ${fieldTrends.overall_trend === "improving"
-                            ? "bg-emerald-50 border-emerald-200"
-                            : fieldTrends.overall_trend === "declining"
-                              ? "bg-red-50 border-red-200"
-                              : "bg-slate-50 border-slate-200"
+                          <div className={`p-4 rounded-xl border ${fieldTrends.overall_trend === "IMPROVING"
+                            ? "bg-green-50/50 border-green-200/60"
+                            : fieldTrends.overall_trend === "DECLINING"
+                              ? "bg-red-50/50 border-red-200/60"
+                              : "bg-slate-50/50 border-slate-200/60"
                             }`}>
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">
-                                {fieldTrends.overall_trend === "improving" ? "📈" :
-                                  fieldTrends.overall_trend === "declining" ? "📉" : "➡️"}
-                              </span>
+                            <div className="flex items-center gap-4">
+                              <div className={cn(
+                                "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
+                                fieldTrends.overall_trend === "IMPROVING" ? "bg-green-100 text-green-700" :
+                                  fieldTrends.overall_trend === "DECLINING" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"
+                              )}>
+                                {fieldTrends.overall_trend === "IMPROVING" ? "📈" :
+                                  fieldTrends.overall_trend === "DECLINING" ? "📉" : "➡️"}
+                              </div>
                               <div>
                                 <h4 className="font-semibold text-slate-900 capitalize">
                                   FIELD Health: {fieldTrends.overall_trend}
@@ -1564,17 +1568,21 @@ export default function AnalysisPage() {
                       ) : (
                         <>
                           {/* Overall Trend Banner */}
-                          <div className={`p-4 rounded-xl border ${forestTrends.overall_trend === "improving"
-                            ? "bg-emerald-50 border-emerald-200"
-                            : forestTrends.overall_trend === "declining"
-                              ? "bg-red-50 border-red-200"
-                              : "bg-slate-50 border-slate-200"
+                          <div className={`p-4 rounded-xl border ${forestTrends.overall_trend === "IMPROVING"
+                            ? "bg-green-50/50 border-green-200/60"
+                            : forestTrends.overall_trend === "DECLINING"
+                              ? "bg-red-50/50 border-red-200/60"
+                              : "bg-slate-50/50 border-slate-200/60"
                             }`}>
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">
-                                {forestTrends.overall_trend === "improving" ? "📈" :
-                                  forestTrends.overall_trend === "declining" ? "📉" : "➡️"}
-                              </span>
+                            <div className="flex items-center gap-4">
+                              <div className={cn(
+                                "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
+                                forestTrends.overall_trend === "IMPROVING" ? "bg-green-100 text-green-700" :
+                                  forestTrends.overall_trend === "DECLINING" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"
+                              )}>
+                                {forestTrends.overall_trend === "IMPROVING" ? "📈" :
+                                  forestTrends.overall_trend === "DECLINING" ? "📉" : "➡️"}
+                              </div>
                               <div>
                                 <h4 className="font-semibold text-slate-900 capitalize">
                                   FOREST Health: {forestTrends.overall_trend}
@@ -1634,8 +1642,8 @@ export default function AnalysisPage() {
                                       <td className="px-4 py-3 text-slate-600">{analysis.canopy_cover_percent.toFixed(0)}%</td>
                                       <td className="px-4 py-3">
                                         <Badge variant={
-                                          analysis.fire_risk_level === "low" ? "success" :
-                                            analysis.fire_risk_level === "medium" ? "warning" : "error"
+                                          analysis.fire_risk_level === "LOW" ? "success" :
+                                            analysis.fire_risk_level === "MEDIUM" ? "warning" : "error"
                                         }>
                                           {analysis.fire_risk_level}
                                         </Badge>

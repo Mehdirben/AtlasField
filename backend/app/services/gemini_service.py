@@ -69,7 +69,7 @@ If site data is provided, use it to contextualize your responses."""
                     context_parts.append(f"- Description: {field_context['description']}")
                 context_parts.append(f"- Area: {field_context.get('area_hectares', 'N/A')} hectares")
                 
-                if field_context.get('site_type') == 'field':
+                if field_context.get('site_type') == 'FIELD':
                     context_parts.append(f"- Crop: {field_context.get('crop_type', 'Not specified')}")
                     if field_context.get('planting_date'):
                         context_parts.append(f"- Planting date: {field_context['planting_date']}")
@@ -150,7 +150,7 @@ If site data is provided, use it to contextualize your responses."""
         if any(word in message_lower for word in ["ndvi", "vegetation", "health"]):
             if field_context and field_context.get('analyses'):
                 analyses = field_context['analyses']
-                ndvi_analysis = next((a for a in analyses if a['type'] == 'ndvi'), None)
+                ndvi_analysis = next((a for a in analyses if a['type'] == 'NDVI'), None)
                 if ndvi_analysis:
                     return (
                         f"According to the latest NDVI analysis of your site '{field_context.get('site_name', '')}', "

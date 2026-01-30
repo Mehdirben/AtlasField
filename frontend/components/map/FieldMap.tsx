@@ -98,24 +98,24 @@ export default function FieldMap({
         });
 
         // Color based on site type and health
-        let color = "#6b7280"; // default gray
-        if (site.site_type === "forest") {
-          // Forest coloring based on fire risk
-          color = site.fire_risk_level === "low"
-            ? "#059669"  // emerald/green for low risk
-            : site.fire_risk_level === "moderate"
-            ? "#d97706"  // amber for moderate
-            : site.fire_risk_level === "high" || site.fire_risk_level === "extreme"
-            ? "#dc2626"  // red for high/extreme
-            : "#15803d"; // default green for forests
+        let color = "#1b9b1"; // Default emerald
+        if (site.site_type === "FOREST") {
+          // Heatmap colors for fire risk
+          color = site.fire_risk_level === "LOW"
+            ? "#22c55e" // green-500
+            : site.fire_risk_level === "MEDIUM"
+              ? "#f59e0b" // amber-500
+              : site.fire_risk_level === "HIGH" || site.fire_risk_level === "CRITICAL"
+                ? "#ef4444" // red-500
+                : "#22c55e"; // default green-500 for forests
         } else {
           // Field coloring based on NDVI
           color = site.latest_ndvi
             ? site.latest_ndvi >= 0.6
               ? "#10b981"
               : site.latest_ndvi >= 0.4
-              ? "#f59e0b"
-              : "#ef4444"
+                ? "#f59e0b"
+                : "#ef4444"
             : "#6b7280";
         }
 
@@ -214,7 +214,7 @@ export default function FieldMap({
 
     const coordinates = drawPoints.length >= 3 ? [...drawPoints, drawPoints[0]] : drawPoints;
 
-    const geometry = drawPoints.length >= 3 
+    const geometry = drawPoints.length >= 3
       ? { type: "Polygon" as const, coordinates: [coordinates] }
       : { type: "LineString" as const, coordinates: coordinates };
 
@@ -247,7 +247,7 @@ export default function FieldMap({
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
-      
+
       {editable && (
         <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10">
           <button
@@ -255,11 +255,10 @@ export default function FieldMap({
               setIsDrawing(!isDrawing);
               if (!isDrawing) setDrawPoints([]);
             }}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              isDrawing
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${isDrawing
                 ? "bg-red-500 text-white"
                 : "bg-emerald-500 text-white hover:bg-emerald-600"
-            }`}
+              }`}
           >
             {isDrawing ? "Cancel Drawing" : "Draw Field"}
           </button>

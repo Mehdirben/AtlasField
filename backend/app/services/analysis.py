@@ -249,7 +249,7 @@ class AnalysisService:
             # Add yield-specific recommendations
             if mean_value > 0.5:
                 all_recommendations.append({
-                    "priority": "low",
+                    "priority": "LOW",
                     "category": "Harvest Planning",
                     "title": "Plan Optimal Harvest Window",
                     "description": f"With predicted yield of {round(yield_per_ha, 1)} t/ha, plan harvest logistics.",
@@ -268,8 +268,8 @@ class AnalysisService:
                     seen_titles.add(rec["title"])
                     unique_recommendations.append(rec)
             
-            priority_order = {"high": 0, "medium": 1, "low": 2}
-            report["recommendations"] = sorted(unique_recommendations, key=lambda x: priority_order.get(x.get("priority", "low"), 2))
+            priority_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+            report["recommendations"] = sorted(unique_recommendations, key=lambda x: priority_order.get(x.get("priority", "LOW"), 3))
             
             # Comprehensive problems list
             all_problems = cls._generate_ndvi_problems(mean_value, min_value, max_value)
@@ -350,13 +350,13 @@ class AnalysisService:
                 "moisture_status": cls._get_forest_moisture_status(ndmi),
                 "burn_severity": cls._get_burn_severity(nbr),
                 "recent_fire_detected": nbr < -0.1,
-                "fire_prevention_priority": "Critical" if fire_risk_level == "critical" else "High" if fire_risk_level == "high" else "Medium" if fire_risk_level == "medium" else "Normal"
+                "fire_prevention_priority": "CRITICAL" if fire_risk_level == "CRITICAL" else "HIGH" if fire_risk_level == "HIGH" else "MEDIUM" if fire_risk_level == "MEDIUM" else "NORMAL"
             },
             "deforestation_monitoring": {
                 "deforestation_risk": deforestation_risk,
-                "canopy_loss_indicator": "Detected" if mean_value < 0.4 and deforestation_risk in ["medium", "high"] else "Not detected",
+                "canopy_loss_indicator": "Detected" if mean_value < 0.4 and deforestation_risk in ["MEDIUM", "HIGH"] else "Not detected",
                 "forest_fragmentation": cls._assess_forest_fragmentation(max_value - min_value),
-                "protected_area_alert": deforestation_risk in ["medium", "high"],
+                "protected_area_alert": deforestation_risk in ["MEDIUM", "HIGH"],
                 "change_detection_confidence": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
             },
             "carbon_sequestration": {
@@ -606,9 +606,9 @@ class AnalysisService:
         recommendations = []
         
         # Fire risk recommendations
-        if fire_risk in ["critical", "high"]:
+        if fire_risk in ["CRITICAL", "HIGH"]:
             recommendations.append({
-                "priority": "critical" if fire_risk == "critical" else "high",
+                "priority": "CRITICAL" if fire_risk == "CRITICAL" else "HIGH",
                 "category": "Fire Prevention",
                 "title": "Implement Fire Prevention Measures",
                 "description": f"Fire risk is {fire_risk}. Dry conditions detected with NDMI: {ndmi:.3f}.",
@@ -623,7 +623,7 @@ class AnalysisService:
         # Drought stress recommendations
         if ndmi < 0:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Drought Management",
                 "title": "Monitor Drought Stress",
                 "description": "Low moisture content detected. Trees may be experiencing water stress.",
@@ -636,9 +636,9 @@ class AnalysisService:
             })
         
         # Deforestation recommendations
-        if deforestation_risk in ["medium", "high"]:
+        if deforestation_risk in ["MEDIUM", "HIGH"]:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Forest Protection",
                 "title": "Investigate Potential Deforestation",
                 "description": "Vegetation loss indicators detected. Verify cause and take protective action.",
@@ -653,7 +653,7 @@ class AnalysisService:
         # Canopy health recommendations
         if ndvi < 0.4:
             recommendations.append({
-                "priority": "medium",
+                "priority": "MEDIUM",
                 "category": "Canopy Restoration",
                 "title": "Address Canopy Degradation",
                 "description": "Low canopy density detected. Consider restoration activities.",
@@ -666,9 +666,9 @@ class AnalysisService:
             })
         
         # Healthy forest maintenance
-        if ndvi >= 0.6 and fire_risk == "low":
+        if ndvi >= 0.6 and fire_risk == "LOW":
             recommendations.append({
-                "priority": "low",
+                "priority": "LOW",
                 "category": "Maintenance",
                 "title": "Continue Current Management",
                 "description": "Forest health is good. Maintain current conservation practices.",
@@ -682,7 +682,7 @@ class AnalysisService:
         
         # Carbon monitoring recommendation
         recommendations.append({
-            "priority": "low",
+            "priority": "LOW",
             "category": "Carbon Management",
             "title": "Track Carbon Sequestration",
             "description": "Regular monitoring helps track carbon credits and forest value.",
@@ -703,9 +703,9 @@ class AnalysisService:
     ) -> list:
         problems = []
         
-        if fire_risk == "critical":
+        if fire_risk == "CRITICAL":
             problems.append({
-                "severity": "critical",
+                "severity": "CRITICAL",
                 "title": "Critical Fire Risk",
                 "description": f"Extremely dry conditions detected. NBR: {nbr:.3f}, NDMI: {ndmi:.3f}. Immediate action required.",
                 "possible_causes": [
@@ -721,9 +721,9 @@ class AnalysisService:
                     "Consider controlled burns if appropriate"
                 ]
             })
-        elif fire_risk == "high":
+        elif fire_risk == "HIGH":
             problems.append({
-                "severity": "high",
+                "severity": "HIGH",
                 "title": "Elevated Fire Risk",
                 "description": "Dry vegetation conditions increase fire vulnerability.",
                 "possible_causes": [
@@ -738,9 +738,9 @@ class AnalysisService:
                 ]
             })
         
-        if deforestation_risk == "high":
+        if deforestation_risk == "HIGH":
             problems.append({
-                "severity": "critical",
+                "severity": "CRITICAL",
                 "title": "Significant Vegetation Loss Detected",
                 "description": "Major canopy reduction observed. Possible deforestation or severe damage.",
                 "possible_causes": [
@@ -756,9 +756,9 @@ class AnalysisService:
                     "Secure area from further clearing"
                 ]
             })
-        elif deforestation_risk == "medium":
+        elif deforestation_risk == "MEDIUM":
             problems.append({
-                "severity": "medium",
+                "severity": "MEDIUM",
                 "title": "Canopy Loss Indicators",
                 "description": "Some vegetation decline detected. Monitor for progression.",
                 "possible_causes": [
@@ -776,7 +776,7 @@ class AnalysisService:
         
         if ndmi < -0.2:
             problems.append({
-                "severity": "high",
+                "severity": "HIGH",
                 "title": "Severe Drought Stress",
                 "description": f"Very low moisture content (NDMI: {ndmi:.3f}). Trees at risk of mortality.",
                 "possible_causes": [
@@ -793,7 +793,7 @@ class AnalysisService:
         
         if nbr < -0.2:
             problems.append({
-                "severity": "high",
+                "severity": "HIGH",
                 "title": "Recent Burn Damage Detected",
                 "description": f"Low NBR ({nbr:.3f}) indicates recent fire damage or severely stressed vegetation.",
                 "possible_causes": [
@@ -817,15 +817,15 @@ class AnalysisService:
         schedule = []
         
         # Determine monitoring urgency
-        if fire_risk in ["critical", "high"] or deforestation_risk == "high":
+        if fire_risk in ["CRITICAL", "HIGH"] or deforestation_risk == "HIGH":
             analysis_interval = "2-3 days"
-            urgency = "High"
-        elif fire_risk == "medium" or deforestation_risk == "medium" or ndvi < 0.4:
+            urgency = "HIGH"
+        elif fire_risk == "MEDIUM" or deforestation_risk == "MEDIUM" or ndvi < 0.4:
             analysis_interval = "Weekly"
-            urgency = "Medium"
+            urgency = "MEDIUM"
         else:
             analysis_interval = "Every 2 weeks"
-            urgency = "Low"
+            urgency = "LOW"
         
         schedule.append({
             "task": "Next forest analysis",
@@ -835,27 +835,27 @@ class AnalysisService:
         
         schedule.append({
             "task": "Fire risk assessment",
-            "recommended_interval": "Weekly during fire season" if fire_risk != "low" else "Monthly",
-            "urgency": "High" if fire_risk in ["critical", "high"] else "Medium"
+            "recommended_interval": "Weekly during fire season" if fire_risk != "LOW" else "Monthly",
+            "urgency": "HIGH" if fire_risk in ["CRITICAL", "HIGH"] else "MEDIUM"
         })
         
         schedule.append({
             "task": "Ground patrol / inspection",
-            "recommended_interval": "Weekly" if deforestation_risk in ["medium", "high"] else "Monthly",
-            "urgency": "High" if deforestation_risk == "high" else "Medium"
+            "recommended_interval": "Weekly" if deforestation_risk in ["MEDIUM", "HIGH"] else "Monthly",
+            "urgency": "HIGH" if deforestation_risk == "HIGH" else "MEDIUM"
         })
         
         schedule.append({
             "task": "Carbon stock assessment",
             "recommended_interval": "Quarterly",
-            "urgency": "Low"
+            "urgency": "LOW"
         })
         
-        if fire_risk in ["critical", "high"]:
+        if fire_risk in ["CRITICAL", "HIGH"]:
             schedule.append({
                 "task": "Weather monitoring",
                 "recommended_interval": "Daily",
-                "urgency": "High"
+                "urgency": "HIGH"
             })
         
         return schedule
@@ -1016,7 +1016,7 @@ class AnalysisService:
         
         if mean >= 0.6:
             recommendations.append({
-                "priority": "low",
+                "priority": "LOW",
                 "category": "Maintenance",
                 "title": "Maintain Current Practices",
                 "description": "Your crop health is excellent. Continue with current management practices.",
@@ -1028,7 +1028,7 @@ class AnalysisService:
             })
         elif mean >= 0.45:
             recommendations.append({
-                "priority": "medium",
+                "priority": "MEDIUM",
                 "category": "Optimization",
                 "title": "Consider Growth Enhancement",
                 "description": "Vegetation health is good but there's room for improvement.",
@@ -1040,7 +1040,7 @@ class AnalysisService:
             })
         else:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Intervention",
                 "title": "Immediate Action Required",
                 "description": "Vegetation shows signs of stress requiring intervention.",
@@ -1055,7 +1055,7 @@ class AnalysisService:
         # Uniformity recommendations
         if (max_val - min_val) > 0.3:
             recommendations.append({
-                "priority": "medium",
+                "priority": "MEDIUM",
                 "category": "Precision Agriculture",
                 "title": "Address Field Variability",
                 "description": "Significant variation detected across the field.",
@@ -1074,7 +1074,7 @@ class AnalysisService:
         
         if mean < 0.3:
             problems.append({
-                "severity": "critical",
+                "severity": "CRITICAL",
                 "title": "Severe Vegetation Stress",
                 "description": f"Very low NDVI ({mean:.3f}) indicates severe crop stress or sparse vegetation.",
                 "possible_causes": [
@@ -1093,7 +1093,7 @@ class AnalysisService:
             })
         elif mean < 0.4:
             problems.append({
-                "severity": "high",
+                "severity": "HIGH",
                 "title": "Vegetation Stress Detected",
                 "description": f"Low NDVI ({mean:.3f}) suggests your crops are experiencing stress.",
                 "possible_causes": [
@@ -1111,7 +1111,7 @@ class AnalysisService:
         
         if min_val < 0.15:
             problems.append({
-                "severity": "medium",
+                "severity": "MEDIUM",
                 "title": "Localized Problem Areas",
                 "description": "Some areas show very low vegetation that needs attention.",
                 "possible_causes": [
@@ -1134,7 +1134,7 @@ class AnalysisService:
         
         if mean >= 0.6:
             recommendations.append({
-                "priority": "low",
+                "priority": "LOW",
                 "category": "Harvest Planning",
                 "title": "High Biomass Detected",
                 "description": "Radar analysis shows dense vegetation structure.",
@@ -1146,7 +1146,7 @@ class AnalysisService:
             })
         elif mean >= 0.4:
             recommendations.append({
-                "priority": "medium",
+                "priority": "MEDIUM",
                 "category": "Growth",
                 "title": "Normal Biomass Development",
                 "description": "Vegetation structure appears normal for growth stage.",
@@ -1157,7 +1157,7 @@ class AnalysisService:
             })
         else:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Growth Enhancement",
                 "title": "Low Biomass Detected",
                 "description": "Consider growth enhancement strategies.",
@@ -1175,7 +1175,7 @@ class AnalysisService:
         problems = []
         if mean < 0.3:
             problems.append({
-                "severity": "high",
+                "severity": "HIGH",
                 "title": "Low Biomass",
                 "description": "Radar analysis indicates lower than expected biomass.",
                 "possible_causes": [
@@ -1196,7 +1196,7 @@ class AnalysisService:
         
         if mean >= 0.55:
             recommendations.append({
-                "priority": "low",
+                "priority": "LOW",
                 "category": "Maintenance",
                 "title": "Healthy Crop Status Confirmed",
                 "description": "Combined optical and radar analysis confirms good crop health.",
@@ -1208,7 +1208,7 @@ class AnalysisService:
             })
         else:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Investigation",
                 "title": "Multi-Sensor Alert",
                 "description": "Both optical and radar data indicate potential issues.",
@@ -1227,7 +1227,7 @@ class AnalysisService:
         
         if mean < 0.2:
             recommendations.append({
-                "priority": "critical",
+                "priority": "CRITICAL",
                 "category": "Irrigation",
                 "title": "Urgent Irrigation Required",
                 "description": "Soil moisture is critically low.",
@@ -1239,7 +1239,7 @@ class AnalysisService:
             })
         elif mean < 0.35:
             recommendations.append({
-                "priority": "high",
+                "priority": "HIGH",
                 "category": "Irrigation",
                 "title": "Irrigation Recommended",
                 "description": "Soil moisture is below optimal levels.",
@@ -1251,7 +1251,7 @@ class AnalysisService:
             })
         else:
             recommendations.append({
-                "priority": "low",
+                "priority": "LOW",
                 "category": "Monitoring",
                 "title": "Adequate Moisture",
                 "description": "Soil moisture levels are acceptable.",
@@ -1268,7 +1268,7 @@ class AnalysisService:
         problems = []
         if mean < 0.15:
             problems.append({
-                "severity": "critical",
+                "severity": "CRITICAL",
                 "title": "Severe Drought Conditions",
                 "description": "Soil moisture at critical levels, crop damage likely.",
                 "possible_causes": [
@@ -1290,13 +1290,13 @@ class AnalysisService:
         # More frequent monitoring for stressed crops
         if mean < 0.4:
             interval = "2-3 days"
-            urgency = "High"
+            urgency = "HIGH"
         elif mean < 0.55:
             interval = "5-7 days"
-            urgency = "Medium"
+            urgency = "MEDIUM"
         else:
             interval = "7-10 days"
-            urgency = "Low"
+            urgency = "LOW"
         
         schedule.append({
             "task": f"Next {analysis_type.value.upper()} analysis",
@@ -1307,20 +1307,20 @@ class AnalysisService:
         schedule.append({
             "task": "Field visual inspection",
             "recommended_interval": "Weekly",
-            "urgency": "Medium" if mean < 0.5 else "Low"
+            "urgency": "MEDIUM" if mean < 0.5 else "LOW"
         })
         
         schedule.append({
             "task": "Weather monitoring",
             "recommended_interval": "Daily",
-            "urgency": "High"
+            "urgency": "HIGH"
         })
         
         if mean < 0.45:
             schedule.append({
                 "task": "Soil moisture check",
                 "recommended_interval": "Every 2-3 days",
-                "urgency": "High"
+                "urgency": "HIGH"
             })
         
         return schedule

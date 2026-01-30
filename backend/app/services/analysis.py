@@ -68,7 +68,8 @@ class AnalysisService:
                 "max_value": round(max_value, 3),
                 "variability": round(max_value - min_value, 3),
                 "health_status": health_status,
-                "health_score": round(mean_value * 100, 1),
+                "overall_health_score": round(mean_value * 100, 1), # Standardized key
+                "health_score": round(mean_value * 100, 1), # Keep for backwards compatibility
                 "cloud_coverage": cloud_coverage
             }
             
@@ -125,6 +126,7 @@ class AnalysisService:
                 "max_value": round(max_value, 3),
                 "variability": round(max_value - min_value, 3),
                 "health_status": health_status,
+                "overall_health_score": round(mean_value * 100, 1), # Standardized key
                 "confidence_level": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower",
                 "cloud_coverage": cloud_coverage
             }

@@ -520,10 +520,10 @@ async def get_forest_trends(
         ndvi = analysis.mean_value or 0.5
         nbr = forest_data.get("nbr", detailed_report.get("fire_risk_assessment", {}).get("nbr_value", 0.3))
         ndmi = forest_data.get("ndmi", detailed_report.get("fire_risk_assessment", {}).get("ndmi_value", 0.2))
-        carbon = forest_data.get("carbon_estimate_tonnes_ha", detailed_report.get("carbon_sequestration", {}).get("current_carbon_stock_t_ha", 80))
+        carbon = forest_data.get("carbon_estimate_tonnes_ha", detailed_report.get("carbon_sequestration", {}).get("total_carbon_t_ha", 80))
         canopy = forest_data.get("canopy_cover_percent", detailed_report.get("canopy_health", {}).get("canopy_cover_percent", (ndvi * 100)))
-        fire_risk = forest_data.get("fire_risk_level", detailed_report.get("fire_risk_assessment", {}).get("risk_level", "LOW"))
-        deforestation = forest_data.get("deforestation_risk", detailed_report.get("deforestation_monitoring", {}).get("risk_level", "LOW"))
+        fire_risk = forest_data.get("fire_risk_level", detailed_report.get("fire_risk_assessment", {}).get("fire_risk_level", "LOW"))
+        deforestation = forest_data.get("deforestation_risk", detailed_report.get("deforestation_monitoring", {}).get("deforestation_risk", "LOW"))
         
         current_data = {
             "ndvi": ndvi,
@@ -669,15 +669,15 @@ async def get_field_trends(
     first_analysis = analyses[0]
     baseline_detailed = first_analysis.data.get("detailed_report", {})
     baseline_ndvi = first_analysis.mean_value or 0.5
-    baseline_yield = baseline_detailed.get("yield_prediction", {}).get("predicted_yield_per_ha")
+    baseline_yield = baseline_detailed.get("yield_prediction", {}).get("yield_per_ha")
     
     for analysis in analyses:
         detailed_report = analysis.data.get("detailed_report", {})
         
         # Extract values with fallbacks
         ndvi = analysis.mean_value or 0.5
-        yield_val = detailed_report.get("yield_prediction", {}).get("predicted_yield_per_ha")
-        biomass = detailed_report.get("biomass_analysis", {}).get("estimated_biomass_t_ha")
+        yield_val = detailed_report.get("yield_prediction", {}).get("yield_per_ha")
+        biomass = detailed_report.get("biomass_analysis", {}).get("mean_biomass_t_ha")
         moisture = detailed_report.get("moisture_assessment", {}).get("estimated_moisture")
         
         # Multiply moisture by 100 for percentage
@@ -730,7 +730,7 @@ async def get_field_trends(
     last_analysis = analyses[-1]
     last_detailed = last_analysis.data.get("detailed_report", {})
     last_ndvi = last_analysis.mean_value or 0.5
-    last_yield = last_detailed.get("yield_prediction", {}).get("predicted_yield_per_ha")
+    last_yield = last_detailed.get("yield_prediction", {}).get("yield_per_ha")
     
     def calc_pct_raw(curr, prev):
         if prev is None or curr is None or prev == 0:

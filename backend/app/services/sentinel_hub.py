@@ -682,7 +682,7 @@ class SentinelHubService:
             
             if len(ndvi_values) < 10:
                 return {
-                    "detected_type": "unknown",
+                    "detected_type": "UNKNOWN",
                     "confidence": 0.0,
                     "canopy_cover_percent": 0.0,
                     "message": "Insufficient vegetation data for classification"
@@ -735,9 +735,9 @@ class SentinelHubService:
             "coniferous": f"Coniferous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: pine, spruce, fir.",
             "deciduous": f"Deciduous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: oak, beech, maple.",
             "mixed": f"Mixed forest with {density} canopy ({canopy_cover:.0f}% cover). Contains both coniferous and deciduous species.",
-            "unknown": "Unable to classify forest type. Area may have insufficient vegetation cover."
+            "UNKNOWN": "Unable to classify forest type. Area may have insufficient vegetation cover."
         }
-        return interpretations.get(forest_type, interpretations["unknown"])
+        return interpretations.get(forest_type, interpretations["UNKNOWN"])
     
     async def get_forest_analysis(self, bbox: tuple) -> dict:
         """
@@ -797,7 +797,7 @@ class SentinelHubService:
     @staticmethod
     def _interpret_forest_health(ndvi: float, nbr: float, ndmi: float, fire_risk: str, classification: dict) -> str:
         """Generate comprehensive forest health interpretation"""
-        forest_type = classification.get("detected_type", "unknown")
+        forest_type = classification.get("detected_type", "UNKNOWN")
         canopy = classification.get("canopy_cover_percent", 0)
         
         parts = []
@@ -982,7 +982,7 @@ class SentinelHubService:
             
             if len(ndvi_values) < 10:
                 return {
-                    "detected_type": "unknown",
+                    "detected_type": "UNKNOWN",
                     "confidence": 0.0,
                     "vegetation_cover_percent": 0.0,
                     "message": "Insufficient vegetation data for classification"
@@ -999,7 +999,7 @@ class SentinelHubService:
             
             # Classification logic based on spectral signatures
             confidence = 0.65
-            crop_type = "unknown"
+            crop_type = "UNKNOWN"
             
             # Rice detection - high NDVI with water signature
             if mean_ndwi > 0.2 and mean_ndvi > 0.4:
@@ -1090,7 +1090,7 @@ class SentinelHubService:
             "vegetables": "Vegetables/Horticulture",
             "fallow": "Fallow/Bare soil",
             "mixed_crop": "Mixed crops",
-            "unknown": "Unknown crop"
+            "UNKNOWN": "Unknown crop"
         }
         
         name = crop_names.get(crop_type, crop_type.title())

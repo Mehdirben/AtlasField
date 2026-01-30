@@ -192,7 +192,7 @@ async def run_analysis(
             if site.site_type == SiteType.FOREST and not site.forest_type:
                 classification = analysis_data.get("forest_classification", {})
                 detected_type = classification.get("detected_type")
-                if detected_type and detected_type != "unknown":
+                if detected_type and detected_type != "UNKNOWN":
                     site.forest_type = detected_type
                     await db.commit()
         elif effective_analysis_type == AnalysisType.COMPLETE:
@@ -205,7 +205,7 @@ async def run_analysis(
                 try:
                     crop_classification = await sentinel_service.get_crop_classification(bbox)
                     detected_crop = crop_classification.get("detected_type")
-                    if detected_crop and detected_crop not in ("unknown", "fallow"):
+                    if detected_crop and detected_crop not in ("UNKNOWN", "fallow"):
                         site.crop_type = detected_crop
                         await db.commit()
                     # Store crop classification data in analysis
@@ -221,7 +221,7 @@ async def run_analysis(
                 try:
                     crop_classification = await sentinel_service.get_crop_classification(bbox)
                     detected_crop = crop_classification.get("detected_type")
-                    if detected_crop and detected_crop not in ("unknown", "fallow"):
+                    if detected_crop and detected_crop not in ("UNKNOWN", "fallow"):
                         site.crop_type = detected_crop
                         await db.commit()
                     analysis_data["crop_classification"] = crop_classification
@@ -655,7 +655,7 @@ async def get_field_trends(
     if len(analyses) < 2:
         return FieldTrends(
             analyses=[],
-            overall_trend="unknown",
+            overall_trend="UNKNOWN",
             has_sufficient_data=False,
             message="Insufficient data: At least 2 analyses are required for trend comparison."
         )
@@ -746,6 +746,7 @@ async def get_field_trends(
     }
 
     # Determine overall trend
+    overall_trend = "UNKNOWN"
     if avg_ndvi_change is not None:
         if avg_ndvi_change > 1:
             overall_trend = "IMPROVING"
@@ -753,8 +754,6 @@ async def get_field_trends(
             overall_trend = "DECLINING"
         else:
             overall_trend = "STABLE"
-    else:
-        overall_trend = "UNKNOWN"
     
     return FieldTrends(
         analyses=analysis_data_list,

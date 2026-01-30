@@ -53,7 +53,17 @@ def upgrade() -> None:
     if has_label('alertseverity', 'critical'):
         bind.execute(sa.text("ALTER TYPE alertseverity RENAME VALUE 'critical' TO 'CRITICAL'"))
 
-    # 4. Update existing data (always safe to run)
+    # 4. Standardize analysistype
+    for label in ['ndvi', 'rvi', 'moisture', 'fusion', 'yield', 'biomass', 'complete', 'forest']:
+        if has_label('analysistype', label):
+            bind.execute(sa.text(f"ALTER TYPE analysistype RENAME VALUE '{label}' TO '{label.upper()}'"))
+
+    # 5. Standardize alerttype
+    for label in ['vegetation_health', 'moisture', 'fire_risk', 'deforestation', 'drought_stress', 'pest_disease']:
+        if has_label('alerttype', label):
+            bind.execute(sa.text(f"ALTER TYPE alerttype RENAME VALUE '{label}' TO '{label.upper()}'"))
+
+    # 6. Update existing data (always safe to run)
     bind.execute(sa.text("UPDATE users SET subscription_tier = 'FREE' WHERE subscription_tier::text = 'free'"))
     bind.execute(sa.text("UPDATE users SET subscription_tier = 'PRO' WHERE subscription_tier::text = 'pro'"))
     bind.execute(sa.text("UPDATE users SET subscription_tier = 'ENTERPRISE' WHERE subscription_tier::text = 'enterprise'"))
@@ -65,6 +75,9 @@ def upgrade() -> None:
     bind.execute(sa.text("UPDATE alerts SET severity = 'MEDIUM' WHERE severity::text = 'medium'"))
     bind.execute(sa.text("UPDATE alerts SET severity = 'HIGH' WHERE severity::text = 'high'"))
     bind.execute(sa.text("UPDATE alerts SET severity = 'CRITICAL' WHERE severity::text = 'critical'"))
+
+    bind.execute(sa.text("UPDATE analyses SET analysis_type = UPPER(analysis_type::text)"))
+    bind.execute(sa.text("UPDATE alerts SET alert_type = UPPER(alert_type::text)"))
 
 
 def downgrade() -> None:
@@ -88,5 +101,17 @@ def downgrade() -> None:
         bind.execute(sa.text("ALTER TYPE alertseverity RENAME VALUE 'MEDIUM' TO 'medium'"))
         bind.execute(sa.text("ALTER TYPE alertseverity RENAME VALUE 'HIGH' TO 'high'"))
         bind.execute(sa.text("ALTER TYPE alertseverity RENAME VALUE 'CRITICAL' TO 'critical'"))
+    except Exception:
+        pass
+
+    try:
+        for label in ['NDVI', 'RVI', 'MOISTURE', 'FUSION', 'YIELD', 'BIOMASS', 'COMPLETE', 'FOREST']:
+            bind.execute(sa.text(f"ALTER TYPE analysistype RENAME VALUE '{label}' TO '{label.lower()}'"))
+    except Exception:
+        pass
+
+    try:
+        for label in ['VEGETATION_HEALTH', 'MOISTURE', 'FIRE_RISK', 'DEFORESTATION', 'DROUGHT_STRESS', 'PEST_DISEASE']:
+            bind.execute(sa.text(f"ALTER TYPE alerttype RENAME VALUE '{label}' TO '{label.lower()}'"))
     except Exception:
         pass

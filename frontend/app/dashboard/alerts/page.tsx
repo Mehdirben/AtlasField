@@ -52,16 +52,16 @@ export default function AlertsPage() {
 
   const getSeverityIcon = (severity: string, alertType?: string) => {
     // Forest-specific icons
-    if (alertType === "fire_risk") return "🔥";
-    if (alertType === "deforestation") return "🪓";
-    if (alertType === "drought_stress") return "🏜️";
+    if (alertType === "FIRE_RISK") return "🔥";
+    if (alertType === "DEFORESTATION") return "🪓";
+    if (alertType === "DROUGHT_STRESS") return "🏜️";
 
     switch (severity) {
-      case "critical":
+      case "CRITICAL":
         return "🚨";
-      case "high":
+      case "HIGH":
         return "⚠️";
-      case "medium":
+      case "MEDIUM":
         return "⚡";
       default:
         return "ℹ️";
@@ -70,13 +70,13 @@ export default function AlertsPage() {
 
   const getSeverityColor = (severity: string, alertType?: string) => {
     // Forest fire risk gets special treatment
-    if (alertType === "fire_risk") {
+    if (alertType === "FIRE_RISK") {
       return "bg-orange-100 text-orange-700 border-orange-200";
     }
-    if (alertType === "deforestation") {
+    if (alertType === "DEFORESTATION") {
       return "bg-red-100 text-red-700 border-red-200";
     }
-    if (alertType === "drought_stress") {
+    if (alertType === "DROUGHT_STRESS") {
       return "bg-amber-100 text-amber-700 border-amber-200";
     }
 

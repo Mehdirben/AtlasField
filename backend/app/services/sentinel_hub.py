@@ -341,15 +341,15 @@ class SentinelHubService:
     def _interpret_vegetation(value: float) -> str:
         """Interpret vegetation index value"""
         if value < 0.2:
-            return "Very low vegetation or bare soil - attention required"
+            return "VERY LOW VEGETATION OR BARE SOIL - ATTENTION REQUIRED"
         elif value < 0.4:
-            return "Stressed vegetation - monitoring and action recommended"
+            return "STRESSED VEGETATION - MONITORING AND ACTION RECOMMENDED"
         elif value < 0.6:
-            return "Moderate vegetation - normal development"
+            return "MODERATE VEGETATION - NORMAL DEVELOPMENT"
         elif value < 0.8:
-            return "Healthy vegetation - good growth"
+            return "HEALTHY VEGETATION - GOOD GROWTH"
         else:
-            return "Very dense and vigorous vegetation"
+            return "VERY DENSE AND VIGOROUS VEGETATION"
     
     async def get_nbr(self, bbox: tuple, resolution: int = 10) -> dict:
         """
@@ -1003,12 +1003,8 @@ class SentinelHubService:
             
             # Rice detection - high NDVI with water signature
             if mean_ndwi > 0.2 and mean_ndvi > 0.4:
-                crop_type = "rice"
-                confidence = min(0.85, 0.6 + mean_ndwi * 0.5)
-            
-            # Corn/Maize - high NDVI, strong red edge
                 crop_type = "RICE"
-                confidence = 0.85
+                confidence = min(0.85, 0.6 + mean_ndwi * 0.5)
             # Wheat detection - moderate NDVI and specific SWIR ratio
             elif 0.35 < mean_ndvi < 0.6 and mean_swir > 1.5:
                 crop_type = "WHEAT"
@@ -1054,20 +1050,20 @@ class SentinelHubService:
     def _assess_growth_vigor(ndvi: float, ndre: float) -> str:
         """Assess crop growth vigor based on indices"""
         if ndvi > 0.7 and ndre > 0.4:
-            return "excellent"
+            return "EXCELLENT"
         elif ndvi > 0.5 and ndre > 0.3:
-            return "good"
+            return "GOOD"
         elif ndvi > 0.35:
-            return "moderate"
+            return "MODERATE"
         elif ndvi > 0.2:
-            return "poor"
+            return "POOR"
         else:
-            return "very_poor"
+            return "VERY POOR"
 
     @staticmethod
     def _interpret_crop_type(crop_type: str, cover: float, ndvi: float) -> str:
         """Generate interpretation for crop classification"""
-        health = "excellent" if ndvi > 0.6 else "good" if ndvi > 0.45 else "moderate" if ndvi > 0.3 else "poor"
+        health = "EXCELLENT" if ndvi > 0.6 else "GOOD" if ndvi > 0.45 else "MODERATE" if ndvi > 0.3 else "POOR"
         
         crop_names = {
             "RICE": "Paddy Rice",

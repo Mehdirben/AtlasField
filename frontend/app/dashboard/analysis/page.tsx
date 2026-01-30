@@ -332,8 +332,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2">
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
-                        report.canopy_health.health_status === "Excellent" || report.canopy_health.health_status === "Good" ? "success" :
-                          report.canopy_health.health_status === "Moderate" ? "warning" : "error"
+                        report.canopy_health.health_status === "EXCELLENT" || report.canopy_health.health_status === "GOOD" ? "success" :
+                          report.canopy_health.health_status === "MODERATE" ? "warning" : "error"
                       }>
                         {report.canopy_health.health_status}
                       </Badge>
@@ -373,8 +373,8 @@ function DetailedReportPanel({
                       <div className="flex justify-between items-center py-1.5 sm:py-2">
                         <span className="text-xs sm:text-base text-slate-600">Prevention Priority</span>
                         <Badge variant={
-                          report.fire_risk_assessment.fire_prevention_priority === "Normal" ? "success" :
-                            report.fire_risk_assessment.fire_prevention_priority === "Medium" ? "warning" : "error"
+                          report.fire_risk_assessment.fire_prevention_priority === "NORMAL" ? "success" :
+                            report.fire_risk_assessment.fire_prevention_priority === "MEDIUM" ? "warning" : "error"
                         }>
                           {report.fire_risk_assessment.fire_prevention_priority}
                         </Badge>
@@ -486,8 +486,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2">
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
-                        report.vegetation_health.health_status === "Excellent" || report.vegetation_health.health_status === "Good" ? "success" :
-                          report.vegetation_health.health_status === "Moderate" ? "warning" : "error"
+                        report.vegetation_health.health_status === "EXCELLENT" || report.vegetation_health.health_status === "GOOD" ? "success" :
+                          report.vegetation_health.health_status === "MODERATE" ? "warning" : "error"
                       }>
                         {report.vegetation_health.health_status}
                       </Badge>
@@ -508,8 +508,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Moisture Status</span>
                       <Badge variant={
-                        report.moisture_assessment.moisture_status === "Optimal" || report.moisture_assessment.moisture_status === "Good" ? "success" :
-                          report.moisture_assessment.moisture_status === "Moderate" ? "warning" : "error"
+                        report.moisture_assessment.moisture_status === "OPTIMAL" || report.moisture_assessment.moisture_status === "GOOD" ? "success" :
+                          report.moisture_assessment.moisture_status === "MODERATE" ? "warning" : "error"
                       }>
                         {report.moisture_assessment.moisture_status}
                       </Badge>
@@ -521,8 +521,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Water Stress Risk</span>
                       <Badge variant={
-                        report.moisture_assessment.water_stress_risk === "Low" ? "success" :
-                          report.moisture_assessment.water_stress_risk === "Medium" ? "warning" : "error"
+                        report.moisture_assessment.water_stress_risk === "LOW" ? "success" :
+                          report.moisture_assessment.water_stress_risk === "MEDIUM" ? "warning" : "error"
                       }>
                         {report.moisture_assessment.water_stress_risk}
                       </Badge>
@@ -593,8 +593,8 @@ function DetailedReportPanel({
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Yield Potential</span>
                         <Badge variant={
-                          report.yield_prediction.yield_potential === "High" ? "success" :
-                            report.yield_prediction.yield_potential === "Moderate" ? "warning" : "error"
+                          report.yield_prediction.yield_potential === "HIGH" ? "success" :
+                            report.yield_prediction.yield_potential === "MODERATE" ? "warning" : "error"
                         }>
                           {report.yield_prediction.yield_potential}
                         </Badge>
@@ -778,8 +778,8 @@ function DetailedReportPanel({
                           <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600">{item.recommended_interval}</td>
                           <td className="px-3 sm:px-6 py-2 sm:py-4">
                             <Badge variant={
-                              item.urgency === "High" ? "error" :
-                                item.urgency === "Medium" ? "warning" : "default"
+                              item.urgency === "HIGH" ? "error" :
+                                item.urgency === "MEDIUM" ? "warning" : "default"
                             }>
                               {item.urgency}
                             </Badge>

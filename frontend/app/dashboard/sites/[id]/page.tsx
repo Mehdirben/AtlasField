@@ -367,8 +367,8 @@ export default function SiteDetailPage() {
                             }
                             className="text-[10px] sm:text-xs"
                           >
-                            {analysis.mean_value >= 0.6 ? "Good" :
-                              analysis.mean_value >= 0.4 ? "Fair" : "Low"}
+                            {analysis.mean_value >= 0.6 ? "GOOD" :
+                              analysis.mean_value >= 0.4 ? "FAIR" : "LOW"}
                           </Badge>
                         </div>
                       )}

@@ -148,8 +148,10 @@ class YieldPrediction(BaseModel):
     area_ha: float
     yield_per_ha: float
     total_yield_tonnes: float
-    confidence_percent: float
-    assessment_date: str
+    confidence_percent: Optional[float] = None
+    confidence_level: Optional[str] = None
+    yield_potential: Optional[str] = None
+    assessment_date: Optional[str] = None
 
 
 class BiomassEstimate(BaseModel):
@@ -157,6 +159,7 @@ class BiomassEstimate(BaseModel):
     min_biomass_t_ha: float
     max_biomass_t_ha: float
     total_carbon_t_ha: float
+    biomass_level: Optional[str] = None
     interpretation: str
 
 

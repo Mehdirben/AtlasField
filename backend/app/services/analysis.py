@@ -67,7 +67,7 @@ class AnalysisService:
                 "min_value": round(min_value, 3),
                 "max_value": round(max_value, 3),
                 "variability": round(max_value - min_value, 3),
-                "health_status": health_status,
+                "health_status": health_status.upper(),
                 "overall_health_score": round(mean_value * 100, 1), # Standardized key
                 "health_score": round(mean_value * 100, 1), # Keep for backwards compatibility
                 "cloud_coverage": cloud_coverage
@@ -75,11 +75,11 @@ class AnalysisService:
             
             # Health Assessment
             report["health_assessment"] = {
-                "overall_health": health_status,
-                "vegetation_density": cls._get_vegetation_density(mean_value),
-                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value),
+                "overall_health": health_status.upper(),
+                "vegetation_density": cls._get_vegetation_density(mean_value).upper(),
+                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value).upper(),
                 "stress_indicators": cls._get_stress_indicators(mean_value, min_value),
-                "growth_stage_estimate": cls._estimate_growth_stage(mean_value, crop_type)
+                "growth_stage_estimate": cls._estimate_growth_stage(mean_value, crop_type).upper()
             }
             
             # Spatial Analysis
@@ -108,9 +108,9 @@ class AnalysisService:
             }
             
             report["health_assessment"] = {
-                "biomass_level": cls._get_biomass_indicator(mean_value),
-                "canopy_structure": "Dense" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Sparse",
-                "moisture_content": cls._estimate_moisture_from_rvi(mean_value)
+                "biomass_level": cls._get_biomass_indicator(mean_value).upper(),
+                "canopy_structure": "DENSE" if mean_value > 0.6 else "MODERATE" if mean_value > 0.4 else "SPARSE",
+                "moisture_content": cls._estimate_moisture_from_rvi(mean_value).upper()
             }
             
             report["recommendations"] = cls._generate_rvi_recommendations(mean_value, crop_type)
@@ -132,9 +132,9 @@ class AnalysisService:
             }
             
             report["health_assessment"] = {
-                "overall_health": health_status,
-                "vegetation_density": cls._get_vegetation_density(mean_value),
-                "biomass_estimate": cls._get_biomass_indicator(mean_value),
+                "overall_health": health_status.upper(),
+                "vegetation_density": cls._get_vegetation_density(mean_value).upper(),
+                "biomass_estimate": cls._get_biomass_indicator(mean_value).upper(),
                 "stress_indicators": cls._get_stress_indicators(mean_value, min_value)
             }
             
@@ -148,8 +148,8 @@ class AnalysisService:
                 "mean_value": round(mean_value, 3),
                 "min_value": round(min_value, 3),
                 "max_value": round(max_value, 3),
-                "moisture_status": cls._get_moisture_status(mean_value),
-                "irrigation_need": cls._get_irrigation_need(mean_value)
+                "moisture_status": cls._get_moisture_status(mean_value).upper(),
+                "irrigation_need": cls._get_irrigation_need(mean_value).upper()
             }
             
             report["recommendations"] = cls._generate_moisture_recommendations(mean_value)
@@ -164,7 +164,7 @@ class AnalysisService:
                 "index_name": "Complete Field Analysis",
                 "description": "Comprehensive analysis combining vegetation health (NDVI), biomass structure (RVI), soil moisture, yield prediction, and environmental factors.",
                 "overall_health_score": round(mean_value * 100, 1),
-                "health_status": health_status,
+                "health_status": health_status.upper(),
                 "analysis_date": datetime.utcnow().isoformat(),
                 "cloud_coverage": cloud_coverage
             }
@@ -175,17 +175,17 @@ class AnalysisService:
                 "ndvi_min": round(min_value, 3),
                 "ndvi_max": round(max_value, 3),
                 "variability": round(max_value - min_value, 3),
-                "health_status": health_status,
-                "vegetation_density": cls._get_vegetation_density(mean_value),
-                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value),
-                "growth_stage": cls._estimate_growth_stage(mean_value, crop_type)
+                "health_status": health_status.upper(),
+                "vegetation_density": cls._get_vegetation_density(mean_value).upper(),
+                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value).upper(),
+                "growth_stage": cls._estimate_growth_stage(mean_value, crop_type).upper()
             }
             
             # Biomass Analysis (RVI-derived estimates)
             biomass_estimate = cls.estimate_biomass(mean_value)
             report["biomass_analysis"] = {
-                "biomass_level": cls._get_biomass_indicator(mean_value),
-                "canopy_structure": "Dense" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Sparse",
+                "biomass_level": cls._get_biomass_indicator(mean_value).upper(),
+                "canopy_structure": "DENSE" if mean_value > 0.6 else "MODERATE" if mean_value > 0.4 else "SPARSE",
                 "mean_biomass_t_ha": biomass_estimate["mean_biomass_t_ha"],
                 "total_carbon_t_ha": biomass_estimate["total_carbon_t_ha"],
                 "interpretation": biomass_estimate["interpretation"]
@@ -196,9 +196,9 @@ class AnalysisService:
             moisture_value = mean_value * 0.8 + 0.1  # Derived estimate
             report["moisture_assessment"] = {
                 "estimated_moisture": round(moisture_value, 3),
-                "moisture_status": cls._get_moisture_status(moisture_value),
-                "irrigation_need": cls._get_irrigation_need(moisture_value),
-                "water_stress_risk": "Low" if moisture_value > 0.4 else "Medium" if moisture_value > 0.25 else "High"
+                "moisture_status": cls._get_moisture_status(moisture_value).upper(),
+                "irrigation_need": cls._get_irrigation_need(moisture_value).upper(),
+                "water_stress_risk": ("LOW" if moisture_value > 0.4 else "MEDIUM" if moisture_value > 0.25 else "HIGH")
             }
             
             # Yield Prediction
@@ -210,11 +210,11 @@ class AnalysisService:
             total_yield = yield_per_ha * (area_hectares or 1)
             
             report["yield_prediction"] = {
-                "crop_type": crop_type or "Unknown",
+                "crop": crop_type or "UNKNOWN",
                 "yield_per_ha": round(yield_per_ha, 2),
                 "total_yield_tonnes": round(total_yield, 2),
-                "yield_potential": "High" if mean_value > 0.6 else "Moderate" if mean_value > 0.4 else "Below Average",
-                "confidence_level": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
+                "yield_potential": ("HIGH" if mean_value > 0.6 else "MODERATE" if mean_value > 0.4 else "BELOW AVERAGE"),
+                "confidence_level": ("HIGH" if cloud_coverage < 15 else "MEDIUM" if cloud_coverage < 30 else "LOWER")
             }
 
             
@@ -229,20 +229,20 @@ class AnalysisService:
             # Health Assessment Summary
             stress_indicators = cls._get_stress_indicators(mean_value, min_value)
             report["health_assessment"] = {
-                "overall_health": health_status,
-                "vegetation_density": cls._get_vegetation_density(mean_value),
-                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value),
+                "overall_health": health_status.upper(),
+                "vegetation_density": cls._get_vegetation_density(mean_value).upper(),
+                "chlorophyll_activity": cls._get_chlorophyll_activity(mean_value).upper(),
                 "stress_indicators": stress_indicators,
-                "growth_stage_estimate": cls._estimate_growth_stage(mean_value, crop_type),
-                "risk_level": "Low" if mean_value > 0.5 else "Medium" if mean_value > 0.35 else "High"
+                "growth_stage_estimate": cls._estimate_growth_stage(mean_value, crop_type).upper(),
+                "risk_level": ("LOW" if mean_value > 0.5 else "MEDIUM" if mean_value > 0.35 else "HIGH")
             }
             
             # Environmental Factors
             report["environmental_factors"] = {
-                "data_quality": "Good" if cloud_coverage < 20 else "Moderate" if cloud_coverage < 40 else "Limited",
+                "data_quality": ("GOOD" if cloud_coverage < 20 else "MODERATE" if cloud_coverage < 40 else "LIMITED"),
                 "cloud_coverage_percent": round(cloud_coverage, 1),
-                "satellite_data_age": "Recent (< 5 days)",
-                "seasonal_context": cls._get_seasonal_context()
+                "satellite_data_age": "RECENT (< 5 DAYS)",
+                "seasonal_context": cls._get_seasonal_context().upper()
             }
             
             # Generate comprehensive recommendations
@@ -331,7 +331,7 @@ class AnalysisService:
                 "index_name": "Complete Forest Analysis",
                 "description": "Comprehensive forest health assessment combining vegetation indices (NDVI), burn ratio (NBR), moisture content (NDMI), fire risk assessment, deforestation monitoring, and carbon sequestration analysis.",
                 "overall_health_score": round(overall_health_score, 1),
-                "health_status": health_status,
+                "health_status": health_status.upper(),
                 "analysis_date": datetime.utcnow().isoformat(),
                 "cloud_coverage": cloud_coverage
             },
@@ -340,56 +340,57 @@ class AnalysisService:
                 "ndvi_min": round(min_value, 3),
                 "ndvi_max": round(max_value, 3),
                 "variability": round(max_value - min_value, 3),
-                "health_status": canopy_health,
+                "health_status": canopy_health.upper(),
                 "canopy_cover_percent": round(canopy_cover, 1),
-                "canopy_density": cls._get_canopy_density(mean_value),
-                "vegetation_vigor": cls._get_vegetation_vigor(mean_value),
+                "canopy_density": cls._get_canopy_density(mean_value).upper(),
+                "vegetation_vigor": cls._get_vegetation_vigor(mean_value).upper(),
                 "stress_indicators": cls._get_forest_stress_indicators(mean_value, nbr, ndmi)
             },
             "fire_risk_assessment": {
                 "nbr_value": round(nbr, 3),
                 "ndmi_value": round(ndmi, 3),
-                "fire_risk_level": fire_risk_level,
+                "fire_risk_level": fire_risk_level.upper(),
                 "fire_risk_score": cls._calculate_fire_risk_score(nbr, ndmi),
-                "moisture_status": cls._get_forest_moisture_status(ndmi),
-                "burn_severity": cls._get_burn_severity(nbr),
+                "moisture_status": cls._get_forest_moisture_status(ndmi).upper(),
+                "burn_severity": cls._get_burn_severity(nbr).upper(),
                 "recent_fire_detected": nbr < -0.1,
-                "fire_prevention_priority": "CRITICAL" if fire_risk_level == "CRITICAL" else "HIGH" if fire_risk_level == "HIGH" else "MEDIUM" if fire_risk_level == "MEDIUM" else "NORMAL"
+                "fire_prevention_priority": fire_risk_level.upper() if fire_risk_level in ["CRITICAL", "HIGH"] else "MEDIUM" if fire_risk_level == "MEDIUM" else "NORMAL"
             },
             "deforestation_monitoring": {
-                "deforestation_risk": deforestation_risk,
-                "canopy_loss_indicator": "Detected" if mean_value < 0.4 and deforestation_risk in ["MEDIUM", "HIGH"] else "Not detected",
-                "forest_fragmentation": cls._assess_forest_fragmentation(max_value - min_value),
+                "deforestation_risk": deforestation_risk.upper(),
+                "canopy_loss_indicator": ("DETECTED" if mean_value < 0.4 and deforestation_risk in ["MEDIUM", "HIGH"] else "NOT DETECTED"),
+                "forest_fragmentation": cls._assess_forest_fragmentation(max_value - min_value).upper(),
                 "protected_area_alert": deforestation_risk in ["MEDIUM", "HIGH"],
-                "change_detection_confidence": "High" if cloud_coverage < 15 else "Medium" if cloud_coverage < 30 else "Lower"
+                "change_detection_confidence": ("HIGH" if cloud_coverage < 15 else "MEDIUM" if cloud_coverage < 30 else "LOWER")
             },
             "carbon_sequestration": {
                 "total_carbon_t_ha": round(carbon_estimate, 2),
                 "total_carbon_tonnes": round(carbon_estimate * (area_hectares or 1), 2),
-                "carbon_status": cls._get_carbon_status(carbon_estimate),
-                "sequestration_potential": cls._get_sequestration_potential(mean_value, canopy_cover),
+                "baseline_canopy_cover": round(baseline_canopy, 1) if baseline_canopy else None,
+                "carbon_status": cls._get_carbon_status(carbon_estimate).upper(),
+                "sequestration_potential": cls._get_sequestration_potential(mean_value, canopy_cover).upper(),
                 "baseline_carbon_t_ha": round(baseline_carbon, 2) if baseline_carbon else None,
                 "carbon_change_percent": round(((carbon_estimate - baseline_carbon) / baseline_carbon) * 100, 1) if baseline_carbon and baseline_carbon > 0 else None,
-                "carbon_trend": cls._get_carbon_trend(carbon_estimate, baseline_carbon) if baseline_carbon else "Baseline not set"
+                "carbon_trend": cls._get_carbon_trend(carbon_estimate, baseline_carbon).upper() if baseline_carbon else "BASELINE NOT SET"
             },
 
             "forest_classification": {
-                "detected_type": forest_classification.get("detected_type", forest_type or "mixed"),
+                "detected_type": forest_classification.get("detected_type", forest_type or "MIXED").upper(),
                 "classification_confidence": forest_classification.get("confidence", 0.7),
                 "canopy_cover_percent": round(canopy_cover, 1),
-                "forest_maturity": cls._estimate_forest_maturity(mean_value, carbon_estimate)
+                "forest_maturity": cls._estimate_forest_maturity(mean_value, carbon_estimate).upper()
             },
             "spatial_analysis": {
                 "uniformity_score": round((1 - (max_value - min_value)) * 100, 1),
-                "uniformity_status": "Excellent" if (max_value - min_value) < 0.2 else "Good" if (max_value - min_value) < 0.3 else "Moderate" if (max_value - min_value) < 0.4 else "Variable",
+                "uniformity_status": ("EXCELLENT" if (max_value - min_value) < 0.2 else "GOOD" if (max_value - min_value) < 0.3 else "MODERATE" if (max_value - min_value) < 0.4 else "VARIABLE"),
                 "healthy_area_estimate": cls._estimate_healthy_forest_area(mean_value, area_hectares or 1),
                 "hotspots": cls._identify_forest_hotspots(mean_value, min_value, nbr, ndmi)
             },
             "environmental_factors": {
-                "data_quality": "Good" if cloud_coverage < 20 else "Moderate" if cloud_coverage < 40 else "Limited",
+                "data_quality": ("GOOD" if cloud_coverage < 20 else "MODERATE" if cloud_coverage < 40 else "LIMITED"),
                 "cloud_coverage_percent": round(cloud_coverage, 1),
-                "satellite_data_age": "Recent (< 5 days)",
-                "seasonal_context": cls._get_forest_seasonal_context()
+                "satellite_data_age": "RECENT (< 5 DAYS)",
+                "seasonal_context": cls._get_forest_seasonal_context().upper()
             },
             "recommendations": cls._generate_forest_recommendations(
                 mean_value, nbr, ndmi, fire_risk_level, deforestation_risk, canopy_health
@@ -868,39 +869,39 @@ class AnalysisService:
     @staticmethod
     def _get_health_status(ndvi: float) -> str:
         if ndvi >= 0.7:
-            return "Excellent"
+            return "EXCELLENT"
         elif ndvi >= 0.5:
-            return "Good"
+            return "GOOD"
         elif ndvi >= 0.4:
-            return "Moderate"
+            return "MODERATE"
         elif ndvi >= 0.3:
-            return "Poor"
+            return "POOR"
         else:
-            return "Critical"
+            return "CRITICAL"
     
     @staticmethod
     def _get_vegetation_density(ndvi: float) -> str:
         if ndvi >= 0.7:
-            return "Very Dense"
+            return "VERY DENSE"
         elif ndvi >= 0.5:
-            return "Dense"
+            return "DENSE"
         elif ndvi >= 0.3:
-            return "Moderate"
+            return "MODERATE"
         elif ndvi >= 0.15:
-            return "Sparse"
+            return "SPARSE"
         else:
-            return "Very Sparse / Bare Soil"
+            return "VERY SPARSE / BARE SOIL"
     
     @staticmethod
     def _get_chlorophyll_activity(ndvi: float) -> str:
         if ndvi >= 0.6:
-            return "High - Active photosynthesis"
+            return "HIGH - ACTIVE PHOTOSYNTHESIS"
         elif ndvi >= 0.4:
-            return "Moderate - Normal activity"
+            return "MODERATE - NORMAL ACTIVITY"
         elif ndvi >= 0.25:
-            return "Low - Reduced activity"
+            return "LOW - REDUCED ACTIVITY"
         else:
-            return "Very Low - Minimal photosynthesis"
+            return "VERY LOW - MINIMAL PHOTOSYNTHESIS"
     
     @staticmethod
     def _get_stress_indicators(mean_value: float, min_value: float) -> list:
@@ -912,87 +913,87 @@ class AnalysisService:
         if mean_value - min_value > 0.3:
             indicators.append("High variability indicating inconsistent growth")
         if not indicators:
-            indicators.append("No significant stress indicators")
+            indicators.append("NO SIGNIFICANT STRESS INDICATORS")
         return indicators
     
     @staticmethod
     def _estimate_growth_stage(ndvi: float, crop_type: Optional[str]) -> str:
         if ndvi < 0.2:
-            return "Pre-emergence / Bare soil"
+            return "PRE-EMERGENCE / BARE SOIL"
         elif ndvi < 0.35:
-            return "Early vegetative / Emergence"
+            return "EARLY VEGETATIVE / EMERGENCE"
         elif ndvi < 0.5:
-            return "Vegetative growth"
+            return "VEGETATIVE GROWTH"
         elif ndvi < 0.65:
-            return "Late vegetative / Early reproductive"
+            return "LATE VEGETATIVE / EARLY REPRODUCTIVE"
         elif ndvi < 0.75:
-            return "Full canopy / Reproductive"
+            return "FULL CANOPY / REPRODUCTIVE"
         else:
-            return "Peak growth / Maturity"
+            return "PEAK GROWTH / MATURITY"
     
     @staticmethod
     def _get_seasonal_context() -> str:
         """Get seasonal context based on current month"""
         month = datetime.utcnow().month
         if month in [12, 1, 2]:
-            return "Winter - Dormant season for most crops"
+            return "WINTER - DORMANT SEASON FOR MOST CROPS"
         elif month in [3, 4, 5]:
-            return "Spring - Active growth and planting season"
+            return "SPRING - ACTIVE GROWTH AND PLANTING SEASON"
         elif month in [6, 7, 8]:
-            return "Summer - Peak growth and reproductive phase"
+            return "SUMMER - PEAK GROWTH AND REPRODUCTIVE PHASE"
         else:
-            return "Autumn - Harvest and preparation season"
+            return "AUTUMN - HARVEST AND PREPARATION SEASON"
     
     @staticmethod
     def _get_biomass_indicator(rvi: float) -> str:
         if rvi >= 0.7:
-            return "Very High"
+            return "VERY HIGH"
         elif rvi >= 0.5:
-            return "High"
+            return "HIGH"
         elif rvi >= 0.35:
-            return "Moderate"
+            return "MODERATE"
         else:
-            return "Low"
+            return "LOW"
     
     @staticmethod
     def _estimate_moisture_from_rvi(rvi: float) -> str:
         if rvi >= 0.6:
-            return "High vegetation water content"
+            return "HIGH VEGETATION WATER CONTENT"
         elif rvi >= 0.4:
-            return "Adequate moisture"
+            return "ADEQUATE MOISTURE"
         else:
-            return "May indicate water stress"
+            return "MAY INDICATE WATER STRESS"
     
     @staticmethod
     def _get_moisture_status(value: float) -> str:
         if value >= 0.6:
-            return "Saturated"
+            return "SATURATED"
         elif value >= 0.4:
-            return "Optimal"
+            return "OPTIMAL"
         elif value >= 0.25:
-            return "Moderate"
+            return "MODERATE"
         elif value >= 0.15:
-            return "Low"
+            return "LOW"
         else:
-            return "Critical - Drought"
+            return "CRITICAL - DROUGHT"
     
     @staticmethod
     def _get_irrigation_need(value: float) -> str:
         if value >= 0.5:
-            return "None needed"
+            return "NONE NEEDED"
         elif value >= 0.35:
-            return "Monitor closely"
+            return "MONITOR CLOSELY"
         elif value >= 0.2:
-            return "Irrigation recommended within 2-3 days"
+            return "IRRIGATION RECOMMENDED WITHIN 2-3 DAYS"
         else:
-            return "Urgent irrigation required"
+            return "URGENT IRRIGATION REQUIRED"
     
     @staticmethod
     def _identify_hotspots(mean: float, min_value: float, max_value: float) -> dict:
         return {
-            "low_vigor_areas": "Detected" if min_value < mean * 0.7 else "None",
-            "high_vigor_areas": "Detected" if max_value > mean * 1.3 else "Uniform",
-            "variability_zones": "Present" if (max_value - min_value) > 0.25 else "Minimal"
+            "low_vigor_areas": "DETECTED" if min_value < mean * 0.7 else "NONE",
+            "high_vigor_areas": "DETECTED" if max_value > mean * 1.3 else "UNIFORM",
+            "variability_zones": "PRESENT" if (max_value - min_value) > 0.25 else "MINIMAL"
         }
     
     @staticmethod
@@ -1367,7 +1368,7 @@ class AnalysisService:
         confidence = min(95, 50 + len(ndvi_history) * 5)
         
         return {
-            "crop": crop_type or "wheat",
+            "crop": crop_type or "WHEAT",
             "area_ha": round(area_ha, 2),
             "yield_per_ha": round(yield_per_ha, 2),
             "total_yield_tonnes": round(total_yield, 2),
@@ -1410,7 +1411,7 @@ class AnalysisService:
             "min_biomass_t_ha": round(min_biomass, 2),
             "max_biomass_t_ha": round(max_biomass, 2),
             "total_carbon_t_ha": round(carbon, 2),
-            "interpretation": cls._interpret_biomass(mean_biomass)
+            "interpretation": cls._interpret_biomass(mean_biomass).upper()
         }
     
     @staticmethod

@@ -12,15 +12,15 @@ from app.database import Base
 
 
 class SubscriptionTier(str, enum.Enum):
-    FREE = "free"
-    PRO = "pro"
-    ENTERPRISE = "enterprise"
+    FREE = "FREE"
+    PRO = "PRO"
+    ENTERPRISE = "ENTERPRISE"
 
 
 class SiteType(str, enum.Enum):
     """Type of monitored site"""
-    FIELD = "field"
-    FOREST = "forest"
+    FIELD = "FIELD"
+    FOREST = "FOREST"
 
 
 class AnalysisType(str, enum.Enum):
@@ -35,20 +35,20 @@ class AnalysisType(str, enum.Enum):
 
 
 class AlertSeverity(str, enum.Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 
 class AlertType(str, enum.Enum):
     """Type of alert for different monitoring scenarios"""
-    VEGETATION_HEALTH = "vegetation_health"
-    MOISTURE = "moisture"
-    FIRE_RISK = "fire_risk"
-    DEFORESTATION = "deforestation"
-    DROUGHT_STRESS = "drought_stress"
-    PEST_DISEASE = "pest_disease"
+    VEGETATION_HEALTH = "VEGETATION_HEALTH"
+    MOISTURE = "MOISTURE"
+    FIRE_RISK = "FIRE_RISK"
+    DEFORESTATION = "DEFORESTATION"
+    DROUGHT_STRESS = "DROUGHT_STRESS"
+    PEST_DISEASE = "PEST_DISEASE"
 
 
 class User(Base):

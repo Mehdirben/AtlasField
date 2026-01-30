@@ -3,7 +3,7 @@ Chat router - AI-powered assistant using Gemini for agriculture and forestry
 """
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -169,7 +169,7 @@ async def chat(
 
 @router.get("/history", response_model=List[ChatHistoryResponse])
 async def get_chat_history(
-    site_id: Optional[int] = None,
+    site_id: Optional[int] = Query(None, alias="field_id"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):

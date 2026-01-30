@@ -190,7 +190,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    site_id: Optional[int] = Field(None, alias="field_id")
+    site_id: Optional[int] = Field(None, alias="field_id", serialization_alias="field_id")
     
     class Config:
         populate_by_name = True
@@ -198,7 +198,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
-    site_context: Optional[dict] = Field(None, alias="field_context")
+    site_context: Optional[dict] = Field(None, alias="field_context", serialization_alias="field_context")
     
     class Config:
         populate_by_name = True
@@ -206,13 +206,14 @@ class ChatResponse(BaseModel):
 
 class ChatHistoryResponse(BaseModel):
     id: int
-    site_id: Optional[int] = Field(None, alias="field_id")
+    site_id: Optional[int] = Field(None, alias="field_id", serialization_alias="field_id")
     messages: list[ChatMessage]
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 # ============== Dashboard Schemas ==============

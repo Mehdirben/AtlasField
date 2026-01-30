@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { sendChatMessage, getSites, getChatHistory, Site, ChatMessage, ChatHistory } from "@/lib/api";
 import { Badge } from "@/components/ui";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
@@ -48,13 +50,6 @@ export default function ChatPage() {
     try {
       const histories = await getChatHistory(selectedSiteId ?? undefined);
       setChatHistories(histories);
-
-      // Load the most recent conversation if available
-      if (histories.length > 0 && !activeHistoryId) {
-        const latestHistory = histories[0];
-        setActiveHistoryId(latestHistory.id);
-        setMessages(latestHistory.messages);
-      }
     } catch (error) {
       console.error("Failed to load chat history:", error);
     }
@@ -63,6 +58,7 @@ export default function ChatPage() {
   const selectChatHistory = (history: ChatHistory) => {
     setActiveHistoryId(history.id);
     setMessages(history.messages);
+    setSelectedSiteId(history.field_id);
   };
 
   const startNewChat = () => {
@@ -149,9 +145,9 @@ export default function ChatPage() {
           </div>
 
           {/* Site Selection */}
-          <div className="space-y-2 mb-4">
+          <div className="flex-1 flex flex-col min-h-0 mb-6 group/sites">
             <button
-              className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === null
+              className={`flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left mb-3 group ${selectedSiteId === null
                 ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
                 : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
                 }`}
@@ -166,70 +162,73 @@ export default function ChatPage() {
               </div>
             </button>
 
-            {sites.length > 0 && (
-              <div className="pt-3 pb-1">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">
-                  Your Sites
-                </p>
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-2 px-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Monitored Sites
+              </p>
+              <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                {sites.length}
+              </span>
+            </div>
 
-            {sites.map((site: Site) => (
-              <button
-                key={site.id}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === site.id
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                  : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
-                  }`}
-                onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
-              >
-                <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium truncate block">{site.name}</span>
-                  {site.site_type === "forest" ? (
-                    site.forest_type && (
-                      <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
-                        {site.forest_type}
-                      </span>
-                    )
-                  ) : (
-                    site.crop_type && (
-                      <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
-                        {site.crop_type}
-                      </span>
-                    )
+            <div className="flex-1 overflow-y-auto space-y-2 pr-2 -mr-2 scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
+              {sites.map((site: Site) => (
+                <button
+                  key={site.id}
+                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 text-left group ${selectedSiteId === site.id
+                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+                    : "bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60"
+                    }`}
+                  onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
+                >
+                  <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium truncate block">{site.name}</span>
+                    {site.site_type === "forest" ? (
+                      site.forest_type && (
+                        <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
+                          {site.forest_type}
+                        </span>
+                      )
+                    ) : (
+                      site.crop_type && (
+                        <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
+                          {site.crop_type}
+                        </span>
+                      )
+                    )}
+                  </div>
+                  {site.health_score !== undefined && site.health_score !== null && (
+                    <Badge
+                      variant={
+                        site.health_score >= 60
+                          ? "success"
+                          : site.health_score >= 40
+                            ? "warning"
+                            : "error"
+                      }
+                      className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
+                    >
+                      {Math.round(site.health_score)}%
+                    </Badge>
                   )}
-                </div>
-                {site.health_score !== undefined && site.health_score !== null && (
-                  <Badge
-                    variant={
-                      site.health_score >= 60
-                        ? "success"
-                        : site.health_score >= 40
-                          ? "warning"
-                          : "error"
-                    }
-                    className={selectedSiteId === site.id ? "bg-white/20 text-white border-white/30" : ""}
-                  >
-                    {Math.round(site.health_score)}%
-                  </Badge>
-                )}
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Chat History Section */}
           <div className="border-t border-slate-200/60 pt-4 flex-1 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2 px-1">
               <div className="flex items-center gap-2">
                 <span className="text-lg">💬</span>
-                <h3 className="font-semibold text-slate-900 text-sm">Chat History</h3>
+                <h3 className="font-semibold text-slate-900 text-sm">Recent Activity</h3>
               </div>
               <button
                 onClick={startNewChat}
-                className="text-xs px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors border border-emerald-200/50"
               >
-                + New
+                + New Chat
               </button>
             </div>
 
@@ -360,7 +359,24 @@ export default function ChatPage() {
                         <span className="text-xs font-semibold text-emerald-600">AI Assistant</span>
                       </div>
                     )}
-                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <div className={`prose prose-sm max-w-none ${message.role === "user" ? "prose-invert text-white" : "text-slate-700"}`}>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          h1: ({ node, ...props }) => <h1 className="text-lg font-bold my-2" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="text-base font-bold my-2" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="text-sm font-bold my-1" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-4 my-2 space-y-1" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-4 my-2 space-y-1" {...props} />,
+                          li: ({ node, ...props }) => <li className="text-sm" {...props} />,
+                          p: ({ node, ...props }) => <p className="mb-3 last:mb-0 leading-relaxed" {...props} />,
+                          strong: ({ node, ...props }) => <strong className={`font-bold ${message.role === "user" ? "text-white underline decoration-white/30" : "text-emerald-700 font-semibold"}`} {...props} />,
+                          a: ({ node, ...props }) => <a className={`${message.role === "user" ? "text-white underline" : "text-emerald-600 underline hover:text-emerald-700"}`} {...props} />
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
                     <p
                       className={`text-xs mt-3 ${message.role === "user" ? "text-emerald-100" : "text-slate-400"
                         }`}

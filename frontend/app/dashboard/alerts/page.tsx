@@ -56,12 +56,13 @@ export default function AlertsPage() {
     if (alertType === "DEFORESTATION") return "🪓";
     if (alertType === "DROUGHT_STRESS") return "🏜️";
 
-    switch (severity) {
+    switch (severity?.toUpperCase()) {
       case "CRITICAL":
         return "🚨";
       case "HIGH":
         return "⚠️";
       case "MEDIUM":
+      case "MODERATE":
         return "⚡";
       default:
         return "ℹ️";
@@ -80,12 +81,13 @@ export default function AlertsPage() {
       return "bg-amber-100 text-amber-700 border-amber-200";
     }
 
-    switch (severity) {
+    switch (severity?.toUpperCase()) {
       case "CRITICAL":
         return "bg-red-100 text-red-700 border-red-200";
       case "HIGH":
         return "bg-orange-100 text-orange-700 border-orange-200";
       case "MEDIUM":
+      case "MODERATE":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
       default:
         return "bg-blue-100 text-blue-700 border-blue-200";
@@ -221,18 +223,18 @@ export default function AlertsPage() {
                           <div className="flex items-center gap-2 shrink-0">
                             <Badge
                               variant={
-                                alert.severity === "CRITICAL"
+                                alert.severity?.toUpperCase() === "CRITICAL"
                                   ? "error"
-                                  : alert.severity === "HIGH"
+                                  : (alert.severity?.toUpperCase() === "HIGH" || alert.severity?.toUpperCase() === "MODERATE")
                                     ? "warning"
                                     : "default"
                               }
                             >
-                              {alert.severity === "CRITICAL"
+                              {alert.severity?.toUpperCase() === "CRITICAL"
                                 ? "Critical"
-                                : alert.severity === "HIGH"
-                                  ? "High"
-                                  : alert.severity === "MEDIUM"
+                                : (alert.severity?.toUpperCase() === "HIGH" || alert.severity?.toUpperCase() === "MODERATE")
+                                  ? (alert.severity?.toUpperCase() === "MODERATE" ? "Moderate" : "High")
+                                  : alert.severity?.toUpperCase() === "MEDIUM"
                                     ? "Medium"
                                     : "Info"}
                             </Badge>

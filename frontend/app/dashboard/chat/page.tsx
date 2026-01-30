@@ -128,7 +128,7 @@ export default function ChatPage() {
 
   const selectedSite = sites.find((s: Site) => s.id === selectedSiteId);
 
-  const suggestedQuestions = selectedSite?.site_type === "FOREST" ? [
+  const suggestedQuestions = selectedSite?.site_type?.toUpperCase() === "FOREST" ? [
     "What is the fire risk level for my forest?",
     "How healthy is my forest?",
     "What type of forest do I have?",
@@ -200,10 +200,10 @@ export default function ChatPage() {
                 }`}
               onClick={() => { setSelectedSiteId(site.id); startNewChat(); }}
             >
-              <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type === "FOREST" ? "🌲" : "🌾"}</span>
+              <span className="text-xl group-hover:scale-110 transition-transform">{site.site_type?.toUpperCase() === "FOREST" ? "🌲" : "🌾"}</span>
               <div className="flex-1 min-w-0">
                 <span className="font-medium truncate block">{site.name}</span>
-                {site.site_type === "FOREST" ? (
+                {site.site_type?.toUpperCase() === "FOREST" ? (
                   site.forest_type && (
                     <span className={`text-xs ${selectedSiteId === site.id ? 'text-emerald-100' : 'text-slate-500'}`}>
                       {site.forest_type}
@@ -348,7 +348,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-2">
             {selectedSite && (
               <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 rounded-xl border border-emerald-100 max-w-[120px] sm:max-w-none">
-                <span className="text-sm">{selectedSite.site_type === "FOREST" ? "🌲" : "🎯"}</span>
+                <span className="text-sm">{selectedSite.site_type?.toUpperCase() === "FOREST" ? "🌲" : "🎯"}</span>
                 <span className="text-sm font-medium text-emerald-700 truncate">{selectedSite.name}</span>
               </div>
             )}

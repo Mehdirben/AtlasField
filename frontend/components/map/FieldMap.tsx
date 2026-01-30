@@ -101,11 +101,11 @@ export default function FieldMap({
         let color = "#1b9b1"; // Default emerald
         if (site.site_type === "FOREST") {
           // Heatmap colors for fire risk
-          color = site.fire_risk_level === "LOW"
+          color = site.fire_risk_level?.toUpperCase() === "LOW"
             ? "#22c55e" // green-500
-            : site.fire_risk_level === "MEDIUM"
+            : (site.fire_risk_level?.toUpperCase() === "MEDIUM" || site.fire_risk_level?.toUpperCase() === "MODERATE")
               ? "#f59e0b" // amber-500
-              : site.fire_risk_level === "HIGH" || site.fire_risk_level === "CRITICAL"
+              : site.fire_risk_level?.toUpperCase() === "HIGH" || site.fire_risk_level?.toUpperCase() === "CRITICAL"
                 ? "#ef4444" // red-500
                 : "#22c55e"; // default green-500 for forests
         } else {
@@ -256,8 +256,8 @@ export default function FieldMap({
               if (!isDrawing) setDrawPoints([]);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${isDrawing
-                ? "bg-red-500 text-white"
-                : "bg-emerald-500 text-white hover:bg-emerald-600"
+              ? "bg-red-500 text-white"
+              : "bg-emerald-500 text-white hover:bg-emerald-600"
               }`}
           >
             {isDrawing ? "Cancel Drawing" : "Draw Field"}

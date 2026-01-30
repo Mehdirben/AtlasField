@@ -34,13 +34,13 @@ export default function DashboardPage() {
   const totalArea = sites.reduce((sum, s) => sum + (s.area_hectares || 0), 0);
   const healthySites = sites.filter((s) => {
     if (s.site_type === "FOREST") {
-      return s.fire_risk_level === "LOW";
+      return s.fire_risk_level?.toUpperCase() === "LOW";
     }
     return s.latest_ndvi && s.latest_ndvi >= 0.4;
   }).length;
   const sitesNeedingAttention = sites.filter((s) => {
     if (s.site_type === "FOREST") {
-      return s.fire_risk_level && s.fire_risk_level !== "LOW";
+      return s.fire_risk_level && s.fire_risk_level.toUpperCase() !== "LOW";
     }
     return s.latest_ndvi && s.latest_ndvi < 0.4;
   }).length;
@@ -173,9 +173,9 @@ export default function DashboardPage() {
                       <span
                         className={cn(
                           "px-2.5 py-1 text-xs font-semibold rounded-lg",
-                          site.fire_risk_level === "LOW"
+                          site.fire_risk_level?.toUpperCase() === "LOW"
                             ? "bg-emerald-100 text-emerald-700"
-                            : site.fire_risk_level === "MEDIUM"
+                            : (site.fire_risk_level?.toUpperCase() === "MEDIUM" || site.fire_risk_level?.toUpperCase() === "MODERATE")
                               ? "bg-amber-100 text-amber-700"
                               : "bg-red-100 text-red-700"
                         )}
@@ -233,22 +233,22 @@ export default function DashboardPage() {
                 key={alert.id}
                 className={cn(
                   "flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm transition-all hover:shadow-md",
-                  alert.severity === "CRITICAL"
+                  alert.severity?.toUpperCase() === "CRITICAL"
                     ? "bg-red-50/80 border-red-200"
-                    : alert.severity === "HIGH"
+                    : (alert.severity?.toUpperCase() === "HIGH" || alert.severity?.toUpperCase() === "MODERATE")
                       ? "bg-amber-50/80 border-amber-200"
                       : "bg-blue-50/80 border-blue-200"
                 )}
               >
                 <div className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-                  alert.severity === "CRITICAL"
+                  alert.severity?.toUpperCase() === "CRITICAL"
                     ? "bg-red-100"
-                    : alert.severity === "HIGH"
+                    : (alert.severity?.toUpperCase() === "HIGH" || alert.severity?.toUpperCase() === "MODERATE")
                       ? "bg-amber-100"
                       : "bg-blue-100"
                 )}>
-                  {alert.severity === "CRITICAL" ? "🚨" : alert.severity === "HIGH" ? "⚠️" : "ℹ️"}
+                  {alert.severity?.toUpperCase() === "CRITICAL" ? "🚨" : (alert.severity?.toUpperCase() === "HIGH" || alert.severity?.toUpperCase() === "MODERATE") ? "⚠️" : "ℹ️"}
                 </div>
                 <div className="flex-1">
                   <span className="block font-semibold text-slate-900">{alert.title}</span>

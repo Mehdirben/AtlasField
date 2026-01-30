@@ -332,8 +332,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2">
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
-                        report.canopy_health.health_status === "EXCELLENT" || report.canopy_health.health_status === "GOOD" ? "success" :
-                          report.canopy_health.health_status === "MODERATE" ? "warning" : "error"
+                        (report.canopy_health.health_status?.toUpperCase() === "EXCELLENT" || report.canopy_health.health_status?.toUpperCase() === "GOOD") ? "success" :
+                          (report.canopy_health.health_status?.toUpperCase() === "MODERATE" || report.canopy_health.health_status?.toUpperCase() === "MEDIUM") ? "warning" : "error"
                       }>
                         {report.canopy_health.health_status}
                       </Badge>
@@ -354,8 +354,8 @@ function DetailedReportPanel({
                     <div className="text-center mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl">
                       <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wide mb-1">Fire Risk Level</p>
                       <Badge variant={
-                        report.fire_risk_assessment.fire_risk_level === "LOW" ? "success" :
-                          report.fire_risk_assessment.fire_risk_level === "MEDIUM" ? "warning" : "error"
+                        report.fire_risk_assessment.fire_risk_level?.toUpperCase() === "LOW" ? "success" :
+                          (report.fire_risk_assessment.fire_risk_level?.toUpperCase() === "MEDIUM" || report.fire_risk_assessment.fire_risk_level?.toUpperCase() === "MODERATE") ? "warning" : "error"
                       } className="text-sm sm:text-lg px-3 py-1">
                         {report.fire_risk_assessment.fire_risk_level?.toUpperCase()}
                       </Badge>
@@ -373,8 +373,8 @@ function DetailedReportPanel({
                       <div className="flex justify-between items-center py-1.5 sm:py-2">
                         <span className="text-xs sm:text-base text-slate-600">Prevention Priority</span>
                         <Badge variant={
-                          report.fire_risk_assessment.fire_prevention_priority === "NORMAL" ? "success" :
-                            report.fire_risk_assessment.fire_prevention_priority === "MEDIUM" ? "warning" : "error"
+                          report.fire_risk_assessment.fire_prevention_priority?.toUpperCase() === "NORMAL" ? "success" :
+                            (report.fire_risk_assessment.fire_prevention_priority?.toUpperCase() === "MEDIUM" || report.fire_risk_assessment.fire_prevention_priority?.toUpperCase() === "MODERATE") ? "warning" : "error"
                         }>
                           {report.fire_risk_assessment.fire_prevention_priority}
                         </Badge>
@@ -396,8 +396,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Deforestation Risk</span>
                       <Badge variant={
-                        report.deforestation_monitoring.deforestation_risk === "LOW" ? "success" :
-                          report.deforestation_monitoring.deforestation_risk === "MEDIUM" ? "warning" : "error"
+                        report.deforestation_monitoring.deforestation_risk?.toUpperCase() === "LOW" ? "success" :
+                          (report.deforestation_monitoring.deforestation_risk?.toUpperCase() === "MEDIUM" || report.deforestation_monitoring.deforestation_risk?.toUpperCase() === "MODERATE") ? "warning" : "error"
                       }>
                         {report.deforestation_monitoring.deforestation_risk}
                       </Badge>
@@ -486,8 +486,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2">
                       <span className="text-xs sm:text-base text-slate-600">Health Status</span>
                       <Badge variant={
-                        report.vegetation_health.health_status === "EXCELLENT" || report.vegetation_health.health_status === "GOOD" ? "success" :
-                          report.vegetation_health.health_status === "MODERATE" ? "warning" : "error"
+                        (report.vegetation_health.health_status?.toUpperCase() === "EXCELLENT" || report.vegetation_health.health_status?.toUpperCase() === "GOOD") ? "success" :
+                          (report.vegetation_health.health_status?.toUpperCase() === "MODERATE" || report.vegetation_health.health_status?.toUpperCase() === "MEDIUM") ? "warning" : "error"
                       }>
                         {report.vegetation_health.health_status}
                       </Badge>
@@ -508,8 +508,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Moisture Status</span>
                       <Badge variant={
-                        report.moisture_assessment.moisture_status === "OPTIMAL" || report.moisture_assessment.moisture_status === "GOOD" ? "success" :
-                          report.moisture_assessment.moisture_status === "MODERATE" ? "warning" : "error"
+                        (report.moisture_assessment.moisture_status?.toUpperCase() === "OPTIMAL" || report.moisture_assessment.moisture_status?.toUpperCase() === "GOOD") ? "success" :
+                          (report.moisture_assessment.moisture_status?.toUpperCase() === "MODERATE" || report.moisture_assessment.moisture_status?.toUpperCase() === "MEDIUM") ? "warning" : "error"
                       }>
                         {report.moisture_assessment.moisture_status}
                       </Badge>
@@ -521,8 +521,8 @@ function DetailedReportPanel({
                     <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                       <span className="text-xs sm:text-base text-slate-600">Water Stress Risk</span>
                       <Badge variant={
-                        report.moisture_assessment.water_stress_risk === "LOW" ? "success" :
-                          report.moisture_assessment.water_stress_risk === "MEDIUM" ? "warning" : "error"
+                        report.moisture_assessment.water_stress_risk?.toUpperCase() === "LOW" ? "success" :
+                          (report.moisture_assessment.water_stress_risk?.toUpperCase() === "MEDIUM" || report.moisture_assessment.water_stress_risk?.toUpperCase() === "MODERATE") ? "warning" : "error"
                       }>
                         {report.moisture_assessment.water_stress_risk}
                       </Badge>
@@ -593,8 +593,8 @@ function DetailedReportPanel({
                       <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-slate-100">
                         <span className="text-xs sm:text-base text-slate-600">Yield Potential</span>
                         <Badge variant={
-                          report.yield_prediction.yield_potential === "HIGH" ? "success" :
-                            report.yield_prediction.yield_potential === "MODERATE" ? "warning" : "error"
+                          report.yield_prediction.yield_potential?.toUpperCase() === "HIGH" ? "success" :
+                            (report.yield_prediction.yield_potential?.toUpperCase() === "MODERATE" || report.yield_prediction.yield_potential?.toUpperCase() === "MEDIUM") ? "warning" : "error"
                         }>
                           {report.yield_prediction.yield_potential}
                         </Badge>
@@ -729,8 +729,8 @@ function DetailedReportPanel({
                       <div key={i} className="p-3 sm:p-4 bg-emerald-50/50 rounded-lg sm:rounded-xl border border-emerald-100">
                         <div className="flex flex-wrap items-start gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                           <Badge variant={
-                            rec.priority === "LOW" ? "success" :
-                              rec.priority === "MEDIUM" ? "warning" : "error"
+                            rec.priority?.toUpperCase() === "LOW" ? "success" :
+                              (rec.priority?.toUpperCase() === "MEDIUM" || rec.priority?.toUpperCase() === "MODERATE") ? "warning" : "error"
                           } className="text-[10px] sm:text-xs">
                             {rec.priority}
                           </Badge>
@@ -778,8 +778,8 @@ function DetailedReportPanel({
                           <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600">{item.recommended_interval}</td>
                           <td className="px-3 sm:px-6 py-2 sm:py-4">
                             <Badge variant={
-                              item.urgency === "HIGH" ? "error" :
-                                item.urgency === "MEDIUM" ? "warning" : "default"
+                              item.urgency?.toUpperCase() === "HIGH" ? "error" :
+                                (item.urgency?.toUpperCase() === "MEDIUM" || item.urgency?.toUpperCase() === "MODERATE") ? "warning" : "default"
                             }>
                               {item.urgency}
                             </Badge>
@@ -1400,8 +1400,8 @@ export default function AnalysisPage() {
                                 }`}>
                                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                                   <Badge variant={
-                                    rec.priority === "LOW" ? "success" :
-                                      rec.priority === "MEDIUM" ? "warning" : "error"
+                                    rec.priority?.toUpperCase() === "LOW" ? "success" :
+                                      (rec.priority?.toUpperCase() === "MEDIUM" || rec.priority?.toUpperCase() === "MODERATE") ? "warning" : "error"
                                   } className="text-[10px] sm:text-xs">
                                     {rec.priority}
                                   </Badge>

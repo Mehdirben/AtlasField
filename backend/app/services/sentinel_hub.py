@@ -729,7 +729,7 @@ class SentinelHubService:
     @staticmethod
     def _interpret_forest_type(forest_type: str, canopy_cover: float) -> str:
         """Generate interpretation for forest classification"""
-        density = "dense" if canopy_cover > 70 else "moderate" if canopy_cover > 40 else "sparse"
+        density = "DENSE" if canopy_cover > 70 else "MODERATE" if canopy_cover > 40 else "SPARSE"
         
         interpretations = {
             "CONIFEROUS": f"Coniferous forest with {density} canopy ({canopy_cover:.0f}% cover). Typical species: pine, spruce, fir.",
@@ -806,7 +806,7 @@ class SentinelHubService:
         if ndvi >= 0.6:
             parts.append(f"This {forest_type} forest shows excellent overall health with {canopy:.0f}% canopy cover.")
         elif ndvi >= 0.4:
-            parts.append(f"This {forest_type} forest shows good health with moderate vegetation density.")
+            parts.append(f"This {forest_type} forest shows good health with MODERATE vegetation density.")
         else:
             parts.append(f"This {forest_type} forest shows signs of stress with reduced vegetation vigor.")
         
@@ -814,7 +814,7 @@ class SentinelHubService:
         if fire_risk in ["HIGH", "CRITICAL"]:
             parts.append(f"⚠️ Fire risk is {fire_risk} - immediate monitoring recommended.")
         elif fire_risk == "MEDIUM":
-            parts.append("Moderate fire risk - regular monitoring advised.")
+            parts.append("MODERATE fire risk - regular monitoring advised.")
         
         # Moisture stress
         if ndmi < 0.2:

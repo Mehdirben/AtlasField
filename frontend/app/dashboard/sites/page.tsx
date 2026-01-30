@@ -243,9 +243,9 @@ export default function SitesPage() {
                     ) : site.site_type === "FOREST" && site.fire_risk_level ? (
                       <span className={cn(
                         "px-2.5 py-1 text-xs font-semibold rounded-lg",
-                        site.fire_risk_level === "LOW" ? "bg-green-100 text-green-700" :
-                          site.fire_risk_level === "MEDIUM" ? "bg-amber-100 text-amber-700" :
-                            site.fire_risk_level === "HIGH" ? "bg-orange-100 text-orange-700" :
+                        site.fire_risk_level?.toUpperCase() === "LOW" ? "bg-green-100 text-green-700" :
+                          (site.fire_risk_level?.toUpperCase() === "MEDIUM" || site.fire_risk_level?.toUpperCase() === "MODERATE") ? "bg-amber-100 text-amber-700" :
+                            site.fire_risk_level?.toUpperCase() === "HIGH" ? "bg-orange-100 text-orange-700" :
                               "bg-red-100 text-red-700"
                       )}>
                         🔥 {site.fire_risk_level}

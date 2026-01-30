@@ -275,17 +275,17 @@ export default function SiteDetailPage() {
                   {site.fire_risk_level && (
                     <div className={cn(
                       "rounded-lg sm:rounded-xl p-3 sm:p-4 border",
-                      site.fire_risk_level === "LOW" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/60" :
-                        site.fire_risk_level === "MEDIUM" ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60" :
-                          site.fire_risk_level === "HIGH" ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/60" :
+                      site.fire_risk_level?.toUpperCase() === "LOW" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/60" :
+                        (site.fire_risk_level?.toUpperCase() === "MEDIUM" || site.fire_risk_level?.toUpperCase() === "MODERATE") ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60" :
+                          site.fire_risk_level?.toUpperCase() === "HIGH" ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/60" :
                             "bg-gradient-to-br from-red-50 to-rose-50 border-red-200/60"
                     )}>
                       <p className="text-[10px] sm:text-sm text-slate-500">Fire Risk</p>
                       <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center text-3xl",
-                        site.fire_risk_level === "LOW" ? "text-green-700" :
-                          site.fire_risk_level === "MEDIUM" ? "text-amber-700" :
-                            site.fire_risk_level === "HIGH" ? "text-orange-700" :
+                        site.fire_risk_level?.toUpperCase() === "LOW" ? "text-green-700" :
+                          (site.fire_risk_level?.toUpperCase() === "MEDIUM" || site.fire_risk_level?.toUpperCase() === "MODERATE") ? "text-amber-700" :
+                            site.fire_risk_level?.toUpperCase() === "HIGH" ? "text-orange-700" :
                               "text-red-700"
                       )}>
                         🔥 {site.fire_risk_level}

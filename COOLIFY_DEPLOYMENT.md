@@ -181,6 +181,9 @@ Set the following environment variables in Coolify:
 | Variable                     | Description                       | Example                                                                 |
 | ---------------------------- | --------------------------------- | ----------------------------------------------------------------------- |
 | `DATABASE_URL`               | PostgreSQL connection string      | `postgresql+asyncpg://user:pass@atlasfield-db:5432/atlasfield`          |
+
+> [!TIP]
+> **New**: The backend now automatically converts `postgres://` to `postgresql+asyncpg://`. You can copy-paste the connection string directly from Coolify without manual editing.
 | `SECRET_KEY`                 | Secure secret key                 | (generate a secure random string)                                       |
 | `DEBUG`                      | Debug mode (false for prod)       | `false`                                                                 |
 | `SENTINEL_HUB_CLIENT_ID`     | Sentinel Hub Client ID            | (your Client ID)                                                        |

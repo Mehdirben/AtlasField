@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSites, getAlerts, Site, Alert } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui";
 
 export default function DashboardPage() {
   const [sites, setSites] = useState<Site[]>([]);
@@ -155,7 +156,19 @@ export default function DashboardPage() {
                     <span className="text-lg">{site.site_type === "forest" ? "🌲" : "🌾"}</span>
                     <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">{site.name}</h3>
                   </div>
-                  {site.site_type === "forest" ? (
+                  {site.health_score !== undefined && site.health_score !== null ? (
+                    <Badge
+                      variant={
+                        site.health_score >= 60
+                          ? "success"
+                          : site.health_score >= 40
+                            ? "warning"
+                            : "error"
+                      }
+                    >
+                      {Math.round(site.health_score)}%
+                    </Badge>
+                  ) : site.site_type === "forest" ? (
                     site.fire_risk_level && (
                       <span
                         className={cn(
@@ -163,8 +176,8 @@ export default function DashboardPage() {
                           site.fire_risk_level === "low"
                             ? "bg-emerald-100 text-emerald-700"
                             : site.fire_risk_level === "moderate"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-red-100 text-red-700"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-red-100 text-red-700"
                         )}
                       >
                         🔥 {site.fire_risk_level}
@@ -178,8 +191,8 @@ export default function DashboardPage() {
                           site.latest_ndvi >= 0.6
                             ? "bg-emerald-100 text-emerald-700"
                             : site.latest_ndvi >= 0.4
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-red-100 text-red-700"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-red-100 text-red-700"
                         )}
                       >
                         {site.latest_ndvi.toFixed(2)}
@@ -223,8 +236,8 @@ export default function DashboardPage() {
                   alert.severity === "critical"
                     ? "bg-red-50/80 border-red-200"
                     : alert.severity === "high"
-                    ? "bg-amber-50/80 border-amber-200"
-                    : "bg-blue-50/80 border-blue-200"
+                      ? "bg-amber-50/80 border-amber-200"
+                      : "bg-blue-50/80 border-blue-200"
                 )}
               >
                 <div className={cn(
@@ -232,8 +245,8 @@ export default function DashboardPage() {
                   alert.severity === "critical"
                     ? "bg-red-100"
                     : alert.severity === "high"
-                    ? "bg-amber-100"
-                    : "bg-blue-100"
+                      ? "bg-amber-100"
+                      : "bg-blue-100"
                 )}>
                   {alert.severity === "critical" ? "🚨" : alert.severity === "high" ? "⚠️" : "ℹ️"}
                 </div>

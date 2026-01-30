@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSites, deleteSite, Site, SiteType } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui";
 
 const FieldMap = dynamic(() => import("@/components/map/FieldMap"), {
   ssr: false,
@@ -27,11 +28,11 @@ const getSiteIcon = (siteType: SiteType) => {
 // Helper to get site color classes
 const getSiteColorClasses = (siteType: SiteType, isSelected: boolean) => {
   if (siteType === "forest") {
-    return isSelected 
+    return isSelected
       ? "border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
       : "border-slate-200/60 hover:border-green-300 hover:bg-green-50/80";
   }
-  return isSelected 
+  return isSelected
     ? "border-emerald-400 bg-gradient-to-r from-emerald-50 to-cyan-50 shadow-md"
     : "border-slate-200/60 hover:border-emerald-300 hover:bg-slate-50/80";
 };
@@ -75,8 +76,8 @@ export default function SitesPage() {
     router.push(`/dashboard/analysis?site=${siteId}`);
   };
 
-  const filteredSites = filterType === "all" 
-    ? sites 
+  const filteredSites = filterType === "all"
+    ? sites
     : sites.filter(s => s.site_type === filterType);
 
   const fieldCount = sites.filter(s => s.site_type === "field").length;
@@ -175,8 +176,8 @@ export default function SitesPage() {
                   {filterType === "all" ? "No sites registered" : `No ${filterType}s registered`}
                 </p>
                 <p className="text-sm text-slate-500 mb-4">Start by adding your first site</p>
-                <Link 
-                  href="/dashboard/sites/new" 
+                <Link
+                  href="/dashboard/sites/new"
                   className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all"
                 >
                   Add First Site
@@ -196,7 +197,7 @@ export default function SitesPage() {
                     <div className="flex items-start gap-3">
                       <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors",
-                        selectedSite === site.id 
+                        selectedSite === site.id
                           ? (site.site_type === "forest" ? "bg-green-100" : "bg-emerald-100")
                           : "bg-slate-100 group-hover:bg-emerald-50"
                       )}>
@@ -205,7 +206,7 @@ export default function SitesPage() {
                       <div>
                         <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">{site.name}</h3>
                         <p className="text-sm text-slate-500">
-                          {site.site_type === "forest" 
+                          {site.site_type === "forest"
                             ? `${site.forest_type || "Forest"} • ${site.area_hectares?.toFixed(1) || "?"} ha`
                             : `${site.crop_type || "Not specified"} • ${site.area_hectares?.toFixed(1) || "?"} ha`
                           }
@@ -218,36 +219,47 @@ export default function SitesPage() {
                       </div>
                     </div>
                     {/* Health indicator */}
-                    {site.site_type === "field" && site.latest_ndvi && (
+                    {site.health_score !== undefined && site.health_score !== null ? (
+                      <Badge
+                        variant={
+                          site.health_score >= 60
+                            ? "success"
+                            : site.health_score >= 40
+                              ? "warning"
+                              : "error"
+                        }
+                      >
+                        {Math.round(site.health_score)}%
+                      </Badge>
+                    ) : site.site_type === "field" && site.latest_ndvi ? (
                       <span className={cn(
                         "px-2.5 py-1 text-xs font-semibold rounded-lg",
-                        site.latest_ndvi >= 0.6 ? "bg-emerald-100 text-emerald-700" : 
-                        site.latest_ndvi >= 0.4 ? "bg-amber-100 text-amber-700" : 
-                        "bg-red-100 text-red-700"
+                        site.latest_ndvi >= 0.6 ? "bg-emerald-100 text-emerald-700" :
+                          site.latest_ndvi >= 0.4 ? "bg-amber-100 text-amber-700" :
+                            "bg-red-100 text-red-700"
                       )}>
                         {site.latest_ndvi.toFixed(2)}
                       </span>
-                    )}
-                    {site.site_type === "forest" && site.fire_risk_level && (
+                    ) : site.site_type === "forest" && site.fire_risk_level ? (
                       <span className={cn(
                         "px-2.5 py-1 text-xs font-semibold rounded-lg",
                         site.fire_risk_level === "low" ? "bg-green-100 text-green-700" :
-                        site.fire_risk_level === "moderate" ? "bg-amber-100 text-amber-700" :
-                        site.fire_risk_level === "high" ? "bg-orange-100 text-orange-700" :
-                        "bg-red-100 text-red-700"
+                          site.fire_risk_level === "moderate" ? "bg-amber-100 text-amber-700" :
+                            site.fire_risk_level === "high" ? "bg-orange-100 text-orange-700" :
+                              "bg-red-100 text-red-700"
                       )}>
                         🔥 {site.fire_risk_level}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-xs text-slate-400">
-                      {site.latest_analysis_date 
+                      {site.latest_analysis_date
                         ? `Last analysis: ${new Date(site.latest_analysis_date).toLocaleDateString()}`
                         : "No analysis yet"}
                     </span>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(site.id); }} 
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(site.id); }}
                       className="text-xs text-slate-400 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50"
                     >
                       Delete

@@ -2,7 +2,7 @@
 Application configuration using Pydantic Settings
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import computed_field
+from pydantic import computed_field, field_validator
 from functools import lru_cache
 from typing import List
 import json
@@ -16,6 +16,20 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://atlasfield:atlasfield@localhost:5432/atlasfield"
+
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        """
+        Fix common DATABASE_URL issues:
+        1. Replace 'postgres://' with 'postgresql+asyncpg://'
+        2. Ensure '+asyncpg' is present for the async engine
+        """
+        if v.startswith("postgres://"):
+            v = v.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif v.startswith("postgresql://") and "+asyncpg" not in v:
+            v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
     
     # JWT Authentication
     SECRET_KEY: str = "your-secret-key-change-in-production"

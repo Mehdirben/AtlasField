@@ -30,14 +30,14 @@ async def create_alert_from_analysis(
     """Create an alert if the analysis results indicate problems"""
     alert = None
     
-    if analysis_type == AnalysisType.NDVI:
+    if analysis_type in (AnalysisType.NDVI, AnalysisType.COMPLETE, AnalysisType.FUSION):
         if mean_value < 0.2:
             alert = Alert(
                 site_id=site.id,
                 alert_type=AlertType.VEGETATION_HEALTH,
                 severity=AlertSeverity.CRITICAL,
                 title=f"Critical: Very Low Vegetation on {site.name}",
-                message=f"NDVI analysis shows critically low vegetation (value: {mean_value:.3f}). "
+                message=f"Vegetation analysis shows critically low values (value: {mean_value:.3f}). "
                         f"This indicates very sparse or severely stressed vegetation. Immediate inspection required. "
                         f"Possible causes: pest infestation, severe drought, disease outbreak.",
             )
@@ -47,7 +47,7 @@ async def create_alert_from_analysis(
                 alert_type=AlertType.VEGETATION_HEALTH,
                 severity=AlertSeverity.HIGH,
                 title=f"Warning: Low Vegetation Health on {site.name}",
-                message=f"NDVI analysis indicates low vegetation health (value: {mean_value:.3f}). "
+                message=f"Vegetation analysis indicates low health (value: {mean_value:.3f}). "
                         f"Your vegetation may be experiencing significant stress.",
             )
         elif mean_value < 0.4:
@@ -56,20 +56,24 @@ async def create_alert_from_analysis(
                 alert_type=AlertType.VEGETATION_HEALTH,
                 severity=AlertSeverity.MEDIUM,
                 title=f"Attention: Moderate Vegetation Stress on {site.name}",
-                message=f"NDVI analysis shows moderate stress levels (value: {mean_value:.3f}). "
+                message=f"Vegetation analysis shows moderate stress levels (value: {mean_value:.3f}). "
                         f"Consider increasing monitoring frequency.",
             )
     
-    elif analysis_type == AnalysisType.MOISTURE:
-        if mean_value < 0.1:
-            alert = Alert(
-                site_id=site.id,
-                alert_type=AlertType.DROUGHT_STRESS,
-                severity=AlertSeverity.CRITICAL,
-                title=f"Critical: Severe Drought on {site.name}",
-                message=f"Moisture analysis indicates severe drought conditions (value: {mean_value:.3f}). "
-                        f"Urgent attention required to prevent damage.",
-            )
+    if not alert and analysis_type in (AnalysisType.MOISTURE, AnalysisType.COMPLETE):
+        # For COMPLETE, we might want to check moisture if explicitly available in analysis_data
+        # but create_alert_from_analysis is currently called with mean_value which is NDVI for fields.
+        # However, if analysis_type is MOISTURE, mean_value IS moisture.
+        if analysis_type == AnalysisType.MOISTURE:
+            if mean_value < 0.1:
+                alert = Alert(
+                    site_id=site.id,
+                    alert_type=AlertType.DROUGHT_STRESS,
+                    severity=AlertSeverity.CRITICAL,
+                    title=f"Critical: Severe Drought on {site.name}",
+                    message=f"Moisture analysis indicates severe drought conditions (value: {mean_value:.3f}). "
+                            f"Urgent attention required to prevent damage.",
+                )
         elif mean_value < 0.2:
             alert = Alert(
                 site_id=site.id,

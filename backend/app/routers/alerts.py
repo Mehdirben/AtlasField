@@ -31,8 +31,12 @@ async def list_alerts(
     if not site_ids:
         return []
     
-    # Build query
-    query = select(Alert).where(Alert.site_id.in_(site_ids))
+    # Build query with join to get site info
+    query = (
+        select(Alert, Site.name, Site.site_type)
+        .join(Site)
+        .where(Alert.site_id.in_(site_ids))
+    )
     
     if unread_only:
         query = query.where(Alert.is_read == False)
@@ -40,9 +44,16 @@ async def list_alerts(
     query = query.order_by(Alert.created_at.desc())
     
     result = await db.execute(query)
-    alerts = result.scalars().all()
+    rows = result.all()
     
-    return alerts
+    alerts_enriched = []
+    for row in rows:
+        alert, site_name, site_type = row
+        alert.site_name = site_name
+        alert.site_type = site_type
+        alerts_enriched.append(alert)
+    
+    return alerts_enriched
 
 
 @router.put("/{alert_id}/read", response_model=AlertResponse)
@@ -52,21 +63,24 @@ async def mark_alert_read(
     db: AsyncSession = Depends(get_db)
 ):
     """Mark an alert as read"""
-    # Get alert and verify ownership
+    # Get alert and verify ownership, join with Site to get info
     result = await db.execute(
-        select(Alert)
+        select(Alert, Site.name, Site.site_type)
         .join(Site)
         .where(Alert.id == alert_id, Site.user_id == current_user.id)
     )
-    alert = result.scalar_one_or_none()
+    row = result.one_or_none()
     
-    if not alert:
+    if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Alert not found"
         )
     
+    alert, site_name, site_type = row
     alert.is_read = True
+    alert.site_name = site_name
+    alert.site_type = site_type
     await db.commit()
     await db.refresh(alert)
     

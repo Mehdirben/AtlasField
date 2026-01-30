@@ -170,6 +170,10 @@ class AlertResponse(BaseModel):
     message: str
     is_read: bool
     created_at: datetime
+    
+    # Enriched fields for UI
+    site_name: Optional[str] = None
+    site_type: Optional[SiteType] = None
 
     class Config:
         from_attributes = True
